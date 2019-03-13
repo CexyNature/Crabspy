@@ -11,6 +11,28 @@ import time
 import csv
 
 
+
+'''
+Function to sample size and color for each crab.
+It should return one value for size (blob maximum axis?), and three values for color (Blue, Green and Red)
+'''
+
+
+'''
+Function to return smoothed x and x position
+'''
+
+'''
+Function to process frame with high light contrast.
+It should return a frame
+'''
+
+'''
+Function to initialize all trackers 
+'''
+
+
+
 def draw_quadrat(frame, vertices):
 
     # This function draws a rectangle in the original frame
