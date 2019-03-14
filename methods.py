@@ -11,6 +11,15 @@ import time
 import csv
 
 
+'''
+Function to retrieve video meta-information and save it in log file.
+'''
+
+
+'''
+Function to display percentage of video analyzed based on total number of frames
+'''
+
 
 '''
 Function to sample size and color for each crab.
