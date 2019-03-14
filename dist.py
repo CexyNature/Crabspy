@@ -15,61 +15,51 @@ from datetime import datetime
 import methods
 
 ap = argparse.ArgumentParser()
-ap.add_argument('-v', '--video', default="GP010016_fast.mp4", help='Provide path to video file')
-ap.add_argument('-d', '--dimension', default=[50, 50, 50, 50], nargs='+', type=int, help='Provide dimension each side')
-ap.add_argument('-s', '--seconds', default=None,
-                help='Provide time in seconds of target video section showing the key points')
-ap.add_argument('-q', '--quadrat_position', type=bool, default=False,
-                help='Should quadrat vertices be selected')
-ap.add_argument('-c', '--crab_id', default='crab_', help='Provide a name for the crab to be tracked')
+ap.add_argument("-v", "--video", default="GP010016_fast.mp4", help="Provide path to video file")
+ap.add_argument("-d", "--dimension", default=[50, 50, 50, 50], nargs="+", type=int, help="Provide dimension each side")
+ap.add_argument("-s", "--seconds", default=None,
+                help="Provide time in seconds of target video section showing the key points")
+ap.add_argument("-q", "--quadrat_position", type=bool, default=False,
+                help="Should quadrat vertices be selected")
+ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
+
+# Return video information
+vid, length_vid, fps, _, _, _  = methods.read_video(args["video"])
+# Set frame where video should start
+vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
+
+
+
+
 """
-This section creates list and/or tuples
+This section creates empty lists, tuples, and objects require in this script
 """
-# Create list for holding quadrat position
+# Create list for holding quadrat's position
 quadrat_pts = []
 # Set initial default position of first point and mouse
 position = (0, 0)
 posmouse = (0, 0)
+# Store quadrat's vertices size if provided
+dim = args["dimension"]
+# Print quadrat's vertices size sides in cm
+print("The quadrat's vertices are {} cm".format(dim))
 
-"""
-This section creates the video object from default or parser argument.
-It also creates the result file, and include high level metadata associated to video.
-"""
-vid = cv2.VideoCapture('video/' + args['video'])
-dim = args['dimension']
-# Print quadrat size sides in cm
-print(dim)
-
-# Total length of video in frames
-length_vid = vid.get(cv2.CAP_PROP_FRAME_COUNT)
-fps = vid.get(cv2.CAP_PROP_FPS)
-
-if args['seconds'] is None:
-    target_frame = 1
-else:
-    target_frame = int(int(args['seconds']) * fps)
-
-# print('video length is ', length_vid, '\nFPS is', fps,  '\ntarget frame is ', target_frame)
-
-# # First argument is: cv2.cv.CV_CAP_PROP_POS_FRAMES
-vid.set(1, target_frame-1)
-
-path = os.path.basename(args['video'])
+path = os.path.basename(args["video"])
 file_name, file_ext = os.path.splitext(path)
-dir_results = 'results'
+dir_results = "results"
 # print(file_name)
 # print(file_ext)
 
-date_now = time.strftime('%d%m%Y')
-time_now = time.strftime('%H%M')
-name_resultFile = 'results/' + file_name + '_' + str(date_now) + '_' + str(time_now) + '.csv'
-resultFile = open(name_resultFile, 'w', newline='\n')
-wr = csv.writer(resultFile, delimiter=',')
-wr.writerow(['file_name', 'processed_at_date', 'processed_at_time', 'length_video', 'fps_video',
-             'target_frame_used', 'vertice_1', 'vertice_2', 'vertice_3', 'vertice_4',
-             'projected_q_side', 'q_factor_distance', 'tracker_method'])
+date_now = time.strftime("%d%m%Y")
+time_now = time.strftime("%H%M")
+name_resultFile = "results/" + file_name + "_" + str(date_now) + "_" + str(time_now) + ".csv"
+resultFile = open(name_resultFile, "w", newline="\n")
+wr = csv.writer(resultFile, delimiter=",")
+wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
+             "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
+             "projected_q_side", "q_factor_distance", "tracker_method"])
 
 
 """
@@ -89,7 +79,7 @@ def click(event, x, y, flags, param):
     if event == cv2.EVENT_MOUSEMOVE:
         posmouse = (x, y)
 
-if args['quadrat_position'] is False:
+if args["quadrat_position"] is False:
     quadrat_pts = [(628, 105), (946, 302), (264, 393), (559, 698)]
 
 else:
@@ -101,13 +91,13 @@ else:
         # cv2.circle(frame, quadrat[2], 5, (0, 0, 255), -1)
         # cv2.circle(frame, quadrat[3], 5, (255, 255, 255), -1)
 
-        cv2.namedWindow('Select vertices quadrat')
-        cv2.setMouseCallback('Select vertices quadrat', click)
+        cv2.namedWindow("Select vertices quadrat")
+        cv2.setMouseCallback("Select vertices quadrat", click)
         for i, val in enumerate(quadrat_pts):
             cv2.circle(frame, val, 3, (204, 204, 0), 2)
         cv2.putText(frame, "Mouse position {}".format(posmouse), (50, 710), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (204, 204, 0), 2)
 
-        cv2.imshow('Select vertices quadrat', frame)
+        cv2.imshow("Select vertices quadrat", frame)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
@@ -121,23 +111,15 @@ print(quadrat_pts)
 
 # Re-arrange (i.e. sort) quadrat's vertices so they can be plotted later as polyline.
 vertices = np.array([quadrat_pts[0],quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
-print('The vertices are ', vertices)
+print("The vertices are ", vertices)
 
 """
 Mathematical calculations are done to estimate centimer to pixel ratio.
 """
 
-vid = cv2.VideoCapture('video/' + args['video'])
+vid, _, _, _, _, _ = methods.read_video(args["video"])
+vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 
-if args['seconds'] is None:
-    target_frame = 1
-else:
-    target_frame = int(int(args['seconds']) * fps)
-
-# print('video length is ', length_vid, '\nFPS is', fps,  '\ntarget frame is ', target_frame)
-
-# # First argument is: cv2.cv.CV_CAP_PROP_POS_FRAMES
-vid.set(1, target_frame-1)
 
 orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
 counter_f = 0
@@ -156,7 +138,7 @@ height = int(max(dist_b, dist_d))
 height_10 = int(max(dist_b, dist_d) + 10)
 
 print(dist_a, dist_b, dist_c, dist_d)
-print('This is the width ', width, 'This is the height ', height)
+print("This is the width ", width, "This is the height ", height)
 
 # Conversion factors from pixel to cm per each side
 side_a_c = dim[0]/dist_a
@@ -164,7 +146,7 @@ side_b_c = dim[1]/dist_b
 side_c_c = dim[2]/dist_c
 side_d_c = dim[3]/dist_d
 
-print('Conversion factor per side', side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
+print("Conversion factor per side", side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
 
 # Average conversion factors from pixel to cm for quadrat height and wide
 q_w = float(side_a_c + side_c_c) / 2
@@ -173,12 +155,12 @@ area = q_w * q_h
 side = np.max([width, height], axis=0)
 conversion = dim[0]/side
 
-print('Quadrat wide factor is ', q_w, '\nQuadrat height factor is ', q_h,
-      '\nQuadrat area factor is ', area, '\nDistance coversion factor is ', conversion)
+print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
+      "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
 
 
 
-print('The selected side vertices is ', side)
+print("The selected side vertices is ", side)
 dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
 M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
 # IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
@@ -194,14 +176,14 @@ center = (0, 0)
 ok, frame = vid.read()
 frame = cv2.warpPerspective(frame, M, (side, side))
 if not ok:
-    print('Cannot read video file')
+    print("Cannot read video file")
     sys.exit()
 
 # Set up tracker.
 # Instead of MIL, you can also use
 # BOOSTING, MIL, KCF, TLD, MEDIANFLOW or GOTURN
 
-# tracker = cv2.Tracker_create('BOOSTING')
+# tracker = cv2.Tracker_create("BOOSTING")
 # tracker = cv2.TrackerBoosting_create()
 # tracker = cv2.TrackerMedianFlow_create()
 tracker = cv2.TrackerMIL_create()
@@ -209,11 +191,11 @@ tracker = cv2.TrackerMIL_create()
 # print(tracker)
 # Define an initial bounding box
 # bbox = (650, 355, 25, 25)
-bbox = cv2.selectROI('tracking select', frame, fromCenter=False)
+bbox = cv2.selectROI("tracking select", frame, fromCenter=False)
 crab_center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
 print(crab_center)
 
-crab_id = args['video'] + '_' + args['crab_id'] + str(crab_center)
+crab_id = args["video"] + "_" + args["crab_id"] + str(crab_center)
 print(crab_id)
 
 # Uncomment the line below to select a different bounding box
@@ -228,8 +210,8 @@ pts = deque(maxlen=10000)
 
 wr.writerow([path, date_now, time_now, length_vid, fps, target_frame,
              quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3], side, conversion, tracker])
-wr.writerow(['\n'])
-wr.writerow(['Crab_ID', 'Crab_Position', 'Crab_frame'])
+wr.writerow(["\n"])
+wr.writerow(["Crab_ID", "Crab_Position", "Crab_frame"])
 # print(M)
 
 counter = 0
@@ -249,7 +231,7 @@ for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3, 3))
 for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11, 11))
 for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE ,(3, 3))
 
-out = cv2.VideoWriter('Uca_detection.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 24, (464,464))
+out = cv2.VideoWriter("Uca_detection.avi",cv2.VideoWriter_fourcc("M","J","P","G"), 24, (464,464))
 
 while vid.isOpened():
     ret, img = vid.read()
@@ -260,7 +242,7 @@ while vid.isOpened():
     crab_frame = cv2.warpPerspective(img, M, (side, side))
     # result_speed = result
     # print(crop_img.shape)
-    print('Dimensions for result are: ', result.shape)
+    print("Dimensions for result are: ", result.shape)
     # result_1 = cv2.warpPerspective(result, IM, (682,593))
 
     methods.draw_quadrat(img, vertices)
@@ -313,7 +295,7 @@ while vid.isOpened():
         # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
         # crab = frame[100:(100 + 50), 250:(250 + 50)]
         # filename = os.path.join(dirname, fname, str(center), startTime1)
-        # cv2.imwrite(dirname + '/' + filename + '_' + startTime1 + str(center) + '_' + '.jpg', crab)
+        # cv2.imwrite(dirname + "/" + filename + "_" + startTime1 + str(center) + "_" + ".jpg", crab)
 
         pts.appendleft(center)
         # print(center)
@@ -367,7 +349,7 @@ while vid.isOpened():
 
         # show the movement deltas and the direction of movement on
         # the frame
-        direction = 'Uca movement ' + str(direction)
+        direction = "Uca movement " + str(direction)
         cv2.putText(result, direction, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, (10, 10, 10), 2)
         cv2.putText(result, "Displacement (cm) dx: {}, dy: {}".format(dX, dY),
@@ -380,10 +362,10 @@ while vid.isOpened():
 
 
     # counter_f += 1
-    # print('Frame count ', counter_f)
+    # print("Frame count ", counter_f)
     # if counter_f == 60:
     #     counter_f = 0
-    #     cv2.imshow('One every ten', result)
+    #     cv2.imshow("One every ten", result)
 
 
     ## DISPLAY (Multiple panels video)
@@ -405,20 +387,20 @@ while vid.isOpened():
     out.write(result)
 
 
-    # cv2.imshow('result_1', result_1)
-    # cv2.imshow('original', img)
-    # cv2.imshow('cropped', crop_img)
-    # cv2.imshow('Crab', crab)
-    # cv2.imshow('result', result)
+    # cv2.imshow("result_1", result_1)
+    # cv2.imshow("original", img)
+    # cv2.imshow("cropped", crop_img)
+    # cv2.imshow("Crab", crab)
+    # cv2.imshow("result", result)
 
     ### From warp.py
-    # cv2.imshow('background substraction', fb_res_two3)
-    # cv2.imshow('masked', masked)
-    cv2.imshow('result', result)
-    # cv2.imshow('Canny Edges', edge)
-    # cv2.imshow('display00', display00)
-    # cv2.imshow('display01', display01)
-    # cv2.imshow('display', display)
+    # cv2.imshow("background substraction", fb_res_two3)
+    # cv2.imshow("masked", masked)
+    cv2.imshow("result", result)
+    # cv2.imshow("Canny Edges", edge)
+    # cv2.imshow("display00", display00)
+    # cv2.imshow("display01", display01)
+    # cv2.imshow("display", display)
     counter += 1
 
     key = cv2.waitKey(1) & 0xFF
