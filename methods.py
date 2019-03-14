@@ -12,6 +12,11 @@ import csv
 
 
 '''
+Function that defines the end of tracking
+'''
+
+
+'''
 Function to retrieve video meta-information and save it in log file.
 '''
 
