@@ -32,20 +32,19 @@ def read_video(video_path):
         vid_fourcc: a four (4) character code which identifies and define a video codec, color and compression format.
             More information about FOURCC codes can be found at https://www.fourcc.org/
     """
+
+    try:
+        os.mkdir("results/Log")
+    except FileExistsError:
+        pass
+
     logging.basicConfig(filename="results/Log/log_" + video_path + '.log',
                         level=logging.INFO,
                         format="%(asctime)s %(message)s")
     logger = logging.getLogger(__name__)
     logger.info("================ New event ================")
-    logger.info("Creating 'Log' folder")
-
-    try:
-        os.mkdir("results/Log")
-    except FileExistsError:
-        logger.info("'Log' folder found")
-        pass
-
     logger.info("Reading video " + video_path)
+
     try:
         vid = cv2.VideoCapture("video/" + video_path)
         if not vid.isOpened():
@@ -56,22 +55,21 @@ def read_video(video_path):
             logger.info("Video was read successfully")
             # Total length in frames
             vid_length = vid.get(cv2.CAP_PROP_FRAME_COUNT)
+            logger.info("The total number of frames in video is %d" % vid_length)
             # Frame per seconds rate
             vid_fps = vid.get(cv2.CAP_PROP_FPS)
+            logger.info("Frame rate per seconds is %f" % vid_fps)
             # Width in pixels
             vid_width = vid.get(cv2.CAP_PROP_FRAME_WIDTH)
             # Height in pixels
             vid_height = vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            logger.info("Frame width is %d pixels, and frame height is %d pixels" % (vid_width, vid_height))
             # Return video format
             # vid.get(cv2.CAP_PROP_FORMAT)
             # Video fourcc
             vid_fourcc = vid.get(cv2.CAP_PROP_FOURCC)
             vid_fourcc = int(vid_fourcc)
             vid_fourcc = ''.join([chr((vid_fourcc >> 8 * i) & 0xFF) for i in range(4)])
-
-            logger.info("The total number of frames in video is %d" % vid_length)
-            logger.info("Frame rate per seconds is %f" % vid_fps)
-            logger.info("Frame width is %d pixels, and frame height is %d pixels" % vid_width, vid_height)
             logger.info("Finish reading video")
 
             return vid, vid_length, vid_fps, vid_width, vid_height, vid_fourcc
