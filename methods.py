@@ -4,11 +4,18 @@ import cv2
 import os
 import logging
 import sys
+import numpy as np
+import math
 import time
 import csv
-# import numpy as np
-# import math
 
+
+quadrat_pts = []
+position = (0, 0)
+posmouse = (0, 0)
+dim = [50, 50, 50, 50]
+
+color_set = (243, 28, 20)
 
 """
 Function that defines the end of tracking
@@ -174,27 +181,96 @@ def draw_quadrat(frame, vertices):
     cv2.polylines(frame, [vertices], True, (204, 204, 0), thickness=2)
     return frame
 
-#
-# def calc_proj(quadrat_pts):
-#     orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
-#
-#     # dist = math.hypot(x2-x1, y2-y1)
-#     dist_a = math.sqrt((quadrat_pts[0][0] - quadrat_pts[1][0]) ** 2 + (quadrat_pts[0][1] - quadrat_pts[1][1]) ** 2)
-#     dist_b = math.sqrt((quadrat_pts[1][0] - quadrat_pts[2][0]) ** 2 + (quadrat_pts[1][1] - quadrat_pts[2][1]) ** 2)
-#     dist_c = math.sqrt((quadrat_pts[2][0] - quadrat_pts[3][0]) ** 2 + (quadrat_pts[2][1] - quadrat_pts[3][1]) ** 2)
-#     dist_d = math.sqrt((quadrat_pts[0][0] - quadrat_pts[3][0]) ** 2 + (quadrat_pts[0][1] - quadrat_pts[3][1]) ** 2)
-#
-#     width = int(max(dist_a, dist_c) + 10)
-#     height = int(max(dist_b, dist_d) + 10)
-#
-#     print(dist_a, dist_b, dist_c, dist_d)
-#     print(width, height)
-#
-#     dest_pts = np.float32([[0, 0], [0, height], [width, height], [width, 0]])
-#     M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
-#
-#     return M, width, height
-#
+
+def enable_point_capture(capture_vertices):
+    global quadrat_pts
+    if capture_vertices is False:
+        quadrat_pts = [(628, 105), (946, 302), (264, 393), (559, 698)]
+    else:
+        cv2.setMouseCallback("Vertices selection", click)
+
+
+def click(event, x, y, flags, param):
+    global quadrat_pts, position, posmouse
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        position = (x, y)
+        quadrat_pts.append(position)
+        # print(quadrat_pts)
+
+    if event == cv2.EVENT_MOUSEMOVE:
+        posmouse = (x, y)
+
+
+def draw_points_mousepos(frame, list_object, posmouse, capture_vertices):
+
+    for i, val in enumerate(list_object):
+        cv2.circle(frame, val, 3, color_set, 2)
+
+    if capture_vertices is True:
+        cv2.putText(frame, "Mouse position {}".format(posmouse), (50, 710), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_set, 2)
+    else:
+        cv2.putText(frame, "The vertices shown were hard-coded", (50, 710), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_set, 2)
+    return frame
+
+
+def calc_proj(quadrat_pts):
+
+    # Re-arrange (i.e. sort) quadrat's vertices so they can be plotted later as polyline.
+    vertices = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
+    # print("The vertices are ", vertices)
+    orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
+    counter_f = 0
+    # frame_r = vid.get(cv2.CAP_PROP_FPS)
+    # print(frame_r)
+
+    # dist = math.hypot(x2-x1, y2-y1)
+    dist_a = math.sqrt((quadrat_pts[0][0] - quadrat_pts[1][0]) ** 2 + (quadrat_pts[0][1] - quadrat_pts[1][1]) ** 2)
+    dist_b = math.sqrt((quadrat_pts[0][0] - quadrat_pts[2][0]) ** 2 + (quadrat_pts[0][1] - quadrat_pts[2][1]) ** 2)
+    dist_c = math.sqrt((quadrat_pts[2][0] - quadrat_pts[3][0]) ** 2 + (quadrat_pts[2][1] - quadrat_pts[3][1]) ** 2)
+    dist_d = math.sqrt((quadrat_pts[3][0] - quadrat_pts[2][0]) ** 2 + (quadrat_pts[3][1] - quadrat_pts[2][1]) ** 2)
+
+    width = int(max(dist_a, dist_c))
+    width_10 = int(max(dist_a, dist_c) + 10)
+    height = int(max(dist_b, dist_d))
+    height_10 = int(max(dist_b, dist_d) + 10)
+
+    # print(dist_a, dist_b, dist_c, dist_d)
+    # print("This is the width ", width, "This is the height ", height)
+
+    # Conversion factors from pixel to cm per each side
+    side_a_c = dim[0] / dist_a
+    side_b_c = dim[1] / dist_b
+    side_c_c = dim[2] / dist_c
+    side_d_c = dim[3] / dist_d
+
+    # print("Conversion factor per side", side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
+
+    # Average conversion factors from pixel to cm for quadrat height and wide
+    q_w = float(side_a_c + side_c_c) / 2
+    q_h = float(side_b_c + side_d_c) / 2
+    area = q_w * q_h
+    side = np.max([width, height], axis=0)
+    conversion = dim[0] / side
+
+    # print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
+    #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
+
+    # print("The selected side vertices is ", side)
+    dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
+    M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
+    # IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
+
+    mini = np.amin(vertices, axis=0)
+    maxi = np.amax(vertices, axis=0)
+    # print(mini, "and ", maxi)
+
+    position1 = (0, 0)
+    center = (0, 0)
+
+    return M, side
+
+
 #
 # def data_writer(video):
 #
