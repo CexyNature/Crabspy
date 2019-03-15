@@ -27,7 +27,7 @@ args = vars(ap.parse_args())
 
 # Return video information
 vid, length_vid, fps, _, _, _  = methods.read_video(args["video"])
-# Set frame where video should start
+# Set frame where video should start to be read
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 
 
@@ -344,6 +344,9 @@ while vid.isOpened():
             # otherwise, compute the thickness of the line and
             # draw the connecting lines
             thickness = int(np.sqrt(10 / float(i + 1)) * 2.5)
+            if thickness == 0:
+                thickness = 1
+
             # cv2.line(result, pts[i - 1], pts[i], (204, 204, 0), thickness)
             cv2.line(result, pts[i - 1], pts[i], (54, 54, 250), thickness)
 

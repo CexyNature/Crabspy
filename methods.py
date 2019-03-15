@@ -4,10 +4,10 @@ import cv2
 import os
 import logging
 import sys
+import time
+import csv
 # import numpy as np
 # import math
-# import time
-# import csv
 
 
 """
@@ -109,6 +109,34 @@ def set_video_star(vid, seconds, fps):
     vid.set(1, target_frame - 1)
 
     return vid, target_frame
+
+
+# def save_tracks(video_path):
+#
+#     try:
+#         os.mkdir("results")
+#     except FileExistsError:
+#         pass
+#
+#     path = os.path.basename(video_path)
+#     file_name, file_ext = os.path.splitext(path)
+#     name_resultFile = "results/" + file_name + ".csv"
+#
+#     if os.path.exists(name_resultFile):
+#         append_condition = 'a'
+#     else:
+#         append_condition = 'w'
+#     resultFile = open(name_resultFile, append_condition, newline="\n")
+#     wr = csv.writer(resultFile, delimiter=",")
+#
+#     date_now = time.strftime("%d%m%Y")
+#     time_now = time.strftime("%H%M")
+#     wr.writerow(["Video {}".format(path), "Processed at date {} time {}".format(date_now, time_now)])
+#     wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
+#                  "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
+#                  "projected_q_side", "q_factor_distance", "tracker_method"])
+#     resultFile.close()
+
 
 
 #
