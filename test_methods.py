@@ -10,7 +10,7 @@ vid, vid_length, vid_fps, vid_width, vid_length, vid_fourcc = methods.read_video
 print(vid_length, vid_fps, vid_width, vid_length, vid_fourcc)
 # methods.save_tracks('GP010016.MP4')
 
-capture_vertices = False
+capture_vertices = True
 
 while vid.isOpened():
     ret, frame = vid.read()
