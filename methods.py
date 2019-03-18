@@ -215,29 +215,19 @@ def draw_points_mousepos(frame, list_object, posmouse, capture_vertices):
 
 
 def calc_proj(quadrat_pts):
+    """
 
-    # quadrat_pts_np = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]], np.float32)
-    # # Sum coordinates for each point
-    # sum_coordinates = quadrat_pts_np.sum(axis=1)
-    # # Substract coordinates for each point
-    # dif_coordinates = np.diff(quadrat_pts, axis=1)
-    #
-    # corner_tl = quadrat_pts_np[np.argmin(sum_coordinates)]
-    # corner_tr = quadrat_pts_np[np.argmin(dif_coordinates)]
-    # corner_bl = quadrat_pts_np[np.argmax(dif_coordinates)]
-    # corner_br = quadrat_pts_np[np.argmax(sum_coordinates)]
-    #
-    # # Re-arrange (i.e. sort) quadrat's vertices so they can be plotted later as polyline.
-    # # vertices = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
-    # vertices = np.array([corner_tl, corner_tr, corner_bl, corner_br])
-
+    :param quadrat_pts: Represent the vertices of the quadrat. It must be provided in the following order:
+                        first select top left, second select top right, third select bottom left, and fourth
+                        select bottom right
+    :return:
+    """
 
     vertices = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]], np.float32)
-
-    # print("The vertices are ", vertices)
-    # orig_pts = np.float32([quadratside _pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
-    # orig_pts = np.float32([corner_tl, corner_tr, corner_bl, corner_br])
+    vertices_draw = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
     orig_pts = vertices
+
+    print(vertices)
 
 
     counter_f = 0
@@ -255,7 +245,7 @@ def calc_proj(quadrat_pts):
     height = int(max(dist_b, dist_d))
     height_10 = int(max(dist_b, dist_d) + 10)
 
-    # print(dist_a, dist_b, dist_c, dist_d)
+    print(dist_a, dist_b, dist_c, dist_d)
     # print("This is the width ", width, "This is the height ", height)
 
     # Conversion factors from pixel to cm per each side
@@ -276,10 +266,10 @@ def calc_proj(quadrat_pts):
     # print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
     #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
 
-    # print("The selected side vertices is ", side)
+    print("The selected side vertices is ", side)
     dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
     M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
-    # IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
+    IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
 
     mini = np.amin(vertices, axis=0)
     maxi = np.amax(vertices, axis=0)
@@ -288,7 +278,7 @@ def calc_proj(quadrat_pts):
     position1 = (0, 0)
     center = (0, 0)
 
-    return M, side
+    return M, side, vertices_draw, IM
 
 
 
