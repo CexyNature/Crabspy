@@ -214,76 +214,76 @@ def draw_points_mousepos(frame, list_object, posmouse, capture_vertices):
     return frame
 
 
-def calc_proj(quadrat_pts):
-
-    quadrat_pts_np = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]], np.int32)
-    # Sum coordinates for each point
-    sum_coordinates = quadrat_pts_np.sum(axis=1)
-    # Substract coordinates for each point
-    dif_coordinates = np.diff(quadrat_pts, axis=1)
-
-    corner_tl = quadrat_pts_np[np.argmin(sum_coordinates)]
-    corner_tr = quadrat_pts_np[np.argmin(dif_coordinates)]
-    corner_bl = quadrat_pts_np[np.argmax(dif_coordinates)]
-    corner_br = quadrat_pts_np[np.argmax(sum_coordinates)]
-
-    # Re-arrange (i.e. sort) quadrat's vertices so they can be plotted later as polyline.
-    # vertices = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
-    vertices = np.array([corner_tl, corner_tr, corner_bl, corner_br])
-
-    # print("The vertices are ", vertices)
-    # orig_pts = np.float32([quadratside _pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
-    orig_pts = np.float32([corner_tl, corner_tr, corner_bl, corner_br])
-
-    counter_f = 0
-    # frame_r = vid.get(cv2.CAP_PROP_FPS)
-    # print(frame_r)
-
-    # dist = math.hypot(x2-x1, y2-y1)
-    dist_a = math.sqrt((vertices[0][0] - vertices[1][0]) ** 2 + (vertices[0][1] - vertices[1][1]) ** 2)
-    dist_b = math.sqrt((vertices[0][0] - vertices[2][0]) ** 2 + (vertices[0][1] - vertices[2][1]) ** 2)
-    dist_c = math.sqrt((vertices[2][0] - vertices[3][0]) ** 2 + (vertices[2][1] - vertices[3][1]) ** 2)
-    dist_d = math.sqrt((vertices[3][0] - vertices[1][0]) ** 2 + (vertices[3][1] - vertices[1][1]) ** 2)
-
-    width = int(max(dist_a, dist_c))
-    width_10 = int(max(dist_a, dist_c) + 10)
-    height = int(max(dist_b, dist_d))
-    height_10 = int(max(dist_b, dist_d) + 10)
-
-    # print(dist_a, dist_b, dist_c, dist_d)
-    # print("This is the width ", width, "This is the height ", height)
-
-    # Conversion factors from pixel to cm per each side
-    side_a_c = dim[0] / dist_a
-    side_b_c = dim[1] / dist_b
-    side_c_c = dim[2] / dist_c
-    side_d_c = dim[3] / dist_d
-
-    # print("Conversion factor per side", side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
-
-    # Average conversion factors from pixel to cm for quadrat height and wide
-    q_w = float(side_a_c + side_c_c) / 2
-    q_h = float(side_b_c + side_d_c) / 2
-    area = q_w * q_h
-    side = np.max([width, height], axis=0)
-    conversion = dim[0] / side
-
-    # print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
-    #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
-
-    # print("The selected side vertices is ", side)
-    dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
-    M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
-    # IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
-
-    mini = np.amin(vertices, axis=0)
-    maxi = np.amax(vertices, axis=0)
-    # print(mini, "and ", maxi)
-
-    position1 = (0, 0)
-    center = (0, 0)
-
-    return M, side
+# def calc_proj(quadrat_pts):
+#
+#     quadrat_pts_np = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]], np.float32)
+#     # Sum coordinates for each point
+#     sum_coordinates = quadrat_pts_np.sum(axis=1)
+#     # Substract coordinates for each point
+#     dif_coordinates = np.diff(quadrat_pts, axis=1)
+#
+#     corner_tl = quadrat_pts_np[np.argmin(sum_coordinates)]
+#     corner_tr = quadrat_pts_np[np.argmin(dif_coordinates)]
+#     corner_bl = quadrat_pts_np[np.argmax(dif_coordinates)]
+#     corner_br = quadrat_pts_np[np.argmax(sum_coordinates)]
+#
+#     # Re-arrange (i.e. sort) quadrat's vertices so they can be plotted later as polyline.
+#     # vertices = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
+#     vertices = np.array([corner_tl, corner_tr, corner_bl, corner_br])
+#
+#     # print("The vertices are ", vertices)
+#     # orig_pts = np.float32([quadratside _pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
+#     orig_pts = np.float32([corner_tl, corner_tr, corner_bl, corner_br])
+#
+#     counter_f = 0
+#     # frame_r = vid.get(cv2.CAP_PROP_FPS)
+#     # print(frame_r)
+#
+#     # dist = math.hypot(x2-x1, y2-y1)
+#     dist_a = math.sqrt((vertices[0][0] - vertices[1][0]) ** 2 + (vertices[0][1] - vertices[1][1]) ** 2)
+#     dist_b = math.sqrt((vertices[0][0] - vertices[2][0]) ** 2 + (vertices[0][1] - vertices[2][1]) ** 2)
+#     dist_c = math.sqrt((vertices[2][0] - vertices[3][0]) ** 2 + (vertices[2][1] - vertices[3][1]) ** 2)
+#     dist_d = math.sqrt((vertices[3][0] - vertices[1][0]) ** 2 + (vertices[3][1] - vertices[1][1]) ** 2)
+#
+#     width = int(max(dist_a, dist_c))
+#     width_10 = int(max(dist_a, dist_c) + 10)
+#     height = int(max(dist_b, dist_d))
+#     height_10 = int(max(dist_b, dist_d) + 10)
+#
+#     # print(dist_a, dist_b, dist_c, dist_d)
+#     # print("This is the width ", width, "This is the height ", height)
+#
+#     # Conversion factors from pixel to cm per each side
+#     side_a_c = dim[0] / dist_a
+#     side_b_c = dim[1] / dist_b
+#     side_c_c = dim[2] / dist_c
+#     side_d_c = dim[3] / dist_d
+#
+#     # print("Conversion factor per side", side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
+#
+#     # Average conversion factors from pixel to cm for quadrat height and wide
+#     q_w = float(side_a_c + side_c_c) / 2
+#     q_h = float(side_b_c + side_d_c) / 2
+#     area = q_w * q_h
+#     side = np.max([width, height], axis=0)
+#     conversion = dim[0] / side
+#
+#     # print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
+#     #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
+#
+#     # print("The selected side vertices is ", side)
+#     dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
+#     M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
+#     # IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
+#
+#     mini = np.amin(vertices, axis=0)
+#     maxi = np.amax(vertices, axis=0)
+#     # print(mini, "and ", maxi)
+#
+#     position1 = (0, 0)
+#     center = (0, 0)
+#
+#     return M, side
 
 
 #
@@ -308,3 +308,78 @@ def calc_proj(quadrat_pts):
 #
 #
 #
+
+
+def order_points(pts):
+    # initialzie a list of coordinates that will be ordered
+    # such that the first entry in the list is the top-left,
+    # the second entry is the top-right, the third is the
+    # bottom-right, and the fourth is the bottom-left
+    rect = np.zeros((4, 2), dtype="float32")
+
+    # the top-left point will have the smallest sum, whereas
+    # the bottom-right point will have the largest sum
+    s = pts.sum(axis=1)
+    rect[0] = pts[np.argmin(s)]
+    rect[2] = pts[np.argmax(s)]
+
+    # now, compute the difference between the points, the
+    # top-right point will have the smallest difference,
+    # whereas the bottom-left will have the largest difference
+    diff = np.diff(pts, axis=1)
+
+    if (pts[np.argmin(diff)] == rect[2]).all():
+        rect[1] = pts[np.arange(len(pts))!=np.argmin(diff)][np.argmin(diff)]
+    else:
+        rect[1] = pts[np.argmin(diff)]
+
+    if (pts[np.argmax(diff)] == rect[0]).all():
+        rect[3] = pts[np.arange(len(pts))!=np.argmax(diff)][np.argmax(diff)]
+    else:
+        rect[3] = pts[np.argmax(diff)]
+
+    print(rect)
+
+    # return the ordered coordinates
+    return rect
+
+
+def four_point_transform(image, pts):
+    # obtain a consistent order of the points and unpack them
+    # individually
+    rect = order_points(pts)
+    (tl, tr, br, bl) = rect
+
+    # compute the width of the new image, which will be the
+    # maximum distance between bottom-right and bottom-left
+    # x-coordiates or the top-right and top-left x-coordinates
+    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+    maxWidth = max(int(widthA), int(widthB))
+
+    # compute the height of the new image, which will be the
+    # maximum distance between the top-right and bottom-right
+    # y-coordinates or the top-left and bottom-left y-coordinates
+    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+    maxHeight = max(int(heightA), int(heightB))
+
+    # now that we have the dimensions of the new image, construct
+    # the set of destination points to obtain a "birds eye view",
+    # (i.e. top-down view) of the image, again specifying points
+    # in the top-left, top-right, bottom-right, and bottom-left
+    # order
+    dst = np.array([
+        [0, 0],
+        [maxWidth - 1, 0],
+        [maxWidth - 1, maxHeight - 1],
+        [0, maxHeight - 1]], dtype="float32")
+
+    # compute the perspective transform matrix and then apply it
+    M = cv2.getPerspectiveTransform(rect, dst)
+    warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+
+    # return the warped image
+    return warped
+
+
