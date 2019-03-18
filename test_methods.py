@@ -7,8 +7,8 @@ import methods
 
 
 vid, vid_length, vid_fps, vid_width, vid_length, vid_fourcc = methods.read_video('VIRB0002.MP4')
-print(vid_length, vid_fps, vid_width, vid_length, vid_fourcc)
 # methods.save_tracks('GP010016.MP4')
+print(vid_length, vid_fps, vid_width, vid_length, vid_fourcc)
 
 capture_vertices = True
 
@@ -34,6 +34,7 @@ cv2.destroyAllWindows()
 while vid.isOpened():
     ret, frame = vid.read()
     M, side = methods.calc_proj(methods.quadrat_pts)
+    print(side)
     frame = cv2.warpPerspective(frame, M, (side, side))
     cv2.imshow("Video stream warped", frame)
 

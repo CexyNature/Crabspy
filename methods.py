@@ -232,7 +232,7 @@ def calc_proj(quadrat_pts):
     vertices = np.array([corner_tl, corner_tr, corner_bl, corner_br])
 
     # print("The vertices are ", vertices)
-    # orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
+    # orig_pts = np.float32([quadratside _pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
     orig_pts = np.float32([corner_tl, corner_tr, corner_bl, corner_br])
 
     counter_f = 0
