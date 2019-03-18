@@ -216,19 +216,34 @@ def draw_points_mousepos(frame, list_object, posmouse, capture_vertices):
 
 def calc_proj(quadrat_pts):
 
+    quadrat_pts_np = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]], np.int32)
+    # Sum coordinates for each point
+    sum_coordinates = quadrat_pts_np.sum(axis=1)
+    # Substract coordinates for each point
+    dif_coordinates = np.diff(quadrat_pts, axis=1)
+
+    corner_tl = quadrat_pts_np[np.argmin(sum_coordinates)]
+    corner_tr = quadrat_pts_np[np.argmin(dif_coordinates)]
+    corner_bl = quadrat_pts_np[np.argmax(dif_coordinates)]
+    corner_br = quadrat_pts_np[np.argmax(sum_coordinates)]
+
     # Re-arrange (i.e. sort) quadrat's vertices so they can be plotted later as polyline.
-    vertices = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
+    # vertices = np.array([quadrat_pts[0], quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
+    vertices = np.array([corner_tl, corner_tr, corner_bl, corner_br])
+
     # print("The vertices are ", vertices)
-    orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
+    # orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
+    orig_pts = np.float32([corner_tl, corner_tr, corner_bl, corner_br])
+
     counter_f = 0
     # frame_r = vid.get(cv2.CAP_PROP_FPS)
     # print(frame_r)
 
     # dist = math.hypot(x2-x1, y2-y1)
-    dist_a = math.sqrt((quadrat_pts[0][0] - quadrat_pts[1][0]) ** 2 + (quadrat_pts[0][1] - quadrat_pts[1][1]) ** 2)
-    dist_b = math.sqrt((quadrat_pts[0][0] - quadrat_pts[2][0]) ** 2 + (quadrat_pts[0][1] - quadrat_pts[2][1]) ** 2)
-    dist_c = math.sqrt((quadrat_pts[2][0] - quadrat_pts[3][0]) ** 2 + (quadrat_pts[2][1] - quadrat_pts[3][1]) ** 2)
-    dist_d = math.sqrt((quadrat_pts[3][0] - quadrat_pts[2][0]) ** 2 + (quadrat_pts[3][1] - quadrat_pts[2][1]) ** 2)
+    dist_a = math.sqrt((vertices[0][0] - vertices[1][0]) ** 2 + (vertices[0][1] - vertices[1][1]) ** 2)
+    dist_b = math.sqrt((vertices[0][0] - vertices[2][0]) ** 2 + (vertices[0][1] - vertices[2][1]) ** 2)
+    dist_c = math.sqrt((vertices[2][0] - vertices[3][0]) ** 2 + (vertices[2][1] - vertices[3][1]) ** 2)
+    dist_d = math.sqrt((vertices[3][0] - vertices[1][0]) ** 2 + (vertices[3][1] - vertices[1][1]) ** 2)
 
     width = int(max(dist_a, dist_c))
     width_10 = int(max(dist_a, dist_c) + 10)
