@@ -214,6 +214,10 @@ def draw_points_mousepos(frame, list_object, posmouse, capture_vertices):
     return frame
 
 
+"""
+I should add to function calc_proj the case when the quadrat does not have equal sides (e.g. rectangular)
+"""
+
 def calc_proj(quadrat_pts):
     """
 
