@@ -17,7 +17,7 @@ while capturing is True:
     frame = cv2.imread("video/" + args["image"])
     frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
     methods.enable_point_capture(capture_vertices)
-    frame = methods.draw_points_mousepos(frame, methods.quadrat_pts, methods.posmouse, capture_vertices)
+    frame = methods.draw_points_mousepos(frame, methods.quadrat_pts, methods.posmouse)
     cv2.imshow("Vertices selection", frame)
 
     if len(methods.quadrat_pts) == 4:

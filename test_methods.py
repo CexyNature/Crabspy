@@ -16,7 +16,7 @@ while vid.isOpened():
     ret, frame = vid.read()
 
     methods.enable_point_capture(capture_vertices)
-    frame = methods.draw_points_mousepos(frame, methods.quadrat_pts, methods.posmouse, capture_vertices)
+    frame = methods.draw_points_mousepos(frame, methods.quadrat_pts, methods.posmouse)
     cv2.imshow("Vertices selection", frame)
 
     if len(methods.quadrat_pts) == 4:
@@ -33,7 +33,7 @@ cv2.destroyAllWindows()
 
 while vid.isOpened():
     ret, frame = vid.read()
-    M, side = methods.calc_proj(methods.quadrat_pts)
+    M, side, vertices_draw, IM = methods.calc_proj(methods.quadrat_pts)
     print(side)
     frame = cv2.warpPerspective(frame, M, (side, side))
     cv2.imshow("Video stream warped", frame)
