@@ -15,6 +15,20 @@
 Code collection for crabs' detection, tracking, measure and count
 
 
+> *"Until comparatively recently, ecologists were content to describe how nature “looks” (sometimes by means of fantastic
+ terms!) and to speculate on what she might have looked like in the past or may look like in the future. 
+ Now, an equal emphasis is being placed on what nature ‘does’, and rightly so, because the changing face 
+ of nature can never be understood unless her metabolism is also studied. This change in approach brings 
+ the small organisms into perspective with the large, and encourages the use of experimental methods to 
+ supplement the analytic. It is evident that so long as a purely descriptive viewpoint is maintained, 
+ there is very little in common between such structurally diverse organisms as sperma-tophytes, 
+ vertebrates and bacteria. In real life, however, all these are intimately linked functionally in 
+ ecological systems, according to well-defined laws. Thus the only kind of general ecology is that which
+ I call a ‘functional ecology’..."*
+
+> -- Eugene P. Odum <br>
+> &nbsp;&nbsp;&nbsp; Fundamentals of Ecology, 1957
+
 # Content:
 
 - [General description](#General-description)
