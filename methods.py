@@ -300,7 +300,7 @@ def calc_proj(quadrat_pts):
     # print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
     #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
 
-    print("The selected side vertices is ", side)
+    # print("The selected side vertices is ", side)
     dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
     M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
     IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
