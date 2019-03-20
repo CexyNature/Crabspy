@@ -113,7 +113,7 @@ fabric.properties
 # Files and folders add by Cesar Herrera
 .idea/
 __pycache__/
-video/
 *.mp4
 *.MP4
 *.avi
+results/
