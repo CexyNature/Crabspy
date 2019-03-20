@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 
-# from scipy import ndimage
-# import matplotlib.pyplot as plt
-
 import cv2
 import numpy as np
-import math
 import argparse
 import csv
 import os
@@ -15,39 +11,25 @@ import sys
 from datetime import datetime
 
 import methods
+import constant
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", default="GP010016_fast.mp4", help="Provide path to video file")
-ap.add_argument("-d", "--dimension", default=[50, 50, 50, 50], nargs="+", type=int, help="Provide dimension each side")
 ap.add_argument("-s", "--seconds", default=None,
                 help="Provide time in seconds of target video section showing the key points")
-ap.add_argument("-q", "--quadrat_position", type=bool, default=False,
-                help="Should quadrat vertices be selected")
 ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
 
 # Return video information
-vid, length_vid, fps, _, _, _  = methods.read_video(args["video"])
+vid, length_vid, fps, _, _, _ = methods.read_video(args["video"])
 # Set frame where video should start to be read
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 
 
-
-
 """
-This section creates empty lists, tuples, and objects require in this script
+Create file to save track paths
 """
-# Create list for holding quadrat's position
-quadrat_pts = []
-# Set initial default position of first point and mouse
-position = (0, 0)
-posmouse = (0, 0)
-# Store quadrat's vertices size if provided
-dim = args["dimension"]
-# Print quadrat's vertices size sides in cm
-print("The quadrat's vertices are {} cm".format(dim))
-
 path = os.path.basename(args["video"])
 file_name, file_ext = os.path.splitext(path)
 dir_results = "results"
@@ -64,119 +46,41 @@ wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_vide
              "projected_q_side", "q_factor_distance", "tracker_method"])
 
 
-"""
-This section call the mouse interacting function to select quadrat's vertices in video. 
-Then, depending in the parser argument open an interacting window so the user can select vertices.
-Otherwise assign quadrat's vertices as predefined arguments.
-"""
-# Define mouse click function
-def click(event, x, y, flags, param):
-    global quadrat_pts, position, posmouse
+while vid.isOpened():
+    ret, frame = vid.read()
 
-    if event == cv2.EVENT_LBUTTONDOWN:
-        position = (x, y)
-        quadrat_pts.append(position)
-        # print(quadrat_pts)
+    methods.enable_point_capture(constant.CAPTURE_VERTICES)
+    frame = methods.draw_points_mousepos(frame, methods.quadrat_pts, methods.posmouse)
+    cv2.imshow("Vertices selection", frame)
 
-    if event == cv2.EVENT_MOUSEMOVE:
-        posmouse = (x, y)
+    if len(methods.quadrat_pts) == 4:
+        print("Vertices were captured")
+        break
 
-if args["quadrat_position"] is False:
-    quadrat_pts = [(628, 105), (946, 302), (264, 393), (559, 698)]
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
+        # print("Q - key pressed. Window quit by user")
+        break
 
-else:
-    while vid.isOpened():
-        ret, frame = vid.read()
-        # quadrat = [(628, 105), (946, 302), (264, 393), (559, 698)]
-        # cv2.circle(frame, quadrat[0], 5, (0, 255, 0), -1)
-        # cv2.circle(frame, quadrat[1], 5, (255, 0, 0), -1)
-        # cv2.circle(frame, quadrat[2], 5, (0, 0, 255), -1)
-        # cv2.circle(frame, quadrat[3], 5, (255, 255, 255), -1)
+vid.release()
+cv2.destroyAllWindows()
+print(methods.quadrat_pts)
 
-        cv2.namedWindow("Select vertices quadrat")
-        cv2.setMouseCallback("Select vertices quadrat", click)
-        for i, val in enumerate(quadrat_pts):
-            cv2.circle(frame, val, 3, (204, 204, 0), 2)
-        cv2.putText(frame, "Mouse position {}".format(posmouse), (50, 710), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (204, 204, 0), 2)
-
-        cv2.imshow("Select vertices quadrat", frame)
-
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord("q"):
-            # print("Q - key pressed. Window quit by user")
-            break
-
-    vid.release()
-    cv2.destroyAllWindows()
-
-print(quadrat_pts)
-
-# Re-arrange (i.e. sort) quadrat's vertices so they can be plotted later as polyline.
-vertices = np.array([quadrat_pts[0],quadrat_pts[1], quadrat_pts[3], quadrat_pts[2]], np.int32)
-print("The vertices are ", vertices)
-
-"""
-Mathematical calculations are done to estimate centimer to pixel ratio.
-"""
-
-vid, _, _, _, _, _ = methods.read_video(args["video"])
-vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
-
-
-orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
-counter_f = 0
-# frame_r = vid.get(cv2.CAP_PROP_FPS)
-# print(frame_r)
-
-# dist = math.hypot(x2-x1, y2-y1)
-dist_a = math.sqrt((quadrat_pts[0][0] - quadrat_pts[1][0])**2 + (quadrat_pts[0][1] - quadrat_pts[1][1])**2)
-dist_b = math.sqrt((quadrat_pts[0][0] - quadrat_pts[2][0])**2 + (quadrat_pts[0][1] - quadrat_pts[2][1])**2)
-dist_c = math.sqrt((quadrat_pts[2][0] - quadrat_pts[3][0])**2 + (quadrat_pts[2][1] - quadrat_pts[3][1])**2)
-dist_d = math.sqrt((quadrat_pts[3][0] - quadrat_pts[2][0])**2 + (quadrat_pts[3][1] - quadrat_pts[2][1])**2)
-
-width = int(max(dist_a, dist_c))
-width_10 = int(max(dist_a, dist_c) + 10)
-height = int(max(dist_b, dist_d))
-height_10 = int(max(dist_b, dist_d) + 10)
-
-print(dist_a, dist_b, dist_c, dist_d)
-print("This is the width ", width, "This is the height ", height)
-
-# Conversion factors from pixel to cm per each side
-side_a_c = dim[0]/dist_a
-side_b_c = dim[1]/dist_b
-side_c_c = dim[2]/dist_c
-side_d_c = dim[3]/dist_d
-
-print("Conversion factor per side", side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
-
-# Average conversion factors from pixel to cm for quadrat height and wide
-q_w = float(side_a_c + side_c_c) / 2
-q_h = float(side_b_c + side_d_c) / 2
-area = q_w * q_h
-side = np.max([width, height], axis=0)
-conversion = dim[0]/side
-
-print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
-      "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
-
-
-
-print("The selected side vertices is ", side)
-dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
-M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
-# IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
-
-mini = np.amin(vertices, axis=0)
-maxi = np.amax(vertices, axis=0)
-print(mini, "and ", maxi)
-
-position1 = (0, 0)
+M, side, vertices_draw, IM = methods.calc_proj(methods.quadrat_pts)
 center = (0, 0)
 
+# vertices = np.array([methods.quadrat_pts[0], methods.quadrat_pts[1],
+#                      methods.quadrat_pts[2], methods.quadrat_pts[3]], np.float32)
+mini = np.amin(vertices_draw, axis=0)
+maxi = np.amax(vertices_draw, axis=0)
+# print(mini, "and ", maxi)
+
 # Read first frame.q
+vid, length_vid, fps, _, _, _ = methods.read_video(args["video"])
+vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 ok, frame = vid.read()
 frame = cv2.warpPerspective(frame, M, (side, side))
+
 if not ok:
     print("Cannot read video file")
     sys.exit()
@@ -211,7 +115,8 @@ ok = tracker.init(frame, bbox)
 pts = deque(maxlen=10000)
 
 wr.writerow([path, date_now, time_now, length_vid, fps, target_frame,
-             quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3], side, conversion, tracker])
+             methods.quadrat_pts[0], methods.quadrat_pts[1],
+             methods.quadrat_pts[2], methods.quadrat_pts[3], side, "conversion", tracker])
 wr.writerow(["\n"])
 wr.writerow(["Crab_ID", "Crab_Position", "Crab_frame"])
 # print(M)
@@ -224,22 +129,24 @@ startTime = datetime.now()
 
 cv2.destroyAllWindows()
 
-### From warp.py
-fgbg1 = cv2.createBackgroundSubtractorMOG2(history = 5000, varThreshold=20)
-fgbg2 = cv2.createBackgroundSubtractorMOG2(history = 5000, varThreshold=100)
-fgbg3 = cv2.createBackgroundSubtractorKNN(history= 5000, dist2Threshold=250)
+# From warp.py
+fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20)
+fgbg2 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=100)
+fgbg3 = cv2.createBackgroundSubtractorKNN(history=5000, dist2Threshold=250)
 
-for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3, 3))
-for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11, 11))
-for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE ,(3, 3))
+for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 
-out = cv2.VideoWriter("Uca_detection.avi",cv2.VideoWriter_fourcc("M","J","P","G"), 24, (464,464))
+out = cv2.VideoWriter("Uca_detection.avi",
+                      cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
 while vid.isOpened():
-    ret, img = vid.read()
+    _, img = vid.read()
     # print(img.shape)
     # img = cv2.resize(img, (640,400))
     crop_img = img[mini[1]-10:maxi[1]+10, mini[0]-10:maxi[0]+10]
+
     result = cv2.warpPerspective(img, M, (side, side))
     crab_frame = cv2.warpPerspective(img, M, (side, side))
     # result_speed = result
@@ -247,11 +154,10 @@ while vid.isOpened():
     print("Dimensions for result are: ", result.shape)
     # result_1 = cv2.warpPerspective(result, IM, (682,593))
 
-    methods.draw_quadrat(img, vertices)
+    methods.draw_quadrat(img, vertices_draw)
     # cv2.polylines(img, np.int32([quadrat_pts]), True, (204, 204, 0), thickness=2)
 
-
-    ### From warp.py
+    # From warp.py
     gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
     hsl = cv2.cvtColor(result, cv2.COLOR_BGR2HLS_FULL)
     one, two, three = cv2.split(hsl)
@@ -361,10 +267,7 @@ while vid.isOpened():
                     (10, 40), cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, (10, 10, 10), 2)
 
-
-        ### Back transform and show tracker and data in original image
-        ###
-
+        # Back transform and show tracker and data in original image
 
     # counter_f += 1
     # print("Frame count ", counter_f)
@@ -372,8 +275,7 @@ while vid.isOpened():
     #     counter_f = 0
     #     cv2.imshow("One every ten", result)
 
-
-    ## DISPLAY (Multiple panels video)
+    # DISPLAY (Multiple panels video)
     # edge_3_ch = cv2.cvtColor(edge, cv2.COLOR_GRAY2BGR)
     # fb_res_two3_3_ch = cv2.cvtColor(fb_res_two3, cv2.COLOR_GRAY2BGR)
     # original_reshape = cv2.resize(crop_img, (809, 928))
@@ -391,14 +293,13 @@ while vid.isOpened():
     # print(display.shape)
     out.write(result)
 
-
     # cv2.imshow("result_1", result_1)
     # cv2.imshow("original", img)
     # cv2.imshow("cropped", crop_img)
     # cv2.imshow("Crab", crab)
     # cv2.imshow("result", result)
 
-    ### From warp.py
+    # From warp.py
     # cv2.imshow("background substraction", fb_res_two3)
     # cv2.imshow("masked", masked)
     cv2.imshow("result", result)
