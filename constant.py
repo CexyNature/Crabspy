@@ -12,6 +12,9 @@ COLOR_SET_0:
     Define the color to use to draw reference elements in the image, such as:
     digital quadrat, point vertices, mouse position, and organism position.
 
+COLOR_SET_1:
+    Alternative color to use at user discretion.
+
 CAPTURE_VERTICES: bool
     If True will enable the capture of quadrat's vertices in the image using the mouse click function.
     If False will import quadrat's vertices coordinates provided by user (i.e. QUADRAT_POINTS)
@@ -22,5 +25,6 @@ QUADRAT_POINTS:
 
 DIM = [50, 50, 50, 50]
 COLOR_SET_0 = (243, 28, 20)
+COLOR_SET_1 = (18, 250, 173)
 CAPTURE_VERTICES = True
 QUADRAT_POINTS = [(628, 105), (946, 302), (264, 393), (559, 698)]
