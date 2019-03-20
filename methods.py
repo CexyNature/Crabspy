@@ -9,17 +9,18 @@ import math
 import time
 import csv
 
+import constant
 
 quadrat_pts = []
 position = (0, 0)
 posmouse = (0, 0)
-dim = [50, 50, 50, 50]
-color_set = (243, 28, 20)
+
 
 
 def read_video(video_path):
     """
     Loads the video file, and it retrieves meta-information associated to the video been analysed.
+    Creates Log file.
 
     Parameters
     ----------
@@ -197,8 +198,9 @@ def enable_point_capture(capture_vertices):
     """
 
     global quadrat_pts
+
     if capture_vertices is False:
-        quadrat_pts = [(628, 105), (946, 302), (264, 393), (559, 698)]
+        quadrat_pts = constant.QUADRAT_POINTS
     else:
         cv2.setMouseCallback("Vertices selection", mouse_click)
 
@@ -224,9 +226,9 @@ def draw_points_mousepos(frame, list_points, posmouse):
     """
 
     for i, val in enumerate(list_points):
-        cv2.circle(frame, val, 3, color_set, 2)
+        cv2.circle(frame, val, 3, constant.COLOR_SET_0, 2)
 
-    cv2.putText(frame, "Mouse position {}".format(posmouse), (50, 710), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_set, 2)
+    cv2.putText(frame, "Mouse position {}".format(posmouse), (50, 710), cv2.FONT_HERSHEY_SIMPLEX, 0.6, constant.COLOR_SET_0, 2)
 
     return frame
 
@@ -281,10 +283,10 @@ def calc_proj(quadrat_pts):
     # print("This is the width ", width, "This is the height ", height)
 
     # Conversion factors from pixel to cm per each side
-    side_a_c = dim[0] / dist_a
-    side_b_c = dim[1] / dist_b
-    side_c_c = dim[2] / dist_c
-    side_d_c = dim[3] / dist_d
+    side_a_c = constant.DIM[0] / dist_a
+    side_b_c = constant.DIM[1] / dist_b
+    side_c_c = constant.DIM[2] / dist_c
+    side_d_c = constant.DIM[3] / dist_d
 
     # print("Conversion factor per side", side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
 
@@ -293,7 +295,7 @@ def calc_proj(quadrat_pts):
     q_h = float(side_b_c + side_d_c) / 2
     area = q_w * q_h
     side = np.max([width, height], axis=0)
-    conversion = dim[0] / side
+    conversion = constant.DIM[0] / side
 
     # print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
     #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
@@ -309,11 +311,6 @@ def calc_proj(quadrat_pts):
 
     return M, side, vertices_draw, IM
 
-
-
-"""
-Function that defines the end of tracking
-"""
 
 # def data_writer(video):
 #
@@ -387,5 +384,7 @@ Function that defines the end of tracking
 # Function to initialize all trackers
 # '''
 #
-#
+# """
+# Function that defines the end of tracking
+# """
 #
