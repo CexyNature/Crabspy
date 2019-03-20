@@ -9,9 +9,7 @@
 [2]: http://www.github.com/CexyNature
 <!-- End -->
 
-<img src="images/logos/pseudo_logo.jpg" width="100" height="100">
-
-CrabSpy
+<img src="images/logos/pseudo_logo.jpg" width="150" height="150"> CrabSpy
 ==========
 
 Code collection for crabs' detection, tracking, measure and count
