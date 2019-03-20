@@ -361,6 +361,8 @@ while vid.isOpened():
             # otherwise, compute the thickness of the line and
             # draw the connecting lines
             thickness = int(np.sqrt(10 / float(i + 1)) * 2.5)
+            if thickness == 0:
+                thickness = 1
             # cv2.line(result, pts[i - 1], pts[i], (204, 204, 0), thickness)
             cv2.line(result, pts[i - 1], pts[i], (54, 54, 250), thickness)
 
