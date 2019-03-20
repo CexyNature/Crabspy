@@ -148,7 +148,7 @@ def draw_quadrat(frame, vertices):
         new image with drawn quadrat
     """
 
-    cv2.polylines(frame, [vertices], True, (204, 204, 0), thickness=2)
+    cv2.polylines(frame, [vertices], True, constant.COLOR_SET_0, thickness=2)
     return frame
 
 
