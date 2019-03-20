@@ -116,4 +116,4 @@ __pycache__/
 *.mp4
 *.MP4
 *.avi
-results/
+*.csv
