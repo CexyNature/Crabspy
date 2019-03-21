@@ -14,16 +14,24 @@ import methods
 import constant
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", default="GP010016_fast.mp4", help="Provide path to video file")
+ap.add_argument("-v", "--video", default="GP010016.mp4", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=None,
                 help="Provide time in seconds of target video section showing the key points")
 ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
 # Return video information
-vid, length_vid, fps, _, _, _ = methods.read_video(args["video"])
+vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
 # Set frame where video should start to be read
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
+
+
+local_creation, creation = methods.get_file_creation(args["video"])
+# print("Video created in local folder at: ", time.strftime("%a, %d %b %Y %H:%M:%S",
+#                                                           time.strptime(local_creation, "%d%m%Y %H%M%S")),
+#       "Video created at: ", time.strftime("%a, %d %b %Y %H:%M:%S",
+#                                           time.strptime(creation, "%d%m%Y %H%M%S")))
+
 
 """
 Create file to save track paths
@@ -74,7 +82,7 @@ maxi = np.amax(vertices_draw, axis=0)
 # print(mini, "and ", maxi)
 
 # Read first frame.q
-vid, length_vid, fps, _, _, _ = methods.read_video(args["video"])
+vid, length_vid, fps, _, _, _, _ = methods.read_video(args["video"])
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 ok, frame = vid.read()
 frame = cv2.warpPerspective(frame, M, (side, side))
@@ -146,20 +154,25 @@ class compile_information(object):
         self.name = name
         self.value = value
 
-info = [compile_information("length_vid", length_vid),
+info = [compile_information("local_creation", local_creation),
+        compile_information("creation", creation),
+        compile_information("length_vid", length_vid),
         compile_information("fps", fps),
+        compile_information("vid_duration", vid_duration),
         compile_information("target_frame", target_frame),
         compile_information("side", side),
         compile_information("conversion", conversion),
-        compile_information("tracker", tracker)]
+        compile_information("tracker", str(tracker))]
 
 info_video = {}
 for i in info:
     info_video[i.name] = i.value
-print(info_video)
+# print(info_video)
 
+result_file = methods.data_writer(args["video"], info_video, True)
 
-
+start, end, step, _, _ = methods.frame_to_time(info_video)
+print("Video recording started at: ", start, " Video recording ended at: ", end)
 
 while vid.isOpened():
     _, img = vid.read()
@@ -216,6 +229,21 @@ while vid.isOpened():
         # cv2.circle(result, (180,180), 3, (0, 204, 100), 3)
 
         center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
+
+        _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
+
+        info = [compile_information("Frame", counter),
+                compile_information("Time_absolute", str(time_absolute)),
+                compile_information("Time_since_start", str(time_since_start)),
+                compile_information("Crab_ID", crab_id),
+                compile_information("Crab_Position_x", center[0]),
+                compile_information("Crab_Position_y", center[1]),
+                compile_information("Counter", counter)]
+
+        for i in info:
+            info_video[i.name] = i.value
+        result_file = methods.data_writer(args["video"], info_video, False)
+
 
         wr.writerow([crab_id, center, counter])
 
@@ -336,3 +364,4 @@ while vid.isOpened():
 vid.release()
 cv2.destroyAllWindows()
 resultFile.close()
+result_file.close()
