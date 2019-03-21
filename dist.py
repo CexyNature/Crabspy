@@ -20,12 +20,10 @@ ap.add_argument("-s", "--seconds", default=None,
 ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
-
 # Return video information
 vid, length_vid, fps, _, _, _ = methods.read_video(args["video"])
 # Set frame where video should start to be read
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
-
 
 """
 Create file to save track paths
@@ -66,7 +64,7 @@ vid.release()
 cv2.destroyAllWindows()
 print(methods.quadrat_pts)
 
-M, side, vertices_draw, IM = methods.calc_proj(methods.quadrat_pts)
+M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadrat_pts)
 center = (0, 0)
 
 # vertices = np.array([methods.quadrat_pts[0], methods.quadrat_pts[1],
@@ -141,6 +139,28 @@ for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 out = cv2.VideoWriter("Uca_detection.avi",
                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
+
+
+class compile_information(object):
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+info = [compile_information("length_vid", length_vid),
+        compile_information("fps", fps),
+        compile_information("target_frame", target_frame),
+        compile_information("side", side),
+        compile_information("conversion", conversion),
+        compile_information("tracker", tracker)]
+
+info_video = {}
+for i in info:
+    info_video[i.name] = i.value
+print(info_video)
+
+
+
+
 while vid.isOpened():
     _, img = vid.read()
     # print(img.shape)
@@ -151,7 +171,7 @@ while vid.isOpened():
     crab_frame = cv2.warpPerspective(img, M, (side, side))
     # result_speed = result
     # print(crop_img.shape)
-    print("Dimensions for result are: ", result.shape)
+    # print("Dimensions for result are: ", result.shape)
     # result_1 = cv2.warpPerspective(result, IM, (682,593))
 
     methods.draw_quadrat(img, vertices_draw)
