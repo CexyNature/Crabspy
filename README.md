@@ -55,9 +55,9 @@ Describe traditional sampling methods, and the need to collect and analyze biodi
 
 - python >= 3.5
 
-- opencv >= 3.4.3
+- opencv >= 3.3.0
 
-- numpy >= 1.14
+- numpy >= 1.14.2
 
 
 ## Installation
