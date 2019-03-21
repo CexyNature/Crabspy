@@ -8,6 +8,7 @@ import numpy as np
 import math
 import time
 import csv
+import datetime
 
 import constant
 
@@ -75,6 +76,8 @@ def read_video(video_path):
             # Height in pixels
             vid_height = vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
             logger.info("Frame width is %d pixels, and frame height is %d pixels" % (vid_width, vid_height))
+            vid_duration = int(vid_length)/vid_fps
+            logger.info("Video duration %d seconds" % vid_duration)
             # Return video format
             # vid.get(cv2.CAP_PROP_FORMAT)
             # Video fourcc
@@ -93,7 +96,7 @@ def read_video(video_path):
         logger.exception(str(e))
         sys.exit(1)
 
-    return vid, vid_length, vid_fps, vid_width, vid_height, vid_fourcc
+    return vid, vid_length, vid_fps, vid_width, vid_height, vid_duration, vid_fourcc
 
 
 def set_video_star(vid, seconds, fps):
@@ -312,35 +315,68 @@ def calc_proj(quadrat_pts):
     return M, side, vertices_draw, IM, conversion
 
 
-def data_writer(video_path, info_video):
+def get_file_creation(video_path):
+    local_creation = time.strftime("%d%m%Y %H%M%S", time.localtime(os.path.getctime("video/" + video_path)))
+    creation = time.strftime("%d%m%Y %H%M%S", time.localtime(os.path.getmtime("video/" + video_path)))
+    return local_creation, creation
+
+
+def frame_to_time(info_video):
+
+
+    start = datetime.datetime.strptime(info_video["creation"], "%d%m%Y %H%M%S")
+    vid_duration = info_video['vid_duration']
+    end = start + datetime.timedelta(0, vid_duration)
+    step = vid_duration / info_video['length_vid']
+
+    if "Counter" in info_video:
+        time_absolute = start + (datetime.timedelta(0, step * (info_video["Counter"]+1)))
+        time_absolute = time_absolute.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
+        time_since_start = step * (info_video["Counter"]+1)
+
+    else:
+        time_absolute = None
+        time_since_start = None
+
+    return start, end, step, time_absolute, time_since_start
+
+
+
+def data_writer(video_path, info_video, head_true):
 
     # create file name with name
     name = os.path.basename(video_path)
     video_name, file_extension = os.path.splitext(name)
     name_result_file = "results/" + video_name + "_" + "track_id" + ".csv"
-    result_file = open(name_result_file, "wa", newline="\n")
-    wr = csv.writer(result_file, delimiter=",")
-    date_now = time.strftime("%d%m%Y")
-    time_now = time.strftime("%H%M")
-
-    wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
-             "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
-             "projected_q_side", "q_factor_distance", "tracker_method"])
-
-    wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
-                info_video["target_frame"], quadrat_pts[0], quadrat_pts[1],
-                quadrat_pts[2], quadrat_pts[3], info_video["side"], info_video["conversion"],
-                info_video["tracker"]])
-    wr.writerow(["\n"])
-    wr.writerow(["Frame", "Time_absolute", "Time_since_start", "Crab_ID", "Crab_Position"])
 
 
+    if head_true:
+        result_file = open(name_result_file, "w", newline="\n")
+        wr = csv.writer(result_file, delimiter=",")
+        date_now = time.strftime("%d%m%Y")
+        time_now = time.strftime("%H%M")
+        wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
+                 "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
+                 "projected_q_side", "q_conversion_factor_distance", "tracker_method"])
 
-    # save track_info to file
+        wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
+                    info_video["target_frame"], quadrat_pts[0], quadrat_pts[1],
+                    quadrat_pts[2], quadrat_pts[3], info_video["side"], info_video["conversion"],
+                    info_video["tracker"]])
+        wr.writerow(["\n"])
+        wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
+                     "Crab_ID", "Crab_Position_x", "Crab_position_y"])
+
+    else:
+        # save track_info to file
+        result_file = open(name_result_file, "a+", newline="\n")
+        wr = csv.writer(result_file, delimiter=",")
+
+        wr.writerow([info_video["Frame"], info_video["Time_absolute"], info_video["Time_since_start"],
+                     info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"]])
 
 
-
-
+    return result_file
 
 # def save_tracks(video_path):
 #
