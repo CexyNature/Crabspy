@@ -309,27 +309,38 @@ def calc_proj(quadrat_pts):
     maxi = np.amax(vertices, axis=0)
     # print(mini, "and ", maxi)
 
-    return M, side, vertices_draw, IM
+    return M, side, vertices_draw, IM, conversion
 
 
-# def data_writer(video):
-#
-#     path = os.path.basename(video)
-#     file_name, file_ext = os.path.splitext(path)
-#
-#     date_now = time.strftime('%d%m%Y')
-#     time_now = time.strftime('%H%M')
-#
-#     name_resultFile = 'results/' + file_name + '_' + str(date_now) + '_' + str(time_now) + '.csv'
-#
-#     resultFile = open(name_resultFile, 'w', newline='\n')
-#
-#     wr = csv.writer(resultFile, delimiter=',')
-#
-#     wr.writerow(['file_name', 'processed_at_date', 'processed_at_time', 'length_video', 'fps_video',
-#                  'target_frame_used', 'point_1', 'point_2', 'point_3', 'point_4'])
-#
-#     resultFile.close()
+def data_writer(video_path, info_video):
+
+    # create file name with name
+    name = os.path.basename(video_path)
+    video_name, file_extension = os.path.splitext(name)
+    name_result_file = "results/" + video_name + "_" + "track_id" + ".csv"
+    result_file = open(name_result_file, "wa", newline="\n")
+    wr = csv.writer(result_file, delimiter=",")
+    date_now = time.strftime("%d%m%Y")
+    time_now = time.strftime("%H%M")
+
+    wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
+             "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
+             "projected_q_side", "q_factor_distance", "tracker_method"])
+
+    wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
+                info_video["target_frame"], quadrat_pts[0], quadrat_pts[1],
+                quadrat_pts[2], quadrat_pts[3], info_video["side"], info_video["conversion"],
+                info_video["tracker"]])
+    wr.writerow(["\n"])
+    wr.writerow(["Frame", "Time_absolute", "Time_since_start", "Crab_ID", "Crab_Position"])
+
+
+
+    # save track_info to file
+
+
+
+
 
 # def save_tracks(video_path):
 #
