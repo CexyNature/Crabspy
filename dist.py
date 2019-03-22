@@ -17,6 +17,12 @@ ap.add_argument("-s", "--seconds", default=None,
 ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
+
+
+
+
+
+
 # Return video information
 vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
 local_creation, creation = methods.get_file_creation(args["video"])
@@ -105,21 +111,15 @@ for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 out = cv2.VideoWriter("Uca_detection.avi",
                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
-
-class CompileInformation(object):
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-
-info = [CompileInformation("local_creation", local_creation),
-        CompileInformation("creation", creation),
-        CompileInformation("length_vid", length_vid),
-        CompileInformation("fps", fps),
-        CompileInformation("vid_duration", vid_duration),
-        CompileInformation("target_frame", target_frame),
-        CompileInformation("side", side),
-        CompileInformation("conversion", conversion),
-        CompileInformation("tracker", str(tracker))]
+info = [methods.CompileInformation("local_creation", local_creation),
+        methods.CompileInformation("creation", creation),
+        methods.CompileInformation("length_vid", length_vid),
+        methods.CompileInformation("fps", fps),
+        methods.CompileInformation("vid_duration", vid_duration),
+        methods.CompileInformation("target_frame", target_frame),
+        methods.CompileInformation("side", side),
+        methods.CompileInformation("conversion", conversion),
+        methods.CompileInformation("tracker", str(tracker))]
 
 info_video = {}
 for i in info:
@@ -130,8 +130,8 @@ result_file = methods.data_writer(args["video"], info_video, True)
 result_file.close()
 
 start, end, step, _, _ = methods.frame_to_time(info_video)
-print("The video recording was started at: ", start, "\n The video recording was ended at: ", end,
-      "\n This information might not be precise as it depends on your computer file system")
+print("The video recording was started at: ", start, "\nThe video recording was ended at: ", end,
+      "\nThis information might not be precise as it depends on your computer file system")
 
 while vid.isOpened():
     _, img = vid.read()
@@ -191,13 +191,13 @@ while vid.isOpened():
 
         _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
 
-        info = [CompileInformation("Frame", counter),
-                CompileInformation("Time_absolute", str(time_absolute)),
-                CompileInformation("Time_since_start", str(time_since_start)),
-                CompileInformation("Crab_ID", crab_id),
-                CompileInformation("Crab_Position_x", center[0]),
-                CompileInformation("Crab_Position_y", center[1]),
-                CompileInformation("Counter", counter)]
+        info = [methods.CompileInformation("Frame", counter),
+                methods.CompileInformation("Time_absolute", str(time_absolute)),
+                methods.CompileInformation("Time_since_start", str(time_since_start)),
+                methods.CompileInformation("Crab_ID", crab_id),
+                methods.CompileInformation("Crab_Position_x", center[0]),
+                methods.CompileInformation("Crab_Position_y", center[1]),
+                methods.CompileInformation("Counter", counter)]
 
         for i in info:
             info_video[i.name] = i.value

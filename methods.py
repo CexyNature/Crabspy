@@ -9,13 +9,14 @@ import math
 import time
 import csv
 import datetime
+import pickle
 
 import constant
 
 quadratpts = []
 position = (0, 0)
 posmouse = (0, 0)
-
+videoname = ""
 
 def read_video(video_path):
     """
@@ -49,6 +50,11 @@ def read_video(video_path):
     this function two times.
     Probably of logging functions should be handle in its own method.
     """
+
+    global videoname
+
+    name = os.path.basename(video_path)
+    videoname, _ = os.path.splitext(name)
 
     try:
         os.mkdir("results/Log")
@@ -380,7 +386,40 @@ def data_writer(video_path, info_video, head_true):
 
     return result_file
 
-#
+
+class CompileInformation(object):
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+
+class CrabNames(object):
+
+    instances = []
+
+    def __init__(self, crab_name, crab_start_position, crab_species, sex, crab_handedness):
+        self.__class__.instances.append(self)
+        self.crab_name = crab_name
+        self.start_position = crab_start_position
+        self.species = crab_species
+        self.sex = sex
+        self.handedness = crab_handedness
+
+    def save_crab_names(self):
+        filename = "results/" + "example"
+        file = open(filename, "wb")
+        pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
+        file.close()
+        # with open("file", "wb") as f:
+        #     pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
+
+    def open_crab_names(self):
+        file = open("Crab_names_list", "rb")
+        temp_dict = pickle.load(file)
+        file.close()
+        self.__dict__.update(temp_dict)
+
+
 # '''
 # Function to display percentage of video analyzed based on total number of frames
 # '''
