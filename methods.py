@@ -12,10 +12,9 @@ import datetime
 
 import constant
 
-quadrat_pts = []
+quadratpts = []
 position = (0, 0)
 posmouse = (0, 0)
-
 
 
 def read_video(video_path):
@@ -43,6 +42,12 @@ def read_video(video_path):
     vid_fourcc:
         a four (4) character code which identifies and define a video codec, color and compression format.
         More information about FOURCC codes can be found at https://www.fourcc.org/
+
+    Notes
+    -----
+    I should add condition that prevent logging same information twice given that script dist.py uses
+    this function two times.
+    Probably of logging functions should be handle in its own method.
     """
 
     try:
@@ -169,18 +174,19 @@ def mouse_click(event, x, y, flags, param):
     y:
         Mouse y coordinate position on image
     flags:
+
     param:
 
     Returns
     -------
     """
 
-    global quadrat_pts, position, posmouse
+    global quadratpts, position, posmouse
 
     if event == cv2.EVENT_LBUTTONDOWN:
         position = (x, y)
-        quadrat_pts.append(position)
-        # print(quadrat_pts)
+        quadratpts.append(position)
+        # print(quadratpts)
 
     if event == cv2.EVENT_MOUSEMOVE:
         posmouse = (x, y)
@@ -200,16 +206,15 @@ def enable_point_capture(capture_vertices):
 
     """
 
-    global quadrat_pts
+    global quadratpts
 
     if capture_vertices is False:
-        quadrat_pts = constant.QUADRAT_POINTS
+        quadratpts = constant.QUADRAT_POINTS
     else:
         cv2.setMouseCallback("Vertices selection", mouse_click)
 
 
-def draw_points_mousepos(frame, list_points, posmouse):
-
+def draw_points_mousepos(frame, list_points, pos_mouse):
     """
     Draw the current position of the mouse and the vertices selected by user on the image.
 
@@ -217,9 +222,9 @@ def draw_points_mousepos(frame, list_points, posmouse):
     ----------
     frame:
         An image.
-    list_object:
+    list_points:
         List of points containing vertices' coordinates
-    posmouse:
+    pos_mouse:
         The coordinates of the current position of the mouse.
 
     Returns
@@ -231,7 +236,8 @@ def draw_points_mousepos(frame, list_points, posmouse):
     for i, val in enumerate(list_points):
         cv2.circle(frame, val, 3, constant.COLOR_SET_0, 2)
 
-    cv2.putText(frame, "Mouse position {}".format(posmouse), (50, 710), cv2.FONT_HERSHEY_SIMPLEX, 0.6, constant.COLOR_SET_0, 2)
+    cv2.putText(frame, "Mouse position {}".format(pos_mouse), (50, 710),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, constant.COLOR_SET_0, 2)
 
     return frame
 
@@ -256,7 +262,8 @@ def calc_proj(quadrat_pts):
     side:
         An integer which defines the width and height in pixels of destination points (i.e. new image, or quadrat)
     vertices_draw:
-        A Numpy array np.int32 containing the coordinates (x,y) of the four points. To be passed to function draw_quadrat.
+        A Numpy array np.int32 containing the coordinates (x,y) of the four points.
+        To be passed to function draw_quadrat.
     IM:
         The inverse 3x3 perspective transform of M.
 
@@ -270,7 +277,6 @@ def calc_proj(quadrat_pts):
     orig_pts = vertices
     # print(vertices)
 
-
     # dist = math.hypot(x2-x1, y2-y1)
     dist_a = math.sqrt((vertices[0][0] - vertices[1][0]) ** 2 + (vertices[0][1] - vertices[1][1]) ** 2)
     dist_b = math.sqrt((vertices[0][0] - vertices[2][0]) ** 2 + (vertices[0][1] - vertices[2][1]) ** 2)
@@ -278,25 +284,25 @@ def calc_proj(quadrat_pts):
     dist_d = math.sqrt((vertices[3][0] - vertices[1][0]) ** 2 + (vertices[3][1] - vertices[1][1]) ** 2)
 
     width = int(max(dist_a, dist_c))
-    width_10 = int(max(dist_a, dist_c) + 10)
+    # width_10 = int(max(dist_a, dist_c) + 10)
     height = int(max(dist_b, dist_d))
-    height_10 = int(max(dist_b, dist_d) + 10)
+    # height_10 = int(max(dist_b, dist_d) + 10)
 
     # print(dist_a, dist_b, dist_c, dist_d)
     # print("This is the width ", width, "This is the height ", height)
 
     # Conversion factors from pixel to cm per each side
-    side_a_c = constant.DIM[0] / dist_a
-    side_b_c = constant.DIM[1] / dist_b
-    side_c_c = constant.DIM[2] / dist_c
-    side_d_c = constant.DIM[3] / dist_d
+    # side_a_c = constant.DIM[0] / dist_a
+    # side_b_c = constant.DIM[1] / dist_b
+    # side_c_c = constant.DIM[2] / dist_c
+    # side_d_c = constant.DIM[3] / dist_d
 
     # print("Conversion factor per side", side_a_c, " ", side_b_c, " ", side_c_c, " ", side_d_c)
 
     # Average conversion factors from pixel to cm for quadrat height and wide
-    q_w = float(side_a_c + side_c_c) / 2
-    q_h = float(side_b_c + side_d_c) / 2
-    area = q_w * q_h
+    # q_w = float(side_a_c + side_c_c) / 2
+    # q_h = float(side_b_c + side_d_c) / 2
+    # area = q_w * q_h
     side = np.max([width, height], axis=0)
     conversion = constant.DIM[0] / side
 
@@ -308,8 +314,8 @@ def calc_proj(quadrat_pts):
     M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
     IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
 
-    mini = np.amin(vertices, axis=0)
-    maxi = np.amax(vertices, axis=0)
+    # mini = np.amin(vertices, axis=0)
+    # maxi = np.amax(vertices, axis=0)
     # print(mini, "and ", maxi)
 
     return M, side, vertices_draw, IM, conversion
@@ -323,7 +329,6 @@ def get_file_creation(video_path):
 
 def frame_to_time(info_video):
 
-
     start = datetime.datetime.strptime(info_video["creation"], "%d%m%Y %H%M%S")
     vid_duration = info_video['vid_duration']
     end = start + datetime.timedelta(0, vid_duration)
@@ -335,11 +340,10 @@ def frame_to_time(info_video):
         time_since_start = step * (info_video["Counter"]+1)
 
     else:
-        time_absolute = None
-        time_since_start = None
+        time_absolute = start.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
+        time_since_start = 0
 
     return start, end, step, time_absolute, time_since_start
-
 
 
 def data_writer(video_path, info_video, head_true):
@@ -349,19 +353,18 @@ def data_writer(video_path, info_video, head_true):
     video_name, file_extension = os.path.splitext(name)
     name_result_file = "results/" + video_name + "_" + "track_id" + ".csv"
 
-
     if head_true:
         result_file = open(name_result_file, "w", newline="\n")
         wr = csv.writer(result_file, delimiter=",")
         date_now = time.strftime("%d%m%Y")
         time_now = time.strftime("%H%M")
         wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
-                 "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
-                 "projected_q_side", "q_conversion_factor_distance", "tracker_method"])
+                     "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
+                     "projected_q_side", "q_conversion_factor_distance", "tracker_method"])
 
         wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
-                    info_video["target_frame"], quadrat_pts[0], quadrat_pts[1],
-                    quadrat_pts[2], quadrat_pts[3], info_video["side"], info_video["conversion"],
+                    info_video["target_frame"], quadratpts[0], quadratpts[1],
+                    quadratpts[2], quadratpts[3], info_video["side"], info_video["conversion"],
                     info_video["tracker"]])
         wr.writerow(["\n"])
         wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
@@ -375,48 +378,17 @@ def data_writer(video_path, info_video, head_true):
         wr.writerow([info_video["Frame"], info_video["Time_absolute"], info_video["Time_since_start"],
                      info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"]])
 
-
     return result_file
-
-# def save_tracks(video_path):
-#
-#     try:
-#         os.mkdir("results")
-#     except FileExistsError:
-#         pass
-#
-#     path = os.path.basename(video_path)
-#     file_name, file_ext = os.path.splitext(path)
-#     name_resultFile = "results/" + file_name + ".csv"
-#
-#     if os.path.exists(name_resultFile):
-#         append_condition = 'a'
-#     else:
-#         append_condition = 'w'
-#     resultFile = open(name_resultFile, append_condition, newline="\n")
-#     wr = csv.writer(resultFile, delimiter=",")
-#
-#     date_now = time.strftime("%d%m%Y")
-#     time_now = time.strftime("%H%M")
-#     wr.writerow(["Video {}".format(path), "Processed at date {} time {}".format(date_now, time_now)])
-#     wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
-#                  "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
-#                  "projected_q_side", "q_factor_distance", "tracker_method"])
-#     resultFile.close()
-
-
 
 #
 # '''
 # Function to display percentage of video analyzed based on total number of frames
 # '''
 #
-#
 # '''
 # Function to sample size and color for each crab.
 # It should return one value for size (blob maximum axis?), and three values for color (Blue, Green and Red)
 # '''
-#
 #
 # '''
 # Function to return smoothed x and x position
@@ -434,4 +406,3 @@ def data_writer(video_path, info_video, head_true):
 # """
 # Function that defines the end of tracking
 # """
-#

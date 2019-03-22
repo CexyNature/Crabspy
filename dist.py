@@ -3,9 +3,6 @@
 import cv2
 import numpy as np
 import argparse
-import csv
-import os
-import time
 from collections import deque
 import sys
 from datetime import datetime
@@ -22,45 +19,20 @@ args = vars(ap.parse_args())
 
 # Return video information
 vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
+local_creation, creation = methods.get_file_creation(args["video"])
 # Set frame where video should start to be read
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
-
-
-local_creation, creation = methods.get_file_creation(args["video"])
-# print("Video created in local folder at: ", time.strftime("%a, %d %b %Y %H:%M:%S",
-#                                                           time.strptime(local_creation, "%d%m%Y %H%M%S")),
-#       "Video created at: ", time.strftime("%a, %d %b %Y %H:%M:%S",
-#                                           time.strptime(creation, "%d%m%Y %H%M%S")))
-
-
-"""
-Create file to save track paths
-"""
-path = os.path.basename(args["video"])
-file_name, file_ext = os.path.splitext(path)
-dir_results = "results"
-# print(file_name)
-# print(file_ext)
-
-date_now = time.strftime("%d%m%Y")
-time_now = time.strftime("%H%M")
-name_resultFile = "results/" + file_name + "_" + str(date_now) + "_" + str(time_now) + ".csv"
-resultFile = open(name_resultFile, "w", newline="\n")
-wr = csv.writer(resultFile, delimiter=",")
-wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
-             "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
-             "projected_q_side", "q_factor_distance", "tracker_method"])
-
 
 while vid.isOpened():
     ret, frame = vid.read()
 
     methods.enable_point_capture(constant.CAPTURE_VERTICES)
-    frame = methods.draw_points_mousepos(frame, methods.quadrat_pts, methods.posmouse)
+    frame = methods.draw_points_mousepos(frame, methods.quadratpts, methods.posmouse)
     cv2.imshow("Vertices selection", frame)
 
-    if len(methods.quadrat_pts) == 4:
-        print("Vertices were captured")
+    if len(methods.quadratpts) == 4:
+        print("Vertices were captured. Coordinates in pixels are: top-left {}, top-right {}, "
+              "bottom-left {}, and bottom-right {}".format(*methods.quadratpts))
         break
 
     key = cv2.waitKey(1) & 0xFF
@@ -68,22 +40,14 @@ while vid.isOpened():
         # print("Q - key pressed. Window quit by user")
         break
 
-vid.release()
+# vid.release()
 cv2.destroyAllWindows()
-print(methods.quadrat_pts)
 
-M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadrat_pts)
+M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
 center = (0, 0)
-
-# vertices = np.array([methods.quadrat_pts[0], methods.quadrat_pts[1],
-#                      methods.quadrat_pts[2], methods.quadrat_pts[3]], np.float32)
 mini = np.amin(vertices_draw, axis=0)
 maxi = np.amax(vertices_draw, axis=0)
-# print(mini, "and ", maxi)
 
-# Read first frame.q
-vid, length_vid, fps, _, _, _, _ = methods.read_video(args["video"])
-vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 ok, frame = vid.read()
 frame = cv2.warpPerspective(frame, M, (side, side))
 
@@ -118,14 +82,8 @@ ok = tracker.init(frame, bbox)
 
 # initialize the list of tracked points, the frame counter,
 # and the coordinate deltas
-pts = deque(maxlen=10000)
+pts = deque(maxlen=100000)
 
-wr.writerow([path, date_now, time_now, length_vid, fps, target_frame,
-             methods.quadrat_pts[0], methods.quadrat_pts[1],
-             methods.quadrat_pts[2], methods.quadrat_pts[3], side, "conversion", tracker])
-wr.writerow(["\n"])
-wr.writerow(["Crab_ID", "Crab_Position", "Crab_frame"])
-# print(M)
 
 counter = 0
 (dX, dY) = (0, 0)
@@ -148,21 +106,20 @@ out = cv2.VideoWriter("Uca_detection.avi",
                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
 
-
-class compile_information(object):
+class CompileInformation(object):
     def __init__(self, name, value):
         self.name = name
         self.value = value
 
-info = [compile_information("local_creation", local_creation),
-        compile_information("creation", creation),
-        compile_information("length_vid", length_vid),
-        compile_information("fps", fps),
-        compile_information("vid_duration", vid_duration),
-        compile_information("target_frame", target_frame),
-        compile_information("side", side),
-        compile_information("conversion", conversion),
-        compile_information("tracker", str(tracker))]
+info = [CompileInformation("local_creation", local_creation),
+        CompileInformation("creation", creation),
+        CompileInformation("length_vid", length_vid),
+        CompileInformation("fps", fps),
+        CompileInformation("vid_duration", vid_duration),
+        CompileInformation("target_frame", target_frame),
+        CompileInformation("side", side),
+        CompileInformation("conversion", conversion),
+        CompileInformation("tracker", str(tracker))]
 
 info_video = {}
 for i in info:
@@ -170,9 +127,11 @@ for i in info:
 # print(info_video)
 
 result_file = methods.data_writer(args["video"], info_video, True)
+result_file.close()
 
 start, end, step, _, _ = methods.frame_to_time(info_video)
-print("Video recording started at: ", start, " Video recording ended at: ", end)
+print("The video recording was started at: ", start, "\n The video recording was ended at: ", end,
+      "\n This information might not be precise as it depends on your computer file system")
 
 while vid.isOpened():
     _, img = vid.read()
@@ -188,7 +147,7 @@ while vid.isOpened():
     # result_1 = cv2.warpPerspective(result, IM, (682,593))
 
     methods.draw_quadrat(img, vertices_draw)
-    # cv2.polylines(img, np.int32([quadrat_pts]), True, (204, 204, 0), thickness=2)
+    # cv2.polylines(img, np.int32([quadratpts]), True, (204, 204, 0), thickness=2)
 
     # From warp.py
     gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
@@ -232,20 +191,16 @@ while vid.isOpened():
 
         _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
 
-        info = [compile_information("Frame", counter),
-                compile_information("Time_absolute", str(time_absolute)),
-                compile_information("Time_since_start", str(time_since_start)),
-                compile_information("Crab_ID", crab_id),
-                compile_information("Crab_Position_x", center[0]),
-                compile_information("Crab_Position_y", center[1]),
-                compile_information("Counter", counter)]
+        info = [CompileInformation("Frame", counter),
+                CompileInformation("Time_absolute", str(time_absolute)),
+                CompileInformation("Time_since_start", str(time_since_start)),
+                CompileInformation("Crab_ID", crab_id),
+                CompileInformation("Crab_Position_x", center[0]),
+                CompileInformation("Crab_Position_y", center[1]),
+                CompileInformation("Counter", counter)]
 
         for i in info:
             info_video[i.name] = i.value
-        result_file = methods.data_writer(args["video"], info_video, False)
-
-
-        wr.writerow([crab_id, center, counter])
 
         crab = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
         # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
@@ -355,6 +310,7 @@ while vid.isOpened():
     # cv2.imshow("display00", display00)
     # cv2.imshow("display01", display01)
     # cv2.imshow("display", display)
+    result_file = methods.data_writer(args["video"], info_video, False)
     counter += 1
 
     key = cv2.waitKey(1) & 0xFF
@@ -363,5 +319,4 @@ while vid.isOpened():
 
 vid.release()
 cv2.destroyAllWindows()
-resultFile.close()
 result_file.close()
