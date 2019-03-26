@@ -9,18 +9,17 @@ import pickle
 
 uca_01 = methods.CrabNames("Uca_01", (101, 205), "Uca coarctata", "male", "right")
 meto_01 = methods.CrabNames("Metopograpsus_01", (301, 203), "Metopograpsus sp", "male", None)
+methods.CrabNames.save_crab_names(methods.CrabNames.instances)
 for instance in methods.CrabNames.instances:
     print(instance.sex)
-methods.CrabNames.save_crab_names(methods.CrabNames.instances)
 
-a = pickle.load(open("results/example", "rb"))
-#
-for instance in a:
-    print("This is a ", instance.crab_name)
+methods.CrabNames.open_crab_names("results/example")
+for instance in methods.CrabNames.instances:
+    print("This is a ", instance.start_position)
 
 
-# uca01 = methods.CrabNames.open_crab_names()
-# print(uca01.sex)
+
+
 
 # vid, vid_length, vid_fps, vid_width, vid_length, vid_fourcc = methods.read_video('VIRB0002.MP4')
 # # methods.save_tracks('GP010016.MP4')

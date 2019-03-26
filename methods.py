@@ -13,6 +13,10 @@ import pickle
 
 import constant
 
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
+
 quadratpts = []
 position = (0, 0)
 posmouse = (0, 0)
@@ -413,11 +417,20 @@ class CrabNames(object):
         # with open("file", "wb") as f:
         #     pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
 
-    def open_crab_names(self):
-        file = open("Crab_names_list", "rb")
+    def open_crab_names(path):
+        file = open(path, "rb")
         temp_dict = pickle.load(file)
+        for instance in temp_dict:
+            # print("This is a ", instance.crab_name)
+            __class__.instances.append(instance)
         file.close()
-        self.__dict__.update(temp_dict)
+
+    # def print_crab_names(__class__.instances):
+    #
+    #     for k, v in vars(__class__.instances).items():
+    #         print(k, v)
+
+
 
 
 # '''
