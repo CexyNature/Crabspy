@@ -22,7 +22,7 @@ ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the
 args = vars(ap.parse_args())
 
 # Return video information
-vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
+video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
 local_creation, creation = methods.get_file_creation(args["video"])
 # Set frame where video should start to be read
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
@@ -75,8 +75,27 @@ bbox = cv2.selectROI("tracking select", frame, fromCenter=False)
 crab_center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
 print(crab_center)
 
-crab_id = args["video"] + "_" + args["crab_id"] + str(crab_center)
-print(crab_id)
+if constant.MANUAL_ANNOTATION is True:
+    try:
+        name = video_name + "_" + str(input("* Please enter name for this individual: "))
+        species = str(input("* Please enter species name for this individual: "))
+        sex = str(input("* Please enter sex for this individual: "))
+        handedness = str(input(" *Please enter handedness for this individual: "))
+    except ValueError:
+        print("Error in input. Using pre-defined information")
+        name = video_name + "_" + methods.random_name()
+        species = "unknown"
+        sex = "unknown"
+        handedness = "unknown"
+else:
+    name = video_name + "_" + methods.random_name()
+    species = "unknown"
+    sex = "unknown"
+    handedness ="unknown"
+
+
+# crab_id = args["video"] + "_" + args["crab_id"] + str(crab_center)
+# print(crab_id)
 
 # Uncomment the line below to select a different bounding box
 # bbox = cv2.selectROI(frame, False)
@@ -87,7 +106,6 @@ ok = tracker.init(frame, bbox)
 # initialize the list of tracked points, the frame counter,
 # and the coordinate deltas
 pts = deque(maxlen=100000)
-
 
 counter = 0
 (dX, dY) = (0, 0)
@@ -109,7 +127,8 @@ for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 out = cv2.VideoWriter("Uca_detection.avi",
                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
-info = [methods.CompileInformation("local_creation", local_creation),
+info = [methods.CompileInformation("name_video", video_name),
+        methods.CompileInformation("local_creation", local_creation),
         methods.CompileInformation("creation", creation),
         methods.CompileInformation("length_vid", length_vid),
         methods.CompileInformation("fps", fps),
@@ -117,12 +136,24 @@ info = [methods.CompileInformation("local_creation", local_creation),
         methods.CompileInformation("target_frame", target_frame),
         methods.CompileInformation("side", side),
         methods.CompileInformation("conversion", conversion),
-        methods.CompileInformation("tracker", str(tracker))]
+        methods.CompileInformation("tracker", str(tracker)),
+        methods.CompileInformation("Crab_ID", name)]
 
 info_video = {}
 for i in info:
     info_video[i.name] = i.value
 # print(info_video)
+
+# print(name, "\n" + species, "\n" + sex, "\n" + handedness)
+
+crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
+print(crab_id)
+
+try:
+    methods.CrabNames.open_crab_names(info_video)
+except:
+    pass
+methods.CrabNames.save_crab_names(methods.CrabNames.instances, info_video)
 
 result_file = methods.data_writer(args["video"], info_video, True)
 result_file.close()
@@ -192,10 +223,13 @@ while vid.isOpened():
         info = [methods.CompileInformation("Frame", counter),
                 methods.CompileInformation("Time_absolute", str(time_absolute)),
                 methods.CompileInformation("Time_since_start", str(time_since_start)),
-                methods.CompileInformation("Crab_ID", crab_id),
+                methods.CompileInformation("Crab_ID", name),
                 methods.CompileInformation("Crab_Position_x", center[0]),
                 methods.CompileInformation("Crab_Position_y", center[1]),
-                methods.CompileInformation("Counter", counter)]
+                methods.CompileInformation("Counter", counter),
+                methods.CompileInformation("Species", species),
+                methods.CompileInformation("Sex", sex),
+                methods.CompileInformation("Handedness", handedness)]
 
         for i in info:
             info_video[i.name] = i.value
