@@ -10,6 +10,8 @@ import time
 import csv
 import datetime
 import pickle
+import string
+import random
 
 import constant
 
@@ -111,7 +113,7 @@ def read_video(video_path):
         logger.exception(str(e))
         sys.exit(1)
 
-    return vid, vid_length, vid_fps, vid_width, vid_height, vid_duration, vid_fourcc
+    return videoname, vid, vid_length, vid_fps, vid_width, vid_height, vid_duration, vid_fourcc
 
 
 def set_video_star(vid, seconds, fps):
@@ -342,7 +344,7 @@ def frame_to_time(info_video):
     start = datetime.datetime.strptime(info_video["creation"], "%d%m%Y %H%M%S")
     vid_duration = info_video['vid_duration']
     end = start + datetime.timedelta(0, vid_duration)
-    step = vid_duration / info_video['length_vid']
+    step = vid_duration / info_video["length_vid"]
 
     if "Counter" in info_video:
         time_absolute = start + (datetime.timedelta(0, step * (info_video["Counter"]+1)))
@@ -361,7 +363,7 @@ def data_writer(video_path, info_video, head_true):
     # create file name with name
     name = os.path.basename(video_path)
     video_name, file_extension = os.path.splitext(name)
-    name_result_file = "results/" + video_name + "_" + "track_id" + ".csv"
+    name_result_file = "results/" + video_name + "_" + info_video["Crab_ID"] + ".csv"
 
     if head_true:
         result_file = open(name_result_file, "w", newline="\n")
@@ -378,7 +380,7 @@ def data_writer(video_path, info_video, head_true):
                     info_video["tracker"]])
         wr.writerow(["\n"])
         wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
-                     "Crab_ID", "Crab_Position_x", "Crab_position_y"])
+                     "Crab_ID", "Crab_Position_x", "Crab_position_y", "Species", "Sex", "Handedness"])
 
     else:
         # save track_info to file
@@ -386,7 +388,8 @@ def data_writer(video_path, info_video, head_true):
         wr = csv.writer(result_file, delimiter=",")
 
         wr.writerow([info_video["Frame"], info_video["Time_absolute"], info_video["Time_since_start"],
-                     info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"]])
+                     info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"],
+                     info_video["Species"], info_video["Sex"], info_video["Handedness"]])
 
     return result_file
 
@@ -409,28 +412,48 @@ class CrabNames(object):
         self.sex = sex
         self.handedness = crab_handedness
 
-    def save_crab_names(self):
-        filename = "results/" + "example"
+    def __str__(self):
+        return "This is individual {crab_name}: a {sex} sex and {handedness} handedness," \
+               " from species {species}. Its tracking started at posiiton {start_position}.".format(**self.__dict__)
+
+    def save_crab_names(self, info_video):
+        filename = "results/" + info_video.get("name_video", "")
         file = open(filename, "wb")
         pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
         file.close()
         # with open("file", "wb") as f:
         #     pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
 
-    def open_crab_names(path):
-        file = open(path, "rb")
+    def open_crab_names(info_video):
+        if isinstance(info_video, dict):
+            filename = "results/" + info_video.get("name_video", "")
+        else:
+            filename = info_video
+        file = open(filename, "rb")
         temp_dict = pickle.load(file)
         for instance in temp_dict:
             # print("This is a ", instance.crab_name)
             __class__.instances.append(instance)
         file.close()
 
-    # def print_crab_names(__class__.instances):
-    #
-    #     for k, v in vars(__class__.instances).items():
-    #         print(k, v)
+    def print_crab_names(info_video):
+        if isinstance(info_video, dict):
+            filename = "results/" + info_video.get("name_video", "")
+        else:
+            filename = info_video
+        file = open(filename, "rb")
+        temp_dict = pickle.load(file)
+        for instances in temp_dict:
+            # print("This is a ", instance.crab_name)
+            print("This is individual {crab_name}: sex {sex} and {handedness} handedness," \
+                  " from species {species}. Its tracking started at posiiton {start_position}.".format(
+                **instances.__dict__))
+        file.close()
 
 
+def random_name(size = 5, characters = string.ascii_lowercase + string.digits):
+    name_rand = "".join(random.choice(characters) for _ in range(size))
+    return name_rand
 
 
 # '''
