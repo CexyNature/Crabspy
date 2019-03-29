@@ -6,18 +6,31 @@ import methods
 import constant
 import pickle
 
+# Working
+# uca_01 = methods.CrabNames("Uca_01", (101, 205), "Uca coarctata", "male", "right")
+# meto_01 = methods.CrabNames("Metopograpsus_01", (301, 203), "Metopograpsus sp", "male", None)
+# methods.CrabNames.save_crab_names(methods.CrabNames.instances)
+# for instance in methods.CrabNames.instances:
+#     print(instance.sex)
 
-uca_01 = methods.CrabNames("Uca_01", (101, 205), "Uca coarctata", "male", "right")
-meto_01 = methods.CrabNames("Metopograpsus_01", (301, 203), "Metopograpsus sp", "male", None)
-methods.CrabNames.save_crab_names(methods.CrabNames.instances)
-for instance in methods.CrabNames.instances:
-    print(instance.sex)
+# Working
+# methods.CrabNames.open_crab_names("results/GP010016")
+# for instance in methods.CrabNames.instances:
+#     variable = instance.__dict__
+#     print(variable)
 
-methods.CrabNames.open_crab_names("results/example")
-for instance in methods.CrabNames.instances:
-    print("This is a ", instance.start_position)
+# Working
+# methods.CrabNames.print_crab_names("results/GP010016")
 
+# Working
+# methods.CrabNames.open_crab_names("results/GP010016")
+# for instance in methods.CrabNames.instances:
+#     # variable = instance.__dict__
+#     print("This is individual {crab_name}: sex {sex} and {handedness} handedness," \
+#                " from species {species}. Its tracking started at posiiton {start_position}.".format(**instance.__dict__))
 
+# Working
+methods.CrabNames.print_crab_names("results/GP010016")
 
 
 
