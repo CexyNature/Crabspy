@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 '''
 This code intends to count feeding activity in crabs
 '''
@@ -9,10 +11,12 @@ from datetime import datetime
 import os
 from collections import deque
 import numpy as np
-
 # from random import randint
-
 import random as rng
+
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
 
 '''
 Parser arguments
@@ -22,7 +26,6 @@ ap.add_argument('-v', '--video', default="VIRB0037-3.MP4", help='Provide path to
 ap.add_argument('-s', '--seconds', default=640,
                 help='Provide time in seconds of target video section showing the key points')
 args = vars(ap.parse_args())
-
 
 # Read video
 # vid = cv2.VideoCapture(args['video'])
