@@ -517,22 +517,19 @@ def single_target_track(vid, resize = True, type_tracker = "MIL"):
     return tracker, bbox
 
 
-def multi_target_track(vid, resize = True, type_tracker = "MIL"):
+def multi_target_track(vid, resize = True, type_tracker = "MIL", number=2):
 
     bboxes = []
     trackers = []
     multitrackers = cv2.MultiTracker_create()
+    counter = 1
 
-    while True:
+    while counter <= number:
         track, bbox = single_target_track(vid, resize, type_tracker)
         bboxes.append(bbox)
         trackers.append(track)
-        print("Well done")
-
-        key = cv2.waitKey(1) & 0xFF
-        if key == 27:
-            print("Selection done. Initializing trackers")
-            break
+        print("Total targets {}. Targets remaining to select {}".format(number, number - counter))
+        counter += 1
 
     ok, frame = vid.read()
     if resize is True:
@@ -541,7 +538,7 @@ def multi_target_track(vid, resize = True, type_tracker = "MIL"):
         pass
 
     for bbox, track in zip(bboxes, trackers):
-        multitrackers.add(track, track, frame, bbox)
+        multitrackers.add(track, frame, bbox)
 
     return  multitrackers
 

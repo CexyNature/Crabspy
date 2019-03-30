@@ -26,7 +26,7 @@ video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(arg
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 
 # tracker, _ = methods.single_target_track(vid)
-trackers = methods.multi_target_track(vid)
+trackers = methods.multi_target_track(vid, number=5)
 
 capture_n_frame = 0
 nth_frame = args["nth_frame"]
