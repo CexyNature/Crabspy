@@ -12,6 +12,7 @@ import datetime
 import pickle
 import string
 import random
+import itertools
 
 import constant
 
@@ -473,7 +474,77 @@ def random_name(size = 5, characters = string.ascii_lowercase + string.digits):
 # Function to process frame with high light contrast.
 # It should return a frame
 # '''
-#
+
+
+def single_target_track(vid, resize = True, type_tracker = "MIL"):
+
+    trackerTypes = ['BOOSTING', 'MIL', 'KCF', 'TLD', 'MEDIANFLOW', 'GOTURN']
+
+    if type_tracker == trackerTypes[0]:
+        tracker = cv2.TrackerBoosting_create()
+    elif type_tracker == trackerTypes[1]:
+        tracker = cv2.TrackerMIL_create()
+    elif type_tracker == trackerTypes[2]:
+        tracker = cv2.TrackerKCF_create()
+    elif type_tracker == trackerTypes[3]:
+        tracker = cv2.TrackerTLD_create()
+    elif type_tracker == trackerTypes[4]:
+        tracker = cv2.TrackerMedianFlow_create()
+    elif type_tracker == trackerTypes[5]:
+        tracker = cv2.TrackerGOTURN_create()
+    else:
+        tracker = None
+        print('Incorrect tracker name')
+        print('Available trackers are:')
+        for type_t in trackerTypes:
+            print(type_t)
+
+    ok, frame = vid.read()
+    if resize is True:
+        frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+    else:
+        pass
+
+
+    bbox = cv2.selectROI("Select individual to tracking. Using {} tracker".format(type_tracker),
+                         frame, fromCenter=False)
+
+    crab_center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
+    print(crab_center)
+    ok = tracker.init(frame, bbox)
+    cv2.destroyAllWindows()
+
+    return tracker, bbox
+
+
+def multi_target_track(vid, resize = True, type_tracker = "MIL"):
+
+    bboxes = []
+    trackers = []
+    multitrackers = cv2.MultiTracker_create()
+
+    while True:
+        track, bbox = single_target_track(vid, resize, type_tracker)
+        bboxes.append(bbox)
+        trackers.append(track)
+        print("Well done")
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == 27:
+            print("Selection done. Initializing trackers")
+            break
+
+    ok, frame = vid.read()
+    if resize is True:
+        frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+    else:
+        pass
+
+    for bbox, track in zip(bboxes, trackers):
+        multitrackers.add(track, track, frame, bbox)
+
+    return  multitrackers
+
 # '''
 # Function to initialize all trackers
 # '''
