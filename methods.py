@@ -467,7 +467,7 @@ def random_name(size = 5, characters = string.ascii_lowercase + string.digits):
 # '''
 #
 # '''
-# Function to return smoothed x and x position
+# Function to return smoothed x and y position
 # '''
 #
 # '''
@@ -542,10 +542,7 @@ def multi_target_track(vid, resize = True, type_tracker = "MIL", number=2):
 
     return  multitrackers
 
-# '''
-# Function to initialize all trackers
-# '''
-#
+
 # """
 # Function that defines the end of tracking
 # """
