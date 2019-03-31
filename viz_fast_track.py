@@ -19,6 +19,12 @@ __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
+"""
+Wish list:
+1. Introduce conditional to define if result video should be cropped to bbox.
+2. Introduce conditional to define if result video should be saved as new video.
+"""
+
 video_name, vid, length_vid, fps, vid_width, vid_height, vid_duration, _ = methods.read_video(args["video"])
 capture_n_frame = 0
 nth_frame = 12

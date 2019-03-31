@@ -22,8 +22,6 @@ Wish list:
 2. Solve how to save each bbox coordinates for multiple trackers.
 """
 
-
-
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", default="VIRB0037-3.MP4", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=640,
