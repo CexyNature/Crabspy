@@ -119,6 +119,10 @@ while True:
 
     if ok:
         frame = cv2.resize(frame_ori, (0, 0), fx=0.5, fy=0.5)
+
+        hsl = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS_FULL)
+        one, two, three = cv2.split(hsl)
+
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Update tracker
         ok, bbox = tracker.update(frame)
@@ -132,7 +136,8 @@ while True:
         center = (int(bbox[0] + bbox[2]/2), int(bbox[1] + bbox[3]/2))
         cv2.rectangle(frame, p1, p2, (0, 0, 255))
 
-        crab = gray[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
+        # crab = gray[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
+        crab = three[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
 
 
         opening = cv2.morphologyEx(crab, cv2.MORPH_OPEN, (3,3))
@@ -154,6 +159,7 @@ while True:
         skeleton[skeleton == 1] = 255
 
         row0 = np.hstack((crab, result))
+        # row0 = np.hstack((crab_ch, result))
         row1 = np.hstack((opening, blur))
         row2 = np.hstack((th5, skeleton))
 
