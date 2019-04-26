@@ -21,6 +21,7 @@ from matplotlib import animation
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib import colors
+import matplotlib.gridspec as gridspec
 import time
 
 
@@ -117,9 +118,11 @@ hull_list = []
 
 element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9,9))
 
-fig = plt.figure()
-ax1 = fig.add_subplot(1, 2, 1, projection = "3d")
-ax2 = fig.add_subplot(1, 2, 2)
+# fig = plt.figure()
+# grid = gridspec.GridSpec(ncols=2, nrows=2)
+# ax1 = fig.add_subplot(grid[:-1,:], projection = "3d")
+# ax2 = fig.add_subplot(grid[-1,:-1])
+# ax3 = fig.add_subplot(grid[-1,-1])
 
 while True:
     # Read a new frame
@@ -155,7 +158,7 @@ while True:
         crab_red = red[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
 
 
-        opening = cv2.morphologyEx(crab, cv2.MORPH_OPEN, (3,3))
+        opening = cv2.morphologyEx(crab, cv2.MORPH_OPEN, (11,11))
         blur = cv2.GaussianBlur(opening, (5,5), 0)
         blur1 = cv2.GaussianBlur(opening, (9,9), 0)
 
@@ -163,8 +166,6 @@ while True:
 
         _, th4 = cv2.threshold(result, 240, 255, cv2.THRESH_OTSU+cv2.THRESH_BINARY)
         th4[th4 == 255] = 1
-
-
 
         th5 = np.array(th4, dtype=np.uint8)
         th5[th5 == 1] = 255
@@ -204,43 +205,54 @@ while True:
         # cv2.imshow("image", image)
         # cv2.imshow("skeleton", skeleton)
 
-        # cv2.imshow("res", res)
+        cv2.imshow("res", res)
         cv2.imshow("Crab color", crab_color)
         # cv2.imshow("Crab red", crab_red)
 
 
-        crab_color2 = frame_norec[p1[1]:p2[1], p1[0]:p2[0]]
-        hsv = cv2.cvtColor(crab_color2, cv2.COLOR_BGR2HSV)
-        one, two, three = cv2.split(hsv)
-
-
-        crab_color2 = cv2.cvtColor(crab_color2, cv2.COLOR_BGR2RGB)
-        crab_color2 = cv2.GaussianBlur(crab_color2, (15,15), 0)
-        pixel_colors = crab_color2.reshape((np.shape(crab_color2)[0] * np.shape(crab_color2)[1], 3))
-        norm = colors.Normalize(vmin=-1., vmax=1.)
-        norm.autoscale(pixel_colors)
-        pixel_colors = norm(pixel_colors).tolist()
-        ax1.clear()
-        ax1.scatter(one.flatten(), two.flatten(), three.flatten(), facecolors=pixel_colors, marker=".")
-        ax1.set_xlabel("Hue")
-        ax1.set_ylabel("Saturation")
-        ax1.set_zlabel("Value")
-        # plt.pause(0.00001)
-
-        lower_hsv1 = np.array([0, 0, 0])
-        upper_hsv1 = np.array([180, 200, 50])
-        lower_hsv2 = np.array([0, 0, 200])
-        upper_hsv2 = np.array([180, 200, 255])
-        mask1 = cv2.inRange(hsv, lower_hsv1, upper_hsv1)
-        mask2 = cv2.inRange(hsv, lower_hsv2, upper_hsv2)
-        mask = cv2.bitwise_or(mask1, mask2)
-        result_plt = cv2.bitwise_not(crab_color2, crab_color2, mask=mask)
-        # result_plt = cv2.bitwise_and(crab_color, crab_color, mask=mask)
-        ax2.clear()
-        # ax2.imshow(mask, cmap="gray")
-        ax2.imshow(result_plt)
-        plt.pause(0.001)
-
+        # crab_color2 = frame_norec[p1[1]:p2[1], p1[0]:p2[0]]
+        # hsv = cv2.cvtColor(crab_color2, cv2.COLOR_BGR2HSV)
+        # hsv = cv2.GaussianBlur(hsv, (21,21), 0)
+        # one, two, three = cv2.split(hsv)
+        #
+        # crab_color2 = cv2.cvtColor(crab_color2, cv2.COLOR_BGR2RGB)
+        # # one, two, three = cv2.split(crab_color2)
+        # crab_color2 = cv2.GaussianBlur(crab_color2, (21, 21), 0)
+        # pixel_colors = crab_color2.reshape((np.shape(crab_color2)[0] * np.shape(crab_color2)[1], 3))
+        # norm = colors.Normalize(vmin=-1., vmax=1.)
+        # norm.autoscale(pixel_colors)
+        # pixel_colors = norm(pixel_colors).tolist()
+        # ax1.clear()
+        # ax1.scatter(one.flatten(), two.flatten(), three.flatten(), facecolors=pixel_colors, marker=".")
+        # ax1.set_xlabel("Hue")
+        # # ax1.set_xlabel("Red")
+        # ax1.set_ylabel("Saturation")
+        # # ax1.set_ylabel("Green")
+        # ax1.set_zlabel("Value")
+        # # ax1.set_zlabel("Blue")
+        # # plt.pause(0.00001)
+        # # Hue: 0-180
+        # # Saturation: 0-255
+        # # Value: 0-255
+        # lower_hsv1 = np.array([0, 0, 0])
+        # upper_hsv1 = np.array([180, 50, 40])
+        # lower_hsv2 = np.array([0, 50, 80])
+        # upper_hsv2 = np.array([180, 100, 120])
+        # # mask1 = cv2.inRange(hsv, lower_hsv1, upper_hsv1)
+        # mask1 = cv2.inRange(crab_color2, lower_hsv1, upper_hsv1)
+        # # mask2 = cv2.inRange(hsv, lower_hsv2, upper_hsv2)
+        # mask2 = cv2.inRange(crab_color2, lower_hsv2, upper_hsv2)
+        # mask = cv2.bitwise_or(mask1, mask2)
+        # # result_plt = cv2.bitwise_not(crab_color2, crab_color2, mask=mask1)
+        # result_plt = cv2.bitwise_and(crab_color2, crab_color2, mask=mask)
+        #
+        # ax2.clear()
+        # ax2.imshow(cv2.bitwise_not(mask), cmap="gray")
+        #
+        # ax3.clear()
+        # ax3.imshow(result_plt)
+        #
+        # plt.pause(0.001)
 
         counter += 1
 
@@ -250,7 +262,7 @@ while True:
             break
 
 # plt.draw()
-plt.show()
+# plt.show()
 vid.release()
 cv2.destroyAllWindows()
 print(datetime.now() - startTime)
