@@ -5,6 +5,7 @@ import cv2
 import methods
 import constant
 import pickle
+import csv
 
 # Working
 # uca_01 = methods.CrabNames("Uca_01", (101, 205), "Uca coarctata", "male", "right")
@@ -23,14 +24,47 @@ import pickle
 # methods.CrabNames.print_crab_names("results/GP010016")
 
 # Working
-# methods.CrabNames.open_crab_names("results/GP010016")
-# for instance in methods.CrabNames.instances:
-#     # variable = instance.__dict__
-#     print("This is individual {crab_name}: sex {sex} and {handedness} handedness," \
-#                " from species {species}. Its tracking started at posiiton {start_position}.".format(**instance.__dict__))
+methods.CrabNames.open_crab_names("results/GP010016")
+for instance in methods.CrabNames.instances:
+    variable = instance.__dict__
+    # print("This is individual {crab_name}: sex {sex} and {handedness} handedness," \
+    #            " from species {species}. Its tracking started at posiiton {start_position}.".format(**instance.__dict__))
+    print(variable)
 
 # Working
-methods.CrabNames.print_crab_names("results/GP010016")
+# # methods.CrabNames.print_crab_names("results/GP010016")
+# methods.CrabNames.get_crab_names("results/GP010016")
+# # print(methods.CrabNames.__dict__)
+# names = []
+# names = methods.CrabNames.get_crab_names("results/GP010016")
+# print(methods.CrabNames.get_crab_names("results/GP010016"))
+# print("new line ##########")
+# print(names)
+
+# if "03i4kl" in methods.CrabNames.get_crab_names("results/GP010016"):
+#     print("Yes")
+#     head_true = True
+# else:
+#     head_true = False
+#     print("No")
+#
+# print(head_true)
+#
+# if head_true:
+#     print("esto deberia imprimirse solo si es True")
+# if not head_true:
+#     print("esto deberia imprimirse solo si es False")
+
+# name_result_file = "results/GP010016_GP010016_1p2lf.csv"
+#
+# with open(name_result_file, "a+", newline="\n") as result_file:
+#     wr = csv.writer(result_file, delimiter=",")
+#
+#     wr.writerow(["Hola", "Hola1", "Hola2"])
+
+
+
+
 
 
 

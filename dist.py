@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import cv2
 import numpy as np
 import argparse
@@ -18,7 +19,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", default="GP010016.mp4", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=None,
                 help="Provide time in seconds of target video section showing the key points")
-ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
+# ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
 # Return video information
@@ -146,17 +147,51 @@ for i in info:
 
 # print(name, "\n" + species, "\n" + sex, "\n" + handedness)
 
-crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
-print(crab_id)
+# crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
+# print(crab_id)
 
-try:
-    methods.CrabNames.open_crab_names(info_video)
-except:
-    pass
+# try:
+#     methods.CrabNames.open_crab_names(info_video)
+# except:
+#     pass
+
+
+if os.path.isfile("results/" + video_name):
+    try:
+        methods.CrabNames.open_crab_names(info_video)
+        # target_name = video_name + "_" + name
+        print("I am looking this crab name in the database: ", name)
+        if name in methods.CrabNames.get_crab_names("results/" + video_name ):
+            print("Yes, file exists and crab name found")
+            head_true = False
+        else:
+            crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
+            print(crab_id)
+            head_true = True
+            print("No, file exists and crab name was not found")
+            methods.data_writer(args["video"], info_video, head_true)
+    except:
+        pass
+# if not os.path.isfile("results" + video_name):
+else:
+    print(video_name, "No, file does not exists")
+    head_true = True
+    crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
+    print(crab_id)
+    methods.data_writer(args["video"], info_video, head_true)
+
 methods.CrabNames.save_crab_names(methods.CrabNames.instances, info_video)
 
-result_file = methods.data_writer(args["video"], info_video, True)
-result_file.close()
+# methods.data_writer(args["video"], info_video, head_true)
+# result_file.close()
+
+# if name in methods.CrabNames.get_crab_names("results/GP010016"):
+#     print("head_true set to False")
+#     head_true = False
+# else:
+#     head_true = True
+#     print("head_true set to True")
+
 
 start, end, step, _, _ = methods.frame_to_time(info_video)
 print("The video recording was started at: ", start, "\nThe video recording was ended at: ", end,
@@ -326,7 +361,7 @@ while vid.isOpened():
     #
     # display = cv2.resize(display, (0,0), fx=.5, fy=.5)
     # print(display.shape)
-    out.write(result)
+    # out.write(result)
 
     # cv2.imshow("result_1", result_1)
     # cv2.imshow("original", img)
@@ -342,7 +377,7 @@ while vid.isOpened():
     # cv2.imshow("display00", display00)
     # cv2.imshow("display01", display01)
     # cv2.imshow("display", display)
-    result_file = methods.data_writer(args["video"], info_video, False)
+    methods.data_writer(args["video"], info_video, False)
     counter += 1
 
     key = cv2.waitKey(1) & 0xFF
@@ -351,4 +386,4 @@ while vid.isOpened():
 
 vid.release()
 cv2.destroyAllWindows()
-result_file.close()
+# result_file.close()

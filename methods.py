@@ -367,32 +367,32 @@ def data_writer(video_path, info_video, head_true):
     name_result_file = "results/" + video_name + "_" + info_video["Crab_ID"] + ".csv"
 
     if head_true:
-        result_file = open(name_result_file, "w", newline="\n")
-        wr = csv.writer(result_file, delimiter=",")
-        date_now = time.strftime("%d%m%Y")
-        time_now = time.strftime("%H%M")
-        wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
-                     "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
-                     "projected_q_side", "q_conversion_factor_distance", "tracker_method"])
+        with open(name_result_file, "w", newline="\n") as result_file:
+            wr = csv.writer(result_file, delimiter=",")
+            date_now = time.strftime("%d%m%Y")
+            time_now = time.strftime("%H%M")
+            wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
+                         "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
+                         "projected_q_side", "q_conversion_factor_distance", "tracker_method"])
 
-        wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
-                    info_video["target_frame"], quadratpts[0], quadratpts[1],
-                    quadratpts[2], quadratpts[3], info_video["side"], info_video["conversion"],
-                    info_video["tracker"]])
-        wr.writerow(["\n"])
-        wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
-                     "Crab_ID", "Crab_Position_x", "Crab_position_y", "Species", "Sex", "Handedness"])
+            wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
+                        info_video["target_frame"], quadratpts[0], quadratpts[1],
+                        quadratpts[2], quadratpts[3], info_video["side"], info_video["conversion"],
+                        info_video["tracker"]])
+            wr.writerow(["\n"])
+            wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
+                         "Crab_ID", "Crab_Position_x", "Crab_position_y", "Species", "Sex", "Handedness"])
 
-    else:
+    if not head_true:
         # save track_info to file
-        result_file = open(name_result_file, "a+", newline="\n")
-        wr = csv.writer(result_file, delimiter=",")
+        with open(name_result_file, "a+", newline="\n") as result_file:
+            wr = csv.writer(result_file, delimiter=",")
 
-        wr.writerow([info_video["Frame"], info_video["Time_absolute"], info_video["Time_since_start"],
-                     info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"],
-                     info_video["Species"], info_video["Sex"], info_video["Handedness"]])
+            wr.writerow([info_video["Frame"], info_video["Time_absolute"], info_video["Time_since_start"],
+                         info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"],
+                         info_video["Species"], info_video["Sex"], info_video["Handedness"]])
 
-    return result_file
+    # return result_file
 
 
 class CompileInformation(object):
@@ -451,6 +451,18 @@ class CrabNames(object):
                 **instances.__dict__))
         file.close()
 
+    def get_crab_names(info_video):
+        if isinstance(info_video, dict):
+            filename = "results/" + info_video.get("name_video", "")
+        else:
+            filename = info_video
+        file = open(filename, "rb")
+        temp_dict = pickle.load(file)
+        for instances in temp_dict:
+            # print(instances.crab_name)
+            res = instances.crab_name
+        file.close()
+        return res
 
 def random_name(size = 5, characters = string.ascii_lowercase + string.digits):
     name_rand = "".join(random.choice(characters) for _ in range(size))
