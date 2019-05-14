@@ -97,7 +97,10 @@ cv2.destroyAllWindows()
 print(quadrat_pts)
 
 vid = cv2.VideoCapture('video/' + args['video'])
-M, width, height = methods.calc_proj(quadrat_pts)
+M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_pts)
+
+
+
 
 # orig_pts = np.float32([quadrat_pts[0], quadrat_pts[1], quadrat_pts[2], quadrat_pts[3]])
 #
@@ -132,7 +135,7 @@ for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE ,(3, 3))
 while vid.isOpened():
     ret, img = vid.read()
     # img = cv2.resize(img, (640,400))
-    result = cv2.warpPerspective(img, M, (width, height))
+    result = cv2.warpPerspective(img, M, (side, side))
 
     gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
 
