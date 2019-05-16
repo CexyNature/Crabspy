@@ -21,6 +21,10 @@ CAPTURE_VERTICES: bool
 
 QUADRAT_POINTS:
     Known pixel coordinates of quadrat's vertices on image.
+
+MANUAL_ANNOTATION:
+    If True user input crab_name, crab_species, sex and crab_handedness.
+    If False a random name is given to crab_name and other properties are set to "unknown".
 """
 
 DIM = [50, 50, 50, 50]
