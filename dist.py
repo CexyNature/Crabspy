@@ -237,6 +237,7 @@ while vid.isOpened():
     # Update tracker
     # ok, bbox = tracker.update(masked)
     ok, bbox = tracker.update(result)
+    ok, bbox = tracker.update(result)
     # print(position)
     position1 = (bbox[0], bbox[1])
 
@@ -255,7 +256,7 @@ while vid.isOpened():
 
         _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
 
-        info = [methods.CompileInformation("Frame", counter),
+        info = [methods.CompileInformation("Frame", target_frame + counter),
                 methods.CompileInformation("Time_absolute", str(time_absolute)),
                 methods.CompileInformation("Time_since_start", str(time_since_start)),
                 methods.CompileInformation("Crab_ID", name),
@@ -270,10 +271,51 @@ while vid.isOpened():
             info_video[i.name] = i.value
 
         crab = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+        # crab = masked[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
         # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
         # crab = frame[100:(100 + 50), 250:(250 + 50)]
         # filename = os.path.join(dirname, fname, str(center), startTime1)
         # cv2.imwrite(dirname + "/" + filename + "_" + startTime1 + str(center) + "_" + ".jpg", crab)
+
+        crab_edge = cv2.Canny(crab, threshold1=100, threshold2=200)
+        cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        if len(cnts) != 0:
+
+            cnts_sorted = sorted(cnts, key=lambda x: cv2.contourArea(x))
+            # Grab second largest contour
+            contour = cnts_sorted[-1]
+            # Grab larger contour from contours list
+            # contour = max(cnts, key=cv2.contourArea)
+            # print('This is maximum contour ', contour.shape)
+            # Finding min and max coordinates in left-right axis
+            min_LR = tuple(contour[contour[:, :, 0].argmin()][0])
+            max_LR = tuple(contour[contour[:, :, 0].argmax()][0])
+            # Finding min and max coordinates in top-bottom axis
+            min_TB = tuple(contour[contour[:, :, 1].argmin()][0])
+            max_TB = tuple(contour[contour[:, :, 1].argmax()][0])
+
+            # Create dictionary of moments for the contour
+            Mo = cv2.moments(contour)
+
+            if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
+                centroid_x = 0
+                centroid_y = 0
+                pass
+            # if Mo["m00"] != 0: # and then else for other cases: cx, cy = 0, 0
+            else:
+                # Calculate centroid coordinates
+                # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
+                centroid_x = int(Mo["m10"] / Mo["m00"])
+                centroid_y = int(Mo['m01'] / Mo['m00'])
+
+            cv2.circle(crab, min_LR, 1, (0, 0, 255), -1)
+            cv2.circle(crab, max_LR, 1, (0, 255, 0), -1)
+            cv2.circle(crab, min_TB, 1, (255, 0, 0), -1)
+            cv2.circle(crab, max_TB, 1, (255, 255, 0), -1)
+
+            cv2.line(crab, min_LR, max_LR, (0, 100, 255), 1)
+            cv2.line(crab, min_TB, max_TB, (255, 100, 0), 1)
 
         pts.appendleft(center)
         # print(center)
@@ -339,6 +381,35 @@ while vid.isOpened():
 
         # Back transform and show tracker and data in original image
 
+    blob = fb_res_two3[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+    ret, blob = cv2.threshold(blob, 50, 255, cv2.THRESH_BINARY)
+    output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
+    num_labels = output[0]
+    stats = output[2]
+    print("Number of labels ", num_labels)
+    # Stat matrix contains in order: leftmost coord, topmost coord, width, height, and area
+    # print("Stat matrix is ", stats)
+    for label in range(1, num_labels):
+        blob_area = stats[label, cv2.CC_STAT_AREA] * conversion
+        print("This is the area ", blob_area, "ID=", label)
+        blob_width = stats[label, cv2.CC_STAT_WIDTH] * conversion
+        print("This is the width ", blob_width, "ID=", label)
+        blob_height = stats[label, cv2.CC_STAT_HEIGHT] * conversion
+        print("This is the height ", blob_height, "ID=", label)
+
+    if num_labels == 1:
+        info = [methods.CompileInformation("Width", ""),
+                methods.CompileInformation("Height", ""),
+                methods.CompileInformation("Area", "")]
+
+    else:
+        info = [methods.CompileInformation("Width", blob_width),
+                methods.CompileInformation("Height", blob_height),
+                methods.CompileInformation("Area", blob_area)]
+
+    for i in info:
+        info_video[i.name] = i.value
+
     # counter_f += 1
     # print("Frame count ", counter_f)
     # if counter_f == 60:
@@ -366,18 +437,22 @@ while vid.isOpened():
     # cv2.imshow("result_1", result_1)
     # cv2.imshow("original", img)
     # cv2.imshow("cropped", crop_img)
+    # crab = cv2.resize(crab, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4)
     # cv2.imshow("Crab", crab)
+    # cv2.imshow("Crab Edge", crab_edge)
     # cv2.imshow("result", result)
+    cv2.imshow("Blob", blob)
 
     # From warp.py
-    # cv2.imshow("background substraction", fb_res_two3)
-    # cv2.imshow("masked", masked)
+    cv2.imshow("background substraction", fb_res_two3)
+    cv2.imshow("masked", masked)
     cv2.imshow("result", result)
     # cv2.imshow("Canny Edges", edge)
     # cv2.imshow("display00", display00)
     # cv2.imshow("display01", display01)
     # cv2.imshow("display", display)
     methods.data_writer(args["video"], info_video, False)
+
     counter += 1
 
     key = cv2.waitKey(1) & 0xFF

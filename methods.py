@@ -348,12 +348,14 @@ def frame_to_time(info_video):
     step = vid_duration / info_video["length_vid"]
 
     if "Counter" in info_video:
-        time_absolute = start + (datetime.timedelta(0, step * (info_video["Counter"]+1)))
+        time_absolute = start + (datetime.timedelta(0, step * (info_video["Frame"]+1)))
         time_absolute = time_absolute.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
-        time_since_start = step * (info_video["Counter"]+1)
+        time_since_start = step * (info_video["Frame"]+1)
 
     else:
-        time_absolute = start.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
+        time_absolute = start + (datetime.timedelta(0, step * (info_video["target_frame"] + 1)))
+        time_absolute = time_absolute.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
+        # time_absolute = start.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
         time_since_start = 0
 
     return start, end, step, time_absolute, time_since_start
@@ -381,7 +383,8 @@ def data_writer(video_path, info_video, head_true):
                         info_video["tracker"]])
             wr.writerow(["\n"])
             wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
-                         "Crab_ID", "Crab_Position_x", "Crab_position_y", "Species", "Sex", "Handedness"])
+                         "Crab_ID", "Crab_Position_x", "Crab_position_y", "Species", "Sex", "Handedness",
+                         "Width", "Height", "Area"])
 
     if not head_true:
         # save track_info to file
@@ -390,7 +393,8 @@ def data_writer(video_path, info_video, head_true):
 
             wr.writerow([info_video["Frame"], info_video["Time_absolute"], info_video["Time_since_start"],
                          info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"],
-                         info_video["Species"], info_video["Sex"], info_video["Handedness"]])
+                         info_video["Species"], info_video["Sex"], info_video["Handedness"],
+                         info_video["Width"], info_video["Height"], info_video["Area"]])
 
     # return result_file
 
