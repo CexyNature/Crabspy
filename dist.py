@@ -386,16 +386,16 @@ while vid.isOpened():
     output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
     num_labels = output[0]
     stats = output[2]
-    print("Number of labels ", num_labels)
+    # print("Number of labels ", num_labels)
     # Stat matrix contains in order: leftmost coord, topmost coord, width, height, and area
     # print("Stat matrix is ", stats)
     for label in range(1, num_labels):
         blob_area = stats[label, cv2.CC_STAT_AREA] * conversion
-        print("This is the area ", blob_area, "ID=", label)
+        # print("This is the area ", blob_area, "ID=", label)
         blob_width = stats[label, cv2.CC_STAT_WIDTH] * conversion
-        print("This is the width ", blob_width, "ID=", label)
+        # print("This is the width ", blob_width, "ID=", label)
         blob_height = stats[label, cv2.CC_STAT_HEIGHT] * conversion
-        print("This is the height ", blob_height, "ID=", label)
+        # print("This is the height ", blob_height, "ID=", label)
 
     if num_labels == 1:
         info = [methods.CompileInformation("Width", ""),
