@@ -366,7 +366,7 @@ def data_writer(video_path, info_video, head_true):
     # create file name with name
     name = os.path.basename(video_path)
     video_name, file_extension = os.path.splitext(name)
-    name_result_file = "results/" + video_name + "_" + info_video["Crab_ID"] + ".csv"
+    name_result_file = "results/" + info_video["Crab_ID"] + ".csv"
 
     if head_true:
         with open(name_result_file, "w", newline="\n") as result_file:
