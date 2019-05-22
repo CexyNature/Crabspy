@@ -170,7 +170,7 @@ if os.path.isfile("results/" + video_name):
             head_true = True
             print("No, file exists and crab name was not found")
             methods.data_writer(args["video"], info_video, head_true)
-    except:
+    except (TypeError, RuntimeError):
         pass
 # if not os.path.isfile("results" + video_name):
 else:
