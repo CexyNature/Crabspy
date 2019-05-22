@@ -121,9 +121,9 @@ fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20)
 fgbg2 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=100)
 fgbg3 = cv2.createBackgroundSubtractorKNN(history=5000, dist2Threshold=250)
 
-for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
-for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.ERODE)
+for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.DILATE)
+# for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 
 out = cv2.VideoWriter("Uca_detection.avi",
                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
@@ -235,9 +235,9 @@ while vid.isOpened():
     # cv2.circle(masked, (163, 335), 2, (240, 10, 10), 2)
 
     # Update tracker
-    # ok, bbox = tracker.update(masked)
-    ok, bbox = tracker.update(result)
-    ok, bbox = tracker.update(result)
+    ok, bbox = tracker.update(masked)
+    # ok, bbox = tracker.update(result)
+    # ok, bbox = tracker.update(result)
     # print(position)
     position1 = (bbox[0], bbox[1])
 
@@ -256,16 +256,16 @@ while vid.isOpened():
 
         _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
 
-        info = [methods.CompileInformation("Frame", target_frame + counter),
-                methods.CompileInformation("Time_absolute", str(time_absolute)),
-                methods.CompileInformation("Time_since_start", str(time_since_start)),
-                methods.CompileInformation("Crab_ID", name),
-                methods.CompileInformation("Crab_Position_x", center[0]),
-                methods.CompileInformation("Crab_Position_y", center[1]),
-                methods.CompileInformation("Counter", counter),
-                methods.CompileInformation("Species", species),
-                methods.CompileInformation("Sex", sex),
-                methods.CompileInformation("Handedness", handedness)]
+        # info = [methods.CompileInformation("Frame", target_frame + counter),
+        #         methods.CompileInformation("Time_absolute", str(time_absolute)),
+        #         methods.CompileInformation("Time_since_start", str(time_since_start)),
+        #         methods.CompileInformation("Crab_ID", name),
+        #         methods.CompileInformation("Crab_Position_x", center[0]),
+        #         methods.CompileInformation("Crab_Position_y", center[1]),
+        #         methods.CompileInformation("Counter", counter),
+        #         methods.CompileInformation("Species", species),
+        #         methods.CompileInformation("Sex", sex),
+        #         methods.CompileInformation("Handedness", handedness)]
 
         for i in info:
             info_video[i.name] = i.value
@@ -400,12 +400,33 @@ while vid.isOpened():
     if num_labels == 1:
         info = [methods.CompileInformation("Width", ""),
                 methods.CompileInformation("Height", ""),
-                methods.CompileInformation("Area", "")]
+                methods.CompileInformation("Area", ""),
+                methods.CompileInformation("Frame", target_frame + counter),
+                methods.CompileInformation("Time_absolute", str(time_absolute)),
+                methods.CompileInformation("Time_since_start", str(time_since_start)),
+                methods.CompileInformation("Crab_ID", name),
+                methods.CompileInformation("Crab_Position_x", ""),
+                methods.CompileInformation("Crab_Position_y", ""),
+                methods.CompileInformation("Counter", counter),
+                methods.CompileInformation("Species", species),
+                methods.CompileInformation("Sex", sex),
+                methods.CompileInformation("Handedness", handedness)]
+        # do not save position
 
     else:
         info = [methods.CompileInformation("Width", blob_width),
                 methods.CompileInformation("Height", blob_height),
-                methods.CompileInformation("Area", blob_area)]
+                methods.CompileInformation("Area", blob_area),
+                methods.CompileInformation("Frame", target_frame + counter),
+                methods.CompileInformation("Time_absolute", str(time_absolute)),
+                methods.CompileInformation("Time_since_start", str(time_since_start)),
+                methods.CompileInformation("Crab_ID", name),
+                methods.CompileInformation("Crab_Position_x", center[0]),
+                methods.CompileInformation("Crab_Position_y", center[1]),
+                methods.CompileInformation("Counter", counter),
+                methods.CompileInformation("Species", species),
+                methods.CompileInformation("Sex", sex),
+                methods.CompileInformation("Handedness", handedness)]
 
     for i in info:
         info_video[i.name] = i.value
