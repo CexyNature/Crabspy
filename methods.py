@@ -383,7 +383,7 @@ def data_writer(video_path, info_video, head_true):
                         info_video["tracker"]])
             wr.writerow(["\n"])
             wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
-                         "Crab_ID", "Crab_Position_x", "Crab_position_y", "Species", "Sex", "Handedness",
+                         "Crab_ID", "Crab_position_x", "Crab_position_y", "Species", "Sex", "Handedness",
                          "Width", "Height", "Area"])
 
     if not head_true:
@@ -558,6 +558,21 @@ def multi_target_track(vid, resize = True, type_tracker = "MIL", number=2):
 
     return  multitrackers
 
+def select_color():
+    MY_COLORS = {"green": (0,204,0),
+                 "blue": (204,0,0),
+                 "red": (0,0,204),
+                 "britain_royal": (136,0,204),
+                 "mud_classic": (0,68,102),
+                 "dream_sky": (255,179,179),
+                 "yellow_ducky": (128,234,255),
+                 "dracula": (0,0,51),
+                 "best_color": (230,191,0),
+                 "phytoalgae": (0,102,102),
+                 "kid_diaper": (204,255,213),
+                 "worker_blue": (102,51,0)}
+
+    return random.choice(list(MY_COLORS.items()))
 
 # """
 # Function that defines the end of tracking
