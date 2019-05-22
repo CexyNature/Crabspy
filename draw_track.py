@@ -5,7 +5,6 @@ import pandas as pd
 from collections import deque
 import cv2
 import numpy as np
-import random
 
 import methods
 
@@ -14,7 +13,7 @@ ap.add_argument("-f", "--file", default="GP010016_GP010016_focal1.csv", help="Pr
 args = vars(ap.parse_args())
 
 track_meta = pd.read_csv("results/" + args["file"], header=0, nrows=1)
-track = pd.read_csv("results/" + args["file"], header=2, skiprows=range(0,1))
+track = pd.read_csv("results/" + args["file"], header=2, skiprows=range(0, 1))
 print(track.head())
 print(track.tail())
 # print(track_meta.head())
@@ -26,27 +25,25 @@ quadrat_vertices = [track_meta["vertice_1"].values[0],
 
 df = pd.DataFrame(quadrat_vertices, columns=["vertices_x"])
 df["vertices_x"] = df["vertices_x"].map(lambda x: x.lstrip("(").rstrip(")"))
-df[["vertices_x", "vertices_y"]] = df["vertices_x"].str.split(",", expand =True)
+df[["vertices_x", "vertices_y"]] = df["vertices_x"].str.split(",", expand=True)
 
-quadrat_vertices = [(int(df.iloc[0,0]), int(df.iloc[0,1])),
-                    (int(df.iloc[1,0]), int(df.iloc[1,1])),
-                    (int(df.iloc[2,0]), int(df.iloc[2,1])),
-                    (int(df.iloc[3,0]), int(df.iloc[3,1]))]
-
+quadrat_vertices = [(int(df.iloc[0, 0]), int(df.iloc[0, 1])),
+                    (int(df.iloc[1, 0]), int(df.iloc[1, 1])),
+                    (int(df.iloc[2, 0]), int(df.iloc[2, 1])),
+                    (int(df.iloc[3, 0]), int(df.iloc[3, 1]))]
 # print(df)
 # print(quadrat_vertices)
-
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(file_name)
 M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 
 pts = deque(maxlen=int(track_meta["length_video"].values[0])+250)
 (dX, dY) = (0, 0)
-target = 10000
+target = 0
 vid.set(1, target)
 counter = target
 # color1 = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
 name_color, color1 = methods.select_color()
-print(name_color)
+# print(name_color)
 
 
 while vid.isOpened():
