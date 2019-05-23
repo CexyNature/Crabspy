@@ -8,6 +8,10 @@ import numpy as np
 
 import methods
 
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-f", "--file", default="GP010016_GP010016_focal1.csv", help="Provide path to file")
 args = vars(ap.parse_args())

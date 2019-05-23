@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
+
 """
 List of constants used in other modules.
 These should be define by the user to fit their experimental setting and purpose.

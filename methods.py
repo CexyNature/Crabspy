@@ -335,12 +335,34 @@ def calc_proj(quadrat_pts):
 
 
 def get_file_creation(video_path):
+
+    """
+
+    Parameters
+    ----------
+    video_path
+
+    Returns
+    -------
+
+    """
     local_creation = time.strftime("%d%m%Y %H%M%S", time.localtime(os.path.getctime("video/" + video_path)))
     creation = time.strftime("%d%m%Y %H%M%S", time.localtime(os.path.getmtime("video/" + video_path)))
     return local_creation, creation
 
 
 def frame_to_time(info_video):
+
+    """
+
+    Parameters
+    ----------
+    info_video
+
+    Returns
+    -------
+
+    """
 
     start = datetime.datetime.strptime(info_video["creation"], "%d%m%Y %H%M%S")
     vid_duration = info_video['vid_duration']
@@ -362,6 +384,19 @@ def frame_to_time(info_video):
 
 
 def data_writer(video_path, info_video, head_true):
+
+    """
+
+    Parameters
+    ----------
+    video_path
+    info_video
+    head_true
+
+    Returns
+    -------
+
+    """
 
     # create file name with name
     name = os.path.basename(video_path)
@@ -468,31 +503,26 @@ class CrabNames(object):
         file.close()
         return res
 
+
 def random_name(size = 5, characters = string.ascii_lowercase + string.digits):
     name_rand = "".join(random.choice(characters) for _ in range(size))
     return name_rand
 
 
-# '''
-# Function to display percentage of video analyzed based on total number of frames
-# '''
-#
-# '''
-# Function to sample size and color for each crab.
-# It should return one value for size (blob maximum axis?), and three values for color (Blue, Green and Red)
-# '''
-#
-# '''
-# Function to return smoothed x and y position
-# '''
-#
-# '''
-# Function to process frame with high light contrast.
-# It should return a frame
-# '''
-
-
 def single_target_track(vid, resize = True, type_tracker = "MIL"):
+
+    """
+
+    Parameters
+    ----------
+    vid
+    resize
+    type_tracker
+
+    Returns
+    -------
+
+    """
 
     trackerTypes = ['BOOSTING', 'MIL', 'KCF', 'TLD', 'MEDIANFLOW', 'GOTURN']
 
@@ -535,6 +565,20 @@ def single_target_track(vid, resize = True, type_tracker = "MIL"):
 
 def multi_target_track(vid, resize = True, type_tracker = "MIL", number=2):
 
+    """
+
+    Parameters
+    ----------
+    vid
+    resize
+    type_tracker
+    number
+
+    Returns
+    -------
+
+    """
+
     bboxes = []
     trackers = []
     multitrackers = cv2.MultiTracker_create()
@@ -559,6 +603,13 @@ def multi_target_track(vid, resize = True, type_tracker = "MIL", number=2):
     return  multitrackers
 
 def select_color():
+
+    """
+
+    Returns
+    -------
+
+    """
     MY_COLORS = {"green": (0,204,0),
                  "blue": (204,0,0),
                  "red": (0,0,204),
@@ -577,3 +628,20 @@ def select_color():
 # """
 # Function that defines the end of tracking
 # """
+# '''
+# Function to display percentage of video analyzed based on total number of frames
+# '''
+#
+# '''
+# Function to sample size and color for each crab.
+# It should return one value for size (blob maximum axis?), and three values for color (Blue, Green and Red)
+# '''
+#
+# '''
+# Function to return smoothed x and y position
+# '''
+#
+# '''
+# Function to process frame with high light contrast.
+# It should return a frame
+# '''
