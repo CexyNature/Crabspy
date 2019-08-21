@@ -1,0 +1,3 @@
+CrabSpy; python >= 3.5
+opencv-contrib-python >= 3.3.0
+numpy >= 1.14.2

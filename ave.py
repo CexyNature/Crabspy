@@ -392,6 +392,10 @@ while vid.isOpened():
             # otherwise, compute the thickness of the line and
             # draw the connecting lines
             thickness = int(np.sqrt(10 / float(i + 1)) * 2.5)
+            print('The thickness is ', thickness)
+            if thickness == 0:
+                thickness = 1
+
             cv2.line(result, pts[i - 1], pts[i], (204, 204, 0), thickness)
 
         # show the movement deltas and the direction of movement on
@@ -446,6 +450,7 @@ while vid.isOpened():
     # cv2.imshow('display01', display01)
     cv2.imshow('display', display)
     counter += 1
+    print('Frame is ', counter)
 
     key = cv2.waitKey(1) & 0xFF
     if key == 27:
