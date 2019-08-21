@@ -23,7 +23,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", default="GP010016.mp4", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=None,
                 help="Provide time in seconds of target video section showing the key points")
-ap.add_argument("-z", "--zoom", default=1.5, help="Provide zoom factor e.g. zoom out 0.5, zoom in 2")
+ap.add_argument("-z", "--zoom", default=1.5, type=float, help="Provide zoom factor e.g. zoom out 0.5, zoom in 2")
 args = vars(ap.parse_args())
 
 
@@ -56,7 +56,7 @@ def save_measures(video_path, info_capture, head_true):
     # create file name with name
     name = os.path.basename(video_path)
     vid_name, file_extension = os.path.splitext(name)
-    name_result_file = "results/measures/" + vid_name + "_measures" + ".csv"
+    name_result_file = "results/measures/" + vid_name + "_measures_" +  time.strftime("%d%m%Y") + "_" + time.strftime("%H%M") + ".csv"
 
     if head_true:
         with open(name_result_file, "w", newline="\n") as result_file:
@@ -124,13 +124,13 @@ _, vid, length_vid, fps, vid_width, vid_height, vid_duration, _ = methods.read_v
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 print('Total number of frames in video = ' + str(length_vid))
 
-print('\n' '(1) Use the bar to navigate through frames. Click, hold and move bar marker using the mouse',
-      '\n' '(2) Once you select the targeted frame press ESC to initialize measure',
-      '\n' '(3) On the image click and hold mouse left button to set starting point of reference',
-      '\n' '(4) Move and release mouse left button to set ending point of reference',
-      '\n' '(5) Press key ''r'' to reset selection, or Press key ''s'' to save selection and exit window',
-      '\n' '(6) Several lines might be created in the frame, but only the last one will be used',
-      '\n' '(7) Press key ESC to exit the window')
+print('\n' '(1) Use the bar to navigate through frames. Click, hold and move bar marker using the mouse pointer.',
+      '\n' '(2) Once you have selected a frame press ESC to initialize measure.',
+      '\n' '(3) Press key ''c'' to activate capture mode. Click and hold mouse left button to set measure starting point.',
+      '\n' '(4) Move and release mouse left button to set ending point.',
+      '\n' '(5) Press key ''r'' to reset selection, or Press key ''s'' to save selection.',
+      '\n' '(6) Several lines could be created in the selected frame, but only these saved using key ''s'' will be recorded in the CSV file.',
+      '\n' '(7) Press key ESC to exit the window.')
 
 cv2.namedWindow('Measure object length')
 if args["seconds"] is None:
@@ -188,13 +188,13 @@ while True:
                 # height_m = vid.get(4) * conversion
                 # area = width_m * height_m
                 size = dist * new_conversion
-                print('\n' 'Measure capture:', '\n' 'Line started at', coord[0], '\n' 'Line ended at ', coord[1])
-                print('Pixel length of reference = ', dist)
-                print('Pixel to meter conversion factor = ', new_conversion)
+                print('\n' 'Measure capture:', '\n' 'Starting point', coord[0], '\n' 'Ending point', coord[1])
+                print('Lenght in pixels = ', round(dist,2))
+                print('Pixel to centimeter conversion factor = ', round(new_conversion,2))
                 # print('Width of field of view in meters = ', width_m)
                 # print('Height of field of view in meters = ', height_m)
                 # print('Area of field of view in square meters = ', area)
-                print('Size in cm is = ', size)
+                print('Size in cm = ', round(size,2))
 
                 info = [methods.CompileInformation("frame_number", selected_f),
                         methods.CompileInformation("coordinate_0", coord[0]),
