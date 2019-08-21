@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # from scipy import ndimage
 # import matplotlib.pyplot as plt
 import cv2
