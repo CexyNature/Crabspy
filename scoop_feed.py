@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-'''
-This code intends to count feeding activity in crabs
-'''
+"""
+This code intends to count feeding activity in crabs.
+"""
+
 import argparse
 import cv2
 import sys
@@ -15,6 +16,8 @@ import numpy as np
 import random as rng
 from skimage.morphology import skeletonize
 from skimage.util import invert
+from skimage import measure, filters, feature, exposure, segmentation, color
+from skimage.future import graph
 
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -49,7 +52,7 @@ dirname = 'samples_pos'
 
 startTime = datetime.now()
 
-####SECONDS
+# SECONDS
 fps = vid.get(cv2.CAP_PROP_FPS)
 if args['seconds'] is None:
     target_frame = 1
@@ -66,7 +69,7 @@ if not vid.isOpened():
 '''
 This section creates a background model for do background substraction'''
 
-### ave
+# ave
 (rAvg, gAvg, bAvg) = (None, None, None)
 total_ave = 0
 
@@ -78,7 +81,7 @@ tracker = cv2.TrackerBoosting_create()
 
 # Read first frame.q
 ok, frame = vid.read()
-frame = cv2.resize(frame, (0,0), fx=0.5, fy=0.5)
+frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
 if not ok:
     print('Cannot read video file')
     sys.exit()
@@ -102,21 +105,21 @@ counter = 0
 (dX, dY) = (0, 0)
 direction = ""
 
-fgbg1 = cv2.createBackgroundSubtractorMOG2(history = 5000, varThreshold=20)
+fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20)
 # fgbg1 = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold=10)
-fgbg2 = cv2.createBackgroundSubtractorMOG2(history = 5000, varThreshold=100)
-fgbg3 = cv2.createBackgroundSubtractorKNN(history= 5000, dist2Threshold=250)
+fgbg2 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=100)
+fgbg3 = cv2.createBackgroundSubtractorKNN(history=5000, dist2Threshold=250)
 
 # for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5, 5))
-for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3, 3))
-for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(20, 20))
-for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE ,(3, 3))
+for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (20, 20))
+for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 
 # out = cv2.VideoWriter('Uca_detection+tracking.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 24, (960,720))
 # BG_MODEL = cv2.imread('BG_model.jpg')
 hull_list = []
 
-element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9,9))
+element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
 
 # fig = plt.figure()
 # grid = gridspec.GridSpec(ncols=2, nrows=2)
@@ -148,7 +151,6 @@ while True:
         p1 = (int(bbox[0]), int(bbox[1]))
         p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
 
-
         center = (int(bbox[0] + bbox[2]/2), int(bbox[1] + bbox[3]/2))
         cv2.rectangle(frame, p1, p2, (0, 0, 255))
 
@@ -157,10 +159,9 @@ while True:
         crab_color = frame[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
         crab_red = red[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
 
-
-        opening = cv2.morphologyEx(crab, cv2.MORPH_OPEN, (11,11))
-        blur = cv2.GaussianBlur(opening, (5,5), 0)
-        blur1 = cv2.GaussianBlur(opening, (9,9), 0)
+        opening = cv2.morphologyEx(crab, cv2.MORPH_OPEN, (11, 11))
+        blur = cv2.GaussianBlur(opening, (5, 5), 0)
+        blur1 = cv2.GaussianBlur(opening, (9, 9), 0)
 
         result = blur1
 
@@ -171,7 +172,7 @@ while True:
         th5[th5 == 1] = 255
         # image = invert(th4)
         skeleton = skeletonize(th4)
-        skeleton = np.array(skeleton, dtype= np.uint8)
+        skeleton = np.array(skeleton, dtype=np.uint8)
         skeleton[skeleton == 1] = 255
 
         row0 = np.hstack((crab, result))
@@ -181,6 +182,37 @@ while True:
 
         res1 = np.vstack((row1, row2))
         res = np.vstack((row0, res1))
+
+        # contours = measure.find_contours(red, 0.8)
+        # new = filters.sobel(crab_red)
+        # new = np.array(new, dtype=np.uint8)
+        # new[new == 1] = 255
+
+        # Sobel filter
+        # new_x = cv2.Sobel(crab_red, cv2.CV_32F, 1, 0)
+        # new_y = cv2.Sobel(crab_red, cv2.CV_32F, 0, 1)
+        # new_xcvt = cv2.convertScaleAbs(new_x)
+        # new_ycvt = cv2.convertScaleAbs(new_y)
+        # new = cv2.addWeighted(new_xcvt, 0.5, new_ycvt, 0.5, 0)
+
+        # Adjust exposure with Gamma and Logarithmic correction
+        # new_gamma = exposure.adjust_gamma(opening, 3)
+        # new_log = exposure.adjust_log(opening, 2, inv=True)
+        new_sigmoid = exposure.adjust_sigmoid(opening, cutoff=0.1, gain=15, inv=False)
+
+        # HOG
+        new_fd, new_hog = feature.hog(new_sigmoid, orientations=5, pixels_per_cell=(22, 22), block_norm="L1",
+                                      cells_per_block=(5, 5), transform_sqrt=False, visualize=True, multichannel=False)
+        new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 10))
+
+
+        # # RAG
+        # labels = segmentation.slic(opening, compactness=30, n_segments=200)
+        # edges = filters.sobel(opening)
+        # edges_rgb = color.gray2rgb(edges)
+        # g = graph.rag_boundary(labels, edges)
+        # lc = graph.show_rag(labels, g, edges_rgb, img_cmap=None, edge_cmap='viridis', edge_width=1.2)
+
 
         # skel = np.zeros(crab.shape, np.uint8)
         # eroded = cv2.erode(crab, element)
@@ -207,8 +239,11 @@ while True:
 
         cv2.imshow("res", res)
         cv2.imshow("Crab color", crab_color)
+        cv2.imshow("Crab color2", new_hog.astype("uint8")*255)
+        # cv2.imshow("Crab color3", new_gamma.astype("uint8")*255)
+        # cv2.imshow("Crab color3", new_log.astype("uint8")*255)
+        # cv2.imshow("Crab color3", new_sigmoid.astype("uint8")*255)
         # cv2.imshow("Crab red", crab_red)
-
 
         # crab_color2 = frame_norec[p1[1]:p2[1], p1[0]:p2[0]]
         # hsv = cv2.cvtColor(crab_color2, cv2.COLOR_BGR2HSV)
