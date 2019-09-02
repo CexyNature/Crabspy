@@ -625,9 +625,28 @@ def select_color():
 
     return random.choice(list(MY_COLORS.items()))
 
-# """
+
+
+def save_snapshot(image, video_path, info_video):
+
+    # create file name with name
+    name = os.path.basename(video_path)
+    video_name, file_extension = os.path.splitext(name)
+    # print(video_name)
+    name_result_folder = "results/snapshots/" + video_name + "/" + info_video["Crab_ID"]
+    name_result_file = "results/snapshots/" + video_name + "/" + info_video["Crab_ID"] + "/" + info_video["Crab_ID"] + "_" + str(info_video["Frame"]) + ".jpg"
+    # print(name_result_file)
+
+
+    os.makedirs(name_result_folder, exist_ok = True)
+    cv2.imwrite(name_result_file, image)
+
+
+
+# '''
 # Function that defines the end of tracking
-# """
+# '''
+#
 # '''
 # Function to display percentage of video analyzed based on total number of frames
 # '''
