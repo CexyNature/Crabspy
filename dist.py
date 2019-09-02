@@ -7,6 +7,7 @@ import argparse
 from collections import deque
 import sys
 from datetime import datetime
+from statistics import mean
 
 import methods
 import constant
@@ -107,6 +108,8 @@ ok = tracker.init(frame, bbox)
 # initialize the list of tracked points, the frame counter,
 # and the coordinate deltas
 pts = deque(maxlen=100000)
+posx = deque(maxlen=constant.DECK)
+posy = deque(maxlen=constant.DECK)
 
 counter = 0
 (dX, dY) = (0, 0)
@@ -252,7 +255,12 @@ while vid.isOpened():
         cv2.rectangle(masked, p1, p2, (204, 204, 0))
         # cv2.circle(result, (180,180), 3, (0, 204, 100), 3)
 
-        center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
+        # center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
+        posx.appendleft(int(bbox[0] + bbox[2] / 2))
+        posy.appendleft(int(bbox[1] + bbox[3] / 2))
+        centx = mean(posx)
+        centy = mean(posy)
+        center = (int(centx), int(centy))
 
         _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
 
@@ -271,6 +279,7 @@ while vid.isOpened():
             info_video[i.name] = i.value
 
         crab = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+        crab_snapshot = crab.copy()
         # crab = masked[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
         # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
         # crab = frame[100:(100 + 50), 250:(250 + 50)]
@@ -278,7 +287,7 @@ while vid.isOpened():
         # cv2.imwrite(dirname + "/" + filename + "_" + startTime1 + str(center) + "_" + ".jpg", crab)
 
         crab_edge = cv2.Canny(crab, threshold1=100, threshold2=200)
-        cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        _, cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         if len(cnts) != 0:
 
@@ -430,6 +439,10 @@ while vid.isOpened():
 
     for i in info:
         info_video[i.name] = i.value
+
+
+    if constant.SNAPSHOT == True:
+        methods.save_snapshot(crab_snapshot, args["video"], info_video)
 
     # counter_f += 1
     # print("Frame count ", counter_f)

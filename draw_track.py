@@ -13,7 +13,7 @@ __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-f", "--file", default="GP010016_GP010016_focal1.csv", help="Provide path to file")
+ap.add_argument("-f", "--file", default="GP010016_h7ewf.csv", help="Provide path to file")
 args = vars(ap.parse_args())
 
 track_meta = pd.read_csv("results/" + args["file"], header=0, nrows=1)
@@ -43,7 +43,7 @@ M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 
 pts = deque(maxlen=int(track_meta["length_video"].values[0])+250)
 (dX, dY) = (0, 0)
-target = 9000
+target = 1
 vid.set(1, target)
 counter = target
 # color1 = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
