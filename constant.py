@@ -29,6 +29,20 @@ QUADRAT_POINTS:
 MANUAL_ANNOTATION:
     If True user input crab_name, crab_species, sex and crab_handedness.
     If False a random name is given to crab_name and other properties are set to "unknown".
+    
+ERODE: tuple
+    Kernel size for erosion morphological command.
+
+DILATE: tuple
+    Kernel size for dilation morphological command.
+
+DECK: integer
+    Size of double ended queue for smoothing track coordinate using a movinf average.
+
+SNAPSHOT: bool
+    If True snapshots (one per frame) from tracked individual will be saved inside directory /results/snapshot/VIDEO-FILE-NAME/INDIVIDUAL-NAME/
+    If False snapshots will not be saved.
+
 """
 
 DIM = [80, 80, 80, 80]
