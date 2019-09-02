@@ -31,11 +31,14 @@ MANUAL_ANNOTATION:
     If False a random name is given to crab_name and other properties are set to "unknown".
 """
 
-DIM = [50, 50, 50, 50]
+DIM = [80, 80, 80, 80]
 COLOR_SET_0 = (243, 28, 20)
 COLOR_SET_1 = (18, 250, 173)
-CAPTURE_VERTICES = False
-QUADRAT_POINTS = [(628, 105), (946, 302), (264, 393), (559, 698)]
-MANUAL_ANNOTATION = False
+CAPTURE_VERTICES = True
+# QUADRAT_POINTS = [(628, 105), (946, 302), (264, 393), (559, 698)]
+QUADRAT_POINTS = [(461, 171), (910, 199), (348, 514), (853, 545)]
+MANUAL_ANNOTATION = True
 ERODE = (3, 3)
 DILATE = (7, 5)
+DECK = 10
+SNAPSHOT = True
