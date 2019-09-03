@@ -44,4 +44,5 @@ setup(
         "numpy>=1.13",
         "opencv-python>=3.3",
         "opencv-contrib-python>=3.3",
-        "pandas>=0.21.0"])
+        "pandas>=0.21.0",
+        "scikit-image >= 0.13.1"])
