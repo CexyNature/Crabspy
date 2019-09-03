@@ -21,7 +21,7 @@ __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", default="GP010016.mp4", help="Provide path to video file")
+ap.add_argument("-v", "--video", default="GP010016.mov", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=None,
                 help="Provide time in seconds of target video section showing the key points")
 # ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
@@ -132,8 +132,8 @@ for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.ERODE)
 for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.DILATE)
 # for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 
-out = cv2.VideoWriter("Uca_detection.avi",
-                      cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
+# out = cv2.VideoWriter("Uca_detection.avi",
+#                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
 info = [methods.CompileInformation("name_video", video_name),
         methods.CompileInformation("local_creation", local_creation),
@@ -386,16 +386,16 @@ while vid.isOpened():
         # show the movement deltas and the direction of movement on
         # the frame
         direction = "Uca movement " + str(direction)
-        cv2.putText(result, direction, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5, (10, 10, 10), 2)
-        cv2.putText(result, "Displacement (cm) dx: {}, dy: {}".format(dX, dY),
-                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5, (10, 10, 10), 2)
+        # cv2.putText(result, direction, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
+        #             0.5, (10, 10, 10), 2)
+        # cv2.putText(result, "Displacement (cm) dx: {}, dy: {}".format(dX, dY),
+        #             (10, 40), cv2.FONT_HERSHEY_SIMPLEX,
+        #             0.5, (10, 10, 10), 2)
 
         # Back transform and show tracker and data in original image
 
     blob = fb_res_two3[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
-    ret, blob = cv2.threshold(blob, 50, 255, cv2.THRESH_BINARY)
+    ret, blob = cv2.threshold(blob, 85, 255, cv2.THRESH_BINARY)
     output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
     num_labels = output[0]
     stats = output[2]
@@ -447,6 +447,12 @@ while vid.isOpened():
 
     if constant.SNAPSHOT == True:
         methods.save_snapshot(crab_snapshot, args["video"], info_video)
+
+
+    percentage_vid = (target_frame + counter) / length_vid * 100
+    text = "Video {0:.1f} %".format(percentage_vid)
+    cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
+    cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
 
     # counter_f += 1
     # print("Frame count ", counter_f)
