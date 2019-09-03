@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Common operations used by other modules.
+"""
+
 import cv2
 import os
 import logging

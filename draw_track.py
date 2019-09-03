@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Display a tracked individual in the video.
+"""
+
 import argparse
 import pandas as pd
 from collections import deque

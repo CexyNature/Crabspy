@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Defines variables used by other modules.
+"""
+
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Module for tracking one individual in a video.
+"""
+
 import os
 import cv2
 import numpy as np
