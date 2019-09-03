@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Defines variables used by other modules.
+Defines constants used by other modules.
 """
 
 __author__ = "Cesar Herrera"
