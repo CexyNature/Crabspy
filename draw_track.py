@@ -17,7 +17,7 @@ __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-f", "--file", default="GP010016_h7ewf.csv", help="Provide path to file")
+ap.add_argument("-f", "--file", default="GP010016_Us_focal_01.csv", help="Provide path to file")
 args = vars(ap.parse_args())
 
 track_meta = pd.read_csv("results/" + args["file"], header=0, nrows=1)
@@ -73,7 +73,7 @@ while vid.isOpened():
 
             for i in np.arange(1, len(pts)):
                 cv2.line(result, pts[i - 1], pts[i], color1, 1)
-                cv2.circle(result, (coord_x, coord_y), 15, color1, 1)
+                cv2.circle(result, (coord_x, coord_y), 15, color1, 2)
         except (ValueError, IndexError):
             pass
     else:
@@ -81,10 +81,10 @@ while vid.isOpened():
 
     percentage_vid = counter/track_meta["length_video"].values[0]*100
     text = "Video {0:.1f} %".format(percentage_vid)
-    cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
-    cv2.putText(result, "Frame n. {0:d}".format(counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
+    cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+    cv2.putText(result, "Frame n. {0:d}".format(counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
-    result2 = cv2.addWeighted(result, 0.5, result2, 0.5, 0)
+    result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
 
 
     cv2.imshow("result", result2)
