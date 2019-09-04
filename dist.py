@@ -12,6 +12,7 @@ from collections import deque
 import sys
 from datetime import datetime
 from statistics import mean
+import math
 
 import methods
 import constant
@@ -290,45 +291,45 @@ while vid.isOpened():
         # filename = os.path.join(dirname, fname, str(center), startTime1)
         # cv2.imwrite(dirname + "/" + filename + "_" + startTime1 + str(center) + "_" + ".jpg", crab)
 
-        crab_edge = cv2.Canny(crab, threshold1=100, threshold2=200)
-        _, cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        if len(cnts) != 0:
-
-            cnts_sorted = sorted(cnts, key=lambda x: cv2.contourArea(x))
-            # Grab second largest contour
-            contour = cnts_sorted[-1]
-            # Grab larger contour from contours list
-            # contour = max(cnts, key=cv2.contourArea)
-            # print('This is maximum contour ', contour.shape)
-            # Finding min and max coordinates in left-right axis
-            min_LR = tuple(contour[contour[:, :, 0].argmin()][0])
-            max_LR = tuple(contour[contour[:, :, 0].argmax()][0])
-            # Finding min and max coordinates in top-bottom axis
-            min_TB = tuple(contour[contour[:, :, 1].argmin()][0])
-            max_TB = tuple(contour[contour[:, :, 1].argmax()][0])
-
-            # Create dictionary of moments for the contour
-            Mo = cv2.moments(contour)
-
-            if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
-                centroid_x = 0
-                centroid_y = 0
-                pass
-            # if Mo["m00"] != 0: # and then else for other cases: cx, cy = 0, 0
-            else:
-                # Calculate centroid coordinates
-                # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
-                centroid_x = int(Mo["m10"] / Mo["m00"])
-                centroid_y = int(Mo['m01'] / Mo['m00'])
-
-            cv2.circle(crab, min_LR, 1, (0, 0, 255), -1)
-            cv2.circle(crab, max_LR, 1, (0, 255, 0), -1)
-            cv2.circle(crab, min_TB, 1, (255, 0, 0), -1)
-            cv2.circle(crab, max_TB, 1, (255, 255, 0), -1)
-
-            cv2.line(crab, min_LR, max_LR, (0, 100, 255), 1)
-            cv2.line(crab, min_TB, max_TB, (255, 100, 0), 1)
+        # crab_edge = cv2.Canny(crab, threshold1=100, threshold2=200)
+        # _, cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        #
+        # if len(cnts) != 0:
+        #
+        #     cnts_sorted = sorted(cnts, key=lambda x: cv2.contourArea(x))
+        #     # Grab second largest contour
+        #     contour = cnts_sorted[-1]
+        #     # Grab larger contour from contours list
+        #     # contour = max(cnts, key=cv2.contourArea)
+        #     # print('This is maximum contour ', contour.shape)
+        #     # Finding min and max coordinates in left-right axis
+        #     min_LR = tuple(contour[contour[:, :, 0].argmin()][0])
+        #     max_LR = tuple(contour[contour[:, :, 0].argmax()][0])
+        #     # Finding min and max coordinates in top-bottom axis
+        #     min_TB = tuple(contour[contour[:, :, 1].argmin()][0])
+        #     max_TB = tuple(contour[contour[:, :, 1].argmax()][0])
+        #
+        #     # Create dictionary of moments for the contour
+        #     Mo = cv2.moments(contour)
+        #
+        #     if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
+        #         centroid_x = 0
+        #         centroid_y = 0
+        #         pass
+        #     # if Mo["m00"] != 0: # and then else for other cases: cx, cy = 0, 0
+        #     else:
+        #         # Calculate centroid coordinates
+        #         # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
+        #         centroid_x = int(Mo["m10"] / Mo["m00"])
+        #         centroid_y = int(Mo['m01'] / Mo['m00'])
+        #
+        #     # cv2.circle(crab, min_LR, 1, (0, 0, 255), -1)
+        #     # cv2.circle(crab, max_LR, 1, (0, 255, 0), -1)
+        #     # cv2.circle(crab, min_TB, 1, (255, 0, 0), -1)
+        #     # cv2.circle(crab, max_TB, 1, (255, 255, 0), -1)
+        #     #
+        #     # cv2.line(crab, min_LR, max_LR, (0, 100, 255), 1)
+        #     # cv2.line(crab, min_TB, max_TB, (255, 100, 0), 1)
 
         pts.appendleft(center)
         # print(center)
@@ -395,10 +396,74 @@ while vid.isOpened():
         # Back transform and show tracker and data in original image
 
     blob = fb_res_two3[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
-    ret, blob = cv2.threshold(blob, 85, 255, cv2.THRESH_BINARY)
+    ret, blob = cv2.threshold(blob, 150, 255, cv2.THRESH_BINARY)
     output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
     num_labels = output[0]
     stats = output[2]
+
+    # Computing the connected components for image, and show them in window.
+    _, label = cv2.connectedComponents(blob)
+    if np.max(label) != 0:
+        label_hue = np.uint8(179 * label / np.max(label))
+        # print(stats)
+        blank_ch = 255 * np.ones_like(label_hue)
+        labeled_img = cv2.merge([label_hue, blank_ch, blank_ch])
+        # cvt to BGR for display
+        labeled_img = cv2.cvtColor(labeled_img, cv2.COLOR_HSV2BGR)
+        # set bg label to black
+        labeled_img[label_hue == 0] = 0
+        cv2.imshow('labeled.png', labeled_img)
+
+
+    crab_size = cv2.Canny(blob, threshold1=100, threshold2=200)
+    _, cnts_size, _ = cv2.findContours(crab_size, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if len(cnts_size) != 0:
+
+        cnts_size_sorted = sorted(cnts_size, key=lambda x: cv2.contourArea(x))
+        # Grab second largest contour
+        contour_size = cnts_size_sorted[-1]
+        # Grab larger contour from contours list
+        # contour = max(cnts, key=cv2.contourArea)
+        # print('This is maximum contour ', contour.shape)
+        # Finding min and max coordinates in left-right axis
+        min_LR_size = tuple(contour_size[contour_size[:, :, 0].argmin()][0])
+        max_LR_size = tuple(contour_size[contour_size[:, :, 0].argmax()][0])
+        # Finding min and max coordinates in top-bottom axis
+        min_TB_size = tuple(contour_size[contour_size[:, :, 1].argmin()][0])
+        max_TB_size = tuple(contour_size[contour_size[:, :, 1].argmax()][0])
+
+        # # Create dictionary of moments for the contour
+        # Mo = cv2.moments(contour_size)
+        #
+        # if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
+        #     centroid_x = 0
+        #     centroid_y = 0
+        #     pass
+        # # if Mo["m00"] != 0: # and then else for other cases: cx, cy = 0, 0
+        # else:
+        #     # Calculate centroid coordinates
+        #     # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
+        #     centroid_x = int(Mo["m10"] / Mo["m00"])
+        #     centroid_y = int(Mo['m01'] / Mo['m00'])
+
+        cv2.circle(crab, min_LR_size, 1, (0, 0, 255), -1)
+        cv2.circle(crab, max_LR_size, 1, (0, 255, 0), -1)
+        cv2.circle(crab, min_TB_size, 1, (255, 0, 0), -1)
+        cv2.circle(crab, max_TB_size, 1, (255, 255, 0), -1)
+
+        cv2.line(crab, min_LR_size, max_LR_size, (0, 100, 255), 1)
+        cv2.line(crab, min_TB_size, max_TB_size, (255, 100, 0), 1)
+
+        dist_LRx = (max_LR_size[0] - min_LR_size[0]) ** 2
+        dist_LRy = (max_LR_size[1] - min_LR_size[1]) ** 2
+        dist_LRman = math.sqrt(dist_LRx + dist_LRy)
+
+        dist_TBx = (max_TB_size[0] - min_TB_size[0]) ** 2
+        dist_TBy = (max_TB_size[1] - min_TB_size[1]) ** 2
+        dist_TBman = math.sqrt(dist_TBx + dist_TBy)
+        # print("MAN width ", dist_TBman * conversion, " height ", dist_TBman * conversion)
+
     # print("Number of labels ", num_labels)
     # Stat matrix contains in order: leftmost coord, topmost coord, width, height, and area
     # print("Stat matrix is ", stats)
@@ -409,6 +474,9 @@ while vid.isOpened():
         # print("This is the width ", blob_width, "ID=", label)
         blob_height = stats[label, cv2.CC_STAT_HEIGHT] * conversion
         # print("This is the height ", blob_height, "ID=", label)
+
+        # print("CV2 width ", blob_width, " height ", blob_height)
+
 
     if num_labels == 1:
         info = [methods.CompileInformation("Width", ""),
@@ -482,7 +550,7 @@ while vid.isOpened():
     # cv2.imshow("original", img)
     # cv2.imshow("cropped", crop_img)
     # crab = cv2.resize(crab, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4)
-    # cv2.imshow("Crab", crab)
+    cv2.imshow("Crab", crab)
     # cv2.imshow("Crab Edge", crab_edge)
     # cv2.imshow("result", result)
     cv2.imshow("Blob", blob)
