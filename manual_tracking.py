@@ -13,7 +13,7 @@ __license__ = "GNU GPL"
 startTime = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", default="video/GP010016.mp4", help="Provide path to video file")
+ap.add_argument("-v", "--video", default="video/GP010016.mov", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=None,
                 help="Provide time in seconds of target video section showing the key points")
 # ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
