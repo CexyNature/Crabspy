@@ -1,6 +1,0 @@
-CrabSpy; python >= 3.5
-opencv-python >= 3.3.0
-opencv-contrib-python >= 3.3.0
-numpy >= 1.14.2
-pandas >= 0.22.0
-scikit-image >= 0.13.1
