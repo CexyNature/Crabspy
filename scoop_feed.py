@@ -333,3 +333,4 @@ while True:
 vid.release()
 cv2.destroyAllWindows()
 print(datetime.now() - startTime)
+
