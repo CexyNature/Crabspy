@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # from scipy import ndimage
 # import matplotlib.pyplot as plt
 import cv2
@@ -311,6 +313,8 @@ while vid.isOpened():
         # wr.writerow([crab_id, center, counter])
 
         crab = crab_frame[center[1] - 20:center[1] + 20, center[0] - 20:center[0] + 20]
+        crab_modif = crab.copy()
+        crab_alpha = crab.copy()
         # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
         # crab = frame[100:(100 + 50), 250:(250 + 50)]
         # filename = os.path.join(dirname, fname, str(center), startTime1)
@@ -318,29 +322,55 @@ while vid.isOpened():
 
         edge1 = edge[center[1] - 20:center[1] + 20, center[0] - 20:center[0] + 20]
         edge1 = cv2.Canny(edge1, threshold1=100, threshold2=200)
-        _, cnts, _ = cv2.findContours(edge1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts, _ = cv2.findContours(edge1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        if len(cnts) !=0:
-            c = max(cnts, key=cv2.contourArea)
-            # print('This is maximum contour ', c)
-            extLeft = tuple(c[c[:, :, 0].argmin()][0])
-            extRight = tuple(c[c[:, :, 0].argmax()][0])
-            extTop = tuple(c[c[:, :, 1].argmin()][0])
-            extBot = tuple(c[c[:, :, 1].argmax()][0])
+        if len(cnts) >=3:
 
-            cv2.rectangle(crab, (extLeft[0],extTop[1]), (extRight[0], extBot[1]), (100,100,2), 1)
+            cnts_sorted = sorted(cnts, key=lambda x:cv2.contourArea(x))
+            # Grab second largest contour
+            contour = cnts_sorted[-3]
+            # Grab larger contour from contours list
+            # contour = max(cnts, key=cv2.contourArea)
+            print('This is maximum contour ', contour.shape)
+            # Finding min and max coordinates in left-right axis
+            min_LR = tuple(contour[contour[:, :, 0].argmin()][0])
+            max_LR = tuple(contour[contour[:, :, 0].argmax()][0])
+            # Finding min and max coordinates in top-bottom axis
+            min_TB = tuple(contour[contour[:, :, 1].argmin()][0])
+            max_TB = tuple(contour[contour[:, :, 1].argmax()][0])
+
+            # Create dictionary of moments for the contour
+            Mo = cv2.moments(contour)
+
+            if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
+                centroid_x = 0
+                centroid_y = 0
+                pass
+            else:
+                # Calculate centroid coordinates
+                # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
+                centroid_x = int(Mo["m10"] / Mo["m00"])
+                centroid_y = int(Mo['m01'] / Mo['m00'])
+
+            cv2.rectangle(crab, (min_LR[0],min_TB[1]), (max_LR[0], max_TB[1]), (100,100,2), 1)
 
             # cv2.drawContours(crab, [c], -1, (0, 255, 255), 2)
-            cv2.circle(crab, extLeft, 1, (0, 0, 255), -1)
-            cv2.circle(crab, extRight, 1, (0, 255, 0), -1)
-            cv2.circle(crab, extTop, 1, (255, 0, 0), -1)
-            cv2.circle(crab, extBot, 1, (255, 255, 0), -1)
+            cv2.circle(crab, min_LR, 1, (0, 0, 255), -1)
+            cv2.circle(crab, max_LR, 1, (0, 255, 0), -1)
+            cv2.circle(crab, min_TB, 1, (255, 0, 0), -1)
+            cv2.circle(crab, max_TB, 1, (255, 255, 0), -1)
 
-            side1 = extRight[0] - extLeft[0]
-            side1a = extRight[1] - extLeft[1]
-            side2 = extBot[1] - extTop[1]
-            side2a = extBot[0] - extTop[0]
+            cv2.line(crab, min_LR, max_LR, (0,100,255), 1)
+            cv2.line(crab, min_TB, max_TB, (255,100,0), 1)
 
+            side1 = max_LR[0] - min_LR[0]
+            side1a = max_LR[1] - min_LR[1]
+            side2 = max_TB[1] - min_TB[1]
+            side2a = max_TB[0] - min_TB[0]
+
+            cv2.ellipse(crab_modif, (centroid_x, centroid_y), (side1, side2), 0, 0, 360, (100,145,10), -1)
+            # Alpha and Beta must sum one (e..g 0.5 + 0.5 = 1)
+            cv2.addWeighted(crab_modif, 0.5, crab_alpha, 0.5, 0, crab_alpha)
 
             print('this is width ', side1, ' or is this ', side1a)
             print('this is height ', side2, ' or is this ', side2a)
@@ -391,6 +421,8 @@ while vid.isOpened():
             # otherwise, compute the thickness of the line and
             # draw the connecting lines
             thickness = int(np.sqrt(10 / float(i + 1)) * 2.5)
+            if thickness == 0:
+                thickness = 1
             cv2.line(result, pts[i - 1], pts[i], (204, 204, 0), thickness)
 
         # show the movement deltas and the direction of movement on
@@ -433,7 +465,9 @@ while vid.isOpened():
     # cv2.imshow('result_1', result_1)
     # cv2.imshow('original', img)
     # cv2.imshow('cropped', crop_img)
+    crab = cv2.resize(crab, (0,0), fx=2, fy=2, interpolation=cv2.INTER_LANCZOS4)
     cv2.imshow('Crab', crab)
+    cv2.imshow('Crab alpha', crab_alpha)
     # cv2.imshow('result', result)
 
     ### From warp.py

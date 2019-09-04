@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-Module for tracking one individual in a video.
-"""
-
 import os
 import cv2
 import numpy as np
@@ -11,8 +7,6 @@ import argparse
 from collections import deque
 import sys
 from datetime import datetime
-from statistics import mean
-import math
 
 import methods
 import constant
@@ -22,7 +16,7 @@ __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", default="GP010016.mov", help="Provide path to video file")
+ap.add_argument("-v", "--video", default="GP010016.mp4", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=None,
                 help="Provide time in seconds of target video section showing the key points")
 # ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
@@ -113,8 +107,6 @@ ok = tracker.init(frame, bbox)
 # initialize the list of tracked points, the frame counter,
 # and the coordinate deltas
 pts = deque(maxlen=100000)
-posx = deque(maxlen=constant.DECK)
-posy = deque(maxlen=constant.DECK)
 
 counter = 0
 (dX, dY) = (0, 0)
@@ -129,12 +121,12 @@ fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20)
 fgbg2 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=100)
 fgbg3 = cv2.createBackgroundSubtractorKNN(history=5000, dist2Threshold=250)
 
-for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.ERODE)
-for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.DILATE)
-# for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 
-# out = cv2.VideoWriter("Uca_detection.avi",
-#                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
+out = cv2.VideoWriter("Uca_detection.avi",
+                      cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
 info = [methods.CompileInformation("name_video", video_name),
         methods.CompileInformation("local_creation", local_creation),
@@ -178,7 +170,7 @@ if os.path.isfile("results/" + video_name):
             head_true = True
             print("No, file exists and crab name was not found")
             methods.data_writer(args["video"], info_video, head_true)
-    except (TypeError, RuntimeError):
+    except:
         pass
 # if not os.path.isfile("results" + video_name):
 else:
@@ -204,6 +196,9 @@ methods.CrabNames.save_crab_names(methods.CrabNames.instances, info_video)
 start, end, step, _, _ = methods.frame_to_time(info_video)
 print("The video recording was started at: ", start, "\nThe video recording was ended at: ", end,
       "\nThis information might not be precise as it depends on your computer file system")
+
+sift = cv2.xfeatures2d.SIFT_create()
+bf_matches = cv2.BFMatcher()
 
 while vid.isOpened():
     _, img = vid.read()
@@ -243,9 +238,8 @@ while vid.isOpened():
     # cv2.circle(masked, (163, 335), 2, (240, 10, 10), 2)
 
     # Update tracker
-    ok, bbox = tracker.update(masked)
-    # ok, bbox = tracker.update(result)
-    # ok, bbox = tracker.update(result)
+    # ok, bbox = tracker.update(masked)
+    ok, bbox = tracker.update(result)
     # print(position)
     position1 = (bbox[0], bbox[1])
 
@@ -260,76 +254,69 @@ while vid.isOpened():
         cv2.rectangle(masked, p1, p2, (204, 204, 0))
         # cv2.circle(result, (180,180), 3, (0, 204, 100), 3)
 
-        # center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
-        posx.appendleft(int(bbox[0] + bbox[2] / 2))
-        posy.appendleft(int(bbox[1] + bbox[3] / 2))
-        centx = mean(posx)
-        centy = mean(posy)
-        center = (int(centx), int(centy))
+        center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
 
         _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
 
-        # info = [methods.CompileInformation("Frame", target_frame + counter),
-        #         methods.CompileInformation("Time_absolute", str(time_absolute)),
-        #         methods.CompileInformation("Time_since_start", str(time_since_start)),
-        #         methods.CompileInformation("Crab_ID", name),
-        #         methods.CompileInformation("Crab_Position_x", center[0]),
-        #         methods.CompileInformation("Crab_Position_y", center[1]),
-        #         methods.CompileInformation("Counter", counter),
-        #         methods.CompileInformation("Species", species),
-        #         methods.CompileInformation("Sex", sex),
-        #         methods.CompileInformation("Handedness", handedness)]
+        info = [methods.CompileInformation("Frame", counter),
+                methods.CompileInformation("Time_absolute", str(time_absolute)),
+                methods.CompileInformation("Time_since_start", str(time_since_start)),
+                methods.CompileInformation("Crab_ID", name),
+                methods.CompileInformation("Crab_Position_x", center[0]),
+                methods.CompileInformation("Crab_Position_y", center[1]),
+                methods.CompileInformation("Counter", counter),
+                methods.CompileInformation("Species", species),
+                methods.CompileInformation("Sex", sex),
+                methods.CompileInformation("Handedness", handedness)]
 
         for i in info:
             info_video[i.name] = i.value
 
         crab = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
-        crab_snapshot = crab.copy()
         # crab = masked[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
         # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
         # crab = frame[100:(100 + 50), 250:(250 + 50)]
         # filename = os.path.join(dirname, fname, str(center), startTime1)
         # cv2.imwrite(dirname + "/" + filename + "_" + startTime1 + str(center) + "_" + ".jpg", crab)
 
-        # crab_edge = cv2.Canny(crab, threshold1=100, threshold2=200)
-        # _, cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        #
-        # if len(cnts) != 0:
-        #
-        #     cnts_sorted = sorted(cnts, key=lambda x: cv2.contourArea(x))
-        #     # Grab second largest contour
-        #     contour = cnts_sorted[-1]
-        #     # Grab larger contour from contours list
-        #     # contour = max(cnts, key=cv2.contourArea)
-        #     # print('This is maximum contour ', contour.shape)
-        #     # Finding min and max coordinates in left-right axis
-        #     min_LR = tuple(contour[contour[:, :, 0].argmin()][0])
-        #     max_LR = tuple(contour[contour[:, :, 0].argmax()][0])
-        #     # Finding min and max coordinates in top-bottom axis
-        #     min_TB = tuple(contour[contour[:, :, 1].argmin()][0])
-        #     max_TB = tuple(contour[contour[:, :, 1].argmax()][0])
-        #
-        #     # Create dictionary of moments for the contour
-        #     Mo = cv2.moments(contour)
-        #
-        #     if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
-        #         centroid_x = 0
-        #         centroid_y = 0
-        #         pass
-        #     # if Mo["m00"] != 0: # and then else for other cases: cx, cy = 0, 0
-        #     else:
-        #         # Calculate centroid coordinates
-        #         # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
-        #         centroid_x = int(Mo["m10"] / Mo["m00"])
-        #         centroid_y = int(Mo['m01'] / Mo['m00'])
-        #
-        #     # cv2.circle(crab, min_LR, 1, (0, 0, 255), -1)
-        #     # cv2.circle(crab, max_LR, 1, (0, 255, 0), -1)
-        #     # cv2.circle(crab, min_TB, 1, (255, 0, 0), -1)
-        #     # cv2.circle(crab, max_TB, 1, (255, 255, 0), -1)
-        #     #
-        #     # cv2.line(crab, min_LR, max_LR, (0, 100, 255), 1)
-        #     # cv2.line(crab, min_TB, max_TB, (255, 100, 0), 1)
+        crab_edge = cv2.Canny(crab, threshold1=100, threshold2=200)
+        _, cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        if len(cnts) != 0:
+
+            cnts_sorted = sorted(cnts, key=lambda x: cv2.contourArea(x))
+            # Grab second largest contour
+            contour = cnts_sorted[-1]
+            # Grab larger contour from contours list
+            # contour = max(cnts, key=cv2.contourArea)
+            # print('This is maximum contour ', contour.shape)
+            # Finding min and max coordinates in left-right axis
+            min_LR = tuple(contour[contour[:, :, 0].argmin()][0])
+            max_LR = tuple(contour[contour[:, :, 0].argmax()][0])
+            # Finding min and max coordinates in top-bottom axis
+            min_TB = tuple(contour[contour[:, :, 1].argmin()][0])
+            max_TB = tuple(contour[contour[:, :, 1].argmax()][0])
+
+            # Create dictionary of moments for the contour
+            Mo = cv2.moments(contour)
+
+            if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
+                centroid_x = 0
+                centroid_y = 0
+                pass
+            else:
+                # Calculate centroid coordinates
+                # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
+                centroid_x = int(Mo["m10"] / Mo["m00"])
+                centroid_y = int(Mo['m01'] / Mo['m00'])
+
+            cv2.circle(crab, min_LR, 1, (0, 0, 255), -1)
+            cv2.circle(crab, max_LR, 1, (0, 255, 0), -1)
+            cv2.circle(crab, min_TB, 1, (255, 0, 0), -1)
+            cv2.circle(crab, max_TB, 1, (255, 255, 0), -1)
+
+            cv2.line(crab, min_LR, max_LR, (0, 100, 255), 1)
+            cv2.line(crab, min_TB, max_TB, (255, 100, 0), 1)
 
         pts.appendleft(center)
         # print(center)
@@ -387,140 +374,13 @@ while vid.isOpened():
         # show the movement deltas and the direction of movement on
         # the frame
         direction = "Uca movement " + str(direction)
-        # cv2.putText(result, direction, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-        #             0.5, (10, 10, 10), 2)
-        # cv2.putText(result, "Displacement (cm) dx: {}, dy: {}".format(dX, dY),
-        #             (10, 40), cv2.FONT_HERSHEY_SIMPLEX,
-        #             0.5, (10, 10, 10), 2)
+        cv2.putText(result, direction, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (10, 10, 10), 2)
+        cv2.putText(result, "Displacement (cm) dx: {}, dy: {}".format(dX, dY),
+                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (10, 10, 10), 2)
 
         # Back transform and show tracker and data in original image
-
-    blob = fb_res_two3[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
-    ret, blob = cv2.threshold(blob, 150, 255, cv2.THRESH_BINARY)
-    output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
-    num_labels = output[0]
-    stats = output[2]
-
-    # Computing the connected components for image, and show them in window.
-    _, label = cv2.connectedComponents(blob)
-    if np.max(label) != 0:
-        label_hue = np.uint8(179 * label / np.max(label))
-        # print(stats)
-        blank_ch = 255 * np.ones_like(label_hue)
-        labeled_img = cv2.merge([label_hue, blank_ch, blank_ch])
-        # cvt to BGR for display
-        labeled_img = cv2.cvtColor(labeled_img, cv2.COLOR_HSV2BGR)
-        # set bg label to black
-        labeled_img[label_hue == 0] = 0
-        cv2.imshow('labeled.png', labeled_img)
-
-
-    crab_size = cv2.Canny(blob, threshold1=100, threshold2=200)
-    _, cnts_size, _ = cv2.findContours(crab_size, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    if len(cnts_size) != 0:
-
-        cnts_size_sorted = sorted(cnts_size, key=lambda x: cv2.contourArea(x))
-        # Grab second largest contour
-        contour_size = cnts_size_sorted[-1]
-        # Grab larger contour from contours list
-        # contour = max(cnts, key=cv2.contourArea)
-        # print('This is maximum contour ', contour.shape)
-        # Finding min and max coordinates in left-right axis
-        min_LR_size = tuple(contour_size[contour_size[:, :, 0].argmin()][0])
-        max_LR_size = tuple(contour_size[contour_size[:, :, 0].argmax()][0])
-        # Finding min and max coordinates in top-bottom axis
-        min_TB_size = tuple(contour_size[contour_size[:, :, 1].argmin()][0])
-        max_TB_size = tuple(contour_size[contour_size[:, :, 1].argmax()][0])
-
-        # # Create dictionary of moments for the contour
-        # Mo = cv2.moments(contour_size)
-        #
-        # if 0 in (Mo["m10"], Mo["m00"], Mo['m01'], Mo['m00']):
-        #     centroid_x = 0
-        #     centroid_y = 0
-        #     pass
-        # # if Mo["m00"] != 0: # and then else for other cases: cx, cy = 0, 0
-        # else:
-        #     # Calculate centroid coordinates
-        #     # https://docs.opencv.org/4.0.0/dd/d49/tutorial_py_contour_features.html
-        #     centroid_x = int(Mo["m10"] / Mo["m00"])
-        #     centroid_y = int(Mo['m01'] / Mo['m00'])
-
-        cv2.circle(crab, min_LR_size, 1, (0, 0, 255), -1)
-        cv2.circle(crab, max_LR_size, 1, (0, 255, 0), -1)
-        cv2.circle(crab, min_TB_size, 1, (255, 0, 0), -1)
-        cv2.circle(crab, max_TB_size, 1, (255, 255, 0), -1)
-
-        cv2.line(crab, min_LR_size, max_LR_size, (0, 100, 255), 1)
-        cv2.line(crab, min_TB_size, max_TB_size, (255, 100, 0), 1)
-
-        dist_LRx = (max_LR_size[0] - min_LR_size[0]) ** 2
-        dist_LRy = (max_LR_size[1] - min_LR_size[1]) ** 2
-        dist_LRman = math.sqrt(dist_LRx + dist_LRy)
-
-        dist_TBx = (max_TB_size[0] - min_TB_size[0]) ** 2
-        dist_TBy = (max_TB_size[1] - min_TB_size[1]) ** 2
-        dist_TBman = math.sqrt(dist_TBx + dist_TBy)
-        # print("MAN width ", dist_TBman * conversion, " height ", dist_TBman * conversion)
-
-    # print("Number of labels ", num_labels)
-    # Stat matrix contains in order: leftmost coord, topmost coord, width, height, and area
-    # print("Stat matrix is ", stats)
-    for label in range(1, num_labels):
-        blob_area = stats[label, cv2.CC_STAT_AREA] * conversion
-        # print("This is the area ", blob_area, "ID=", label)
-        blob_width = stats[label, cv2.CC_STAT_WIDTH] * conversion
-        # print("This is the width ", blob_width, "ID=", label)
-        blob_height = stats[label, cv2.CC_STAT_HEIGHT] * conversion
-        # print("This is the height ", blob_height, "ID=", label)
-
-        # print("CV2 width ", blob_width, " height ", blob_height)
-
-
-    if num_labels == 1:
-        info = [methods.CompileInformation("Width", ""),
-                methods.CompileInformation("Height", ""),
-                methods.CompileInformation("Area", ""),
-                methods.CompileInformation("Frame", target_frame + counter),
-                methods.CompileInformation("Time_absolute", str(time_absolute)),
-                methods.CompileInformation("Time_since_start", str(time_since_start)),
-                methods.CompileInformation("Crab_ID", name),
-                methods.CompileInformation("Crab_Position_x", ""),
-                methods.CompileInformation("Crab_Position_y", ""),
-                methods.CompileInformation("Counter", counter),
-                methods.CompileInformation("Species", species),
-                methods.CompileInformation("Sex", sex),
-                methods.CompileInformation("Handedness", handedness)]
-        # do not save position
-
-    else:
-        info = [methods.CompileInformation("Width", blob_width),
-                methods.CompileInformation("Height", blob_height),
-                methods.CompileInformation("Area", blob_area),
-                methods.CompileInformation("Frame", target_frame + counter),
-                methods.CompileInformation("Time_absolute", str(time_absolute)),
-                methods.CompileInformation("Time_since_start", str(time_since_start)),
-                methods.CompileInformation("Crab_ID", name),
-                methods.CompileInformation("Crab_Position_x", center[0]),
-                methods.CompileInformation("Crab_Position_y", center[1]),
-                methods.CompileInformation("Counter", counter),
-                methods.CompileInformation("Species", species),
-                methods.CompileInformation("Sex", sex),
-                methods.CompileInformation("Handedness", handedness)]
-
-    for i in info:
-        info_video[i.name] = i.value
-
-
-    if constant.SNAPSHOT == True:
-        methods.save_snapshot(crab_snapshot, args["video"], info_video)
-
-
-    percentage_vid = (target_frame + counter) / length_vid * 100
-    text = "Video {0:.1f} %".format(percentage_vid)
-    cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
-    cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
 
     # counter_f += 1
     # print("Frame count ", counter_f)
@@ -549,21 +409,41 @@ while vid.isOpened():
     # cv2.imshow("result_1", result_1)
     # cv2.imshow("original", img)
     # cv2.imshow("cropped", crop_img)
-    # crab = cv2.resize(crab, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4)
+    crab = cv2.resize(crab, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4)
     cv2.imshow("Crab", crab)
-    # cv2.imshow("Crab Edge", crab_edge)
+    cv2.imshow("Crab Edge", crab_edge)
     # cv2.imshow("result", result)
-    cv2.imshow("Blob", blob)
 
     # From warp.py
-    cv2.imshow("background substraction", fb_res_two3)
+    # cv2.imshow("background substraction", fb_res_two3)
     cv2.imshow("masked", masked)
     cv2.imshow("result", result)
-    # cv2.imshow("Canny Edges", edge)
+    cv2.imshow("Canny Edges", edge)
     # cv2.imshow("display00", display00)
     # cv2.imshow("display01", display01)
     # cv2.imshow("display", display)
     methods.data_writer(args["video"], info_video, False)
+
+    if counter == 0:
+        snap = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+
+    current_snap = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+
+    kp0, descriptor0 = sift.detectAndCompute(snap, None)
+    kp1, descriptor1 = sift.detectAndCompute(current_snap, None)
+    matches = bf_matches.knnMatch(descriptor0, descriptor1, k =2)
+
+    # Apply ratio test following Lowe's manuscript
+    good = []
+    for m, n in matches:
+        if m.distance < 0.75 * n.distance:
+            good.append([m])
+
+    matches_overlay = cv2.drawMatchesKnn(snap, kp0, current_snap, kp1, good, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    matches_overlay= cv2.resize(matches_overlay, (0,0), fx=5, fy=5, interpolation=cv2.INTER_LANCZOS4)
+    cv2.imshow("SIFT matches", matches_overlay)
+
+
 
     counter += 1
 

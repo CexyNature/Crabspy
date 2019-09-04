@@ -117,3 +117,6 @@ __pycache__/
 *.MP4
 *.avi
 *.csv
+results/Log/
+results/snapshots/
+video/
