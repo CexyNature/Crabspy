@@ -403,7 +403,7 @@ while vid.isOpened():
     #
     # display = cv2.resize(display, (0,0), fx=.5, fy=.5)
     # print(display.shape)
-    out.write(result)
+    # out.write(result)
 
 
     # cv2.imshow('result_1', result_1)
