@@ -152,10 +152,21 @@ if os.path.isfile("results/" + video_name):
         print("I am looking this crab name in the database: ", name)
         if name in methods.CrabNames.get_crab_names("results/" + video_name ):
             print("Yes, file exists and crab name found")
-            head_true = False
-            species = "Hola0001"
-            sex = "Hola0001"
-            handedness = "Hola0001"
+
+            database = methods.CrabNames.open_crab_names(info_video)
+            for i in database:
+                if i.crab_name == name:
+                    head_true = False
+                    sex = i.sex
+                    species = i.species
+                    handedness = i.handedness
+                    # print("This is a {} from species {} and {} handed".format(sex, species, handedness))
+                else:
+                    pass
+            # head_true = False
+            # species = "Hola0001"
+            # sex = "Hola0001"
+            # handedness = "Hola0001"
 
 
         else:
