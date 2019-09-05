@@ -491,7 +491,7 @@ class CrabNames(object):
         for instances in temp_dict:
             # print("This is a ", instance.crab_name)
             print("This is individual {crab_name}: sex {sex} and {handedness} handedness," \
-                  " from species {species}. Its tracking started at posiiton {start_position}.".format(
+                  " from species {species}. Its tracking started at position {start_position}.".format(
                 **instances.__dict__))
         file.close()
 
