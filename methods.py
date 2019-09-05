@@ -458,7 +458,7 @@ class CrabNames(object):
 
     def __str__(self):
         return "This is individual {crab_name}: a {sex} sex and {handedness} handedness," \
-               " from species {species}. Its tracking started at posiiton {start_position}.".format(**self.__dict__)
+               " from species {species}. Its tracking started at position {start_position}.\n".format(**self.__dict__)
 
     def save_crab_names(self, info_video):
         filename = "results/" + info_video.get("name_video", "")
@@ -479,6 +479,7 @@ class CrabNames(object):
             # print("This is a ", instance.crab_name)
             __class__.instances.append(instance)
         file.close()
+        return  temp_dict
 
     def print_crab_names(info_video):
         if isinstance(info_video, dict):
@@ -507,6 +508,7 @@ class CrabNames(object):
         file.close()
         return res
 
+    __repr__ = __str__
 
 def random_name(size = 5, characters = string.ascii_lowercase + string.digits):
     name_rand = "".join(random.choice(characters) for _ in range(size))
