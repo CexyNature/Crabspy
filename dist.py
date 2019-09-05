@@ -82,31 +82,6 @@ bbox = cv2.selectROI("tracking select", frame, fromCenter=False)
 crab_center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
 print(crab_center)
 
-if constant.MANUAL_ANNOTATION is True:
-    try:
-        name = video_name + "_" + str(input("* Please enter name for this individual: "))
-        species = str(input("* Please enter species name for this individual: "))
-        sex = str(input("* Please enter sex for this individual: "))
-        handedness = str(input(" *Please enter handedness for this individual: "))
-    except ValueError:
-        print("Error in input. Using pre-defined information")
-        name = video_name + "_" + methods.random_name()
-        species = "unknown"
-        sex = "unknown"
-        handedness = "unknown"
-else:
-    name = video_name + "_" + methods.random_name()
-    species = "unknown"
-    sex = "unknown"
-    handedness ="unknown"
-
-
-# crab_id = args["video"] + "_" + args["crab_id"] + str(crab_center)
-# print(crab_id)
-
-# Uncomment the line below to select a different bounding box
-# bbox = cv2.selectROI(frame, False)
-
 # Initialize tracker with first frame and bounding box
 ok = tracker.init(frame, bbox)
 
@@ -136,6 +111,24 @@ for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.DILATE)
 # out = cv2.VideoWriter("Uca_detection.avi",
 #                       cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (464, 464))
 
+if constant.MANUAL_ANNOTATION is True:
+    try:
+        name = video_name + "_" + str(input("* Please enter name for this individual: "))
+        # species = str(input("* Please enter species name for this individual: "))
+        # sex = str(input("* Please enter sex for this individual: "))
+        # handedness = str(input(" *Please enter handedness for this individual: "))
+    except ValueError:
+        print("Error in input. Using pre-defined information")
+        name = video_name + "_" + methods.random_name()
+        # species = "unknown"
+        # sex = "unknown"
+        # handedness = "unknown"
+else:
+    name = video_name + "_" + methods.random_name()
+    # species = "unknown"
+    # sex = "unknown"
+    # handedness = "unknown"
+
 info = [methods.CompileInformation("name_video", video_name),
         methods.CompileInformation("local_creation", local_creation),
         methods.CompileInformation("creation", creation),
@@ -151,18 +144,6 @@ info = [methods.CompileInformation("name_video", video_name),
 info_video = {}
 for i in info:
     info_video[i.name] = i.value
-# print(info_video)
-
-# print(name, "\n" + species, "\n" + sex, "\n" + handedness)
-
-# crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
-# print(crab_id)
-
-# try:
-#     methods.CrabNames.open_crab_names(info_video)
-# except:
-#     pass
-
 
 if os.path.isfile("results/" + video_name):
     try:
@@ -172,7 +153,15 @@ if os.path.isfile("results/" + video_name):
         if name in methods.CrabNames.get_crab_names("results/" + video_name ):
             print("Yes, file exists and crab name found")
             head_true = False
+            species = "Hola0001"
+            sex = "Hola0001"
+            handedness = "Hola0001"
+
+
         else:
+            species = str(input("* Please enter species name for this individual: "))
+            sex = str(input("* Please enter sex for this individual: "))
+            handedness = str(input(" *Please enter handedness for this individual: "))
             crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
             print(crab_id)
             head_true = True
@@ -184,6 +173,9 @@ if os.path.isfile("results/" + video_name):
 else:
     print(video_name, "No, file does not exists")
     head_true = True
+    species = str(input("* Please enter species name for this individual: "))
+    sex = str(input("* Please enter sex for this individual: "))
+    handedness = str(input(" *Please enter handedness for this individual: "))
     crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
     print(crab_id)
     methods.data_writer(args["video"], info_video, head_true)
