@@ -34,7 +34,7 @@ local_creation, creation = methods.get_file_creation(args["video"])
 # Set frame where video should start to be read
 vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
 
-if target_frame > vid_duration:
+if target_frame > length_vid:
     print("You have provided a time beyond the video duration.\n"
           "Video duration is {} seconds".format(round(vid_duration, 2)))
     sys.exit("Crabspy halted")
