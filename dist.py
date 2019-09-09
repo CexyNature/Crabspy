@@ -147,13 +147,14 @@ for i in info:
 
 if os.path.isfile("results/" + video_name):
     try:
-        methods.CrabNames.open_crab_names(info_video)
+        database = methods.CrabNames.open_crab_names(info_video)
         # target_name = video_name + "_" + name
         print("I am looking this crab name in the database: ", name)
-        if name in methods.CrabNames.get_crab_names("results/" + video_name ):
+
+        if name in methods.CrabNames.get_crab_names("results/" + video_name):
             print("Yes, file exists and crab name found")
 
-            database = methods.CrabNames.open_crab_names(info_video)
+            # database = methods.CrabNames.open_crab_names(info_video)
             for i in database:
                 if i.crab_name == name:
                     head_true = False
@@ -170,14 +171,16 @@ if os.path.isfile("results/" + video_name):
 
 
         else:
+            print("Crab name not found in database")
             species = str(input("* Please enter species name for this individual: "))
             sex = str(input("* Please enter sex for this individual: "))
             handedness = str(input(" *Please enter handedness for this individual: "))
             crab_id = methods.CrabNames(name, str(crab_center), species, sex, handedness)
             print(crab_id)
             head_true = True
-            print("No, file exists and crab name was not found")
+            # print("No, file exists and crab name was not found")
             methods.data_writer(args["video"], info_video, head_true)
+
     except (TypeError, RuntimeError):
         pass
 # if not os.path.isfile("results" + video_name):
@@ -196,17 +199,9 @@ methods.CrabNames.save_crab_names(methods.CrabNames.instances, info_video)
 # methods.data_writer(args["video"], info_video, head_true)
 # result_file.close()
 
-# if name in methods.CrabNames.get_crab_names("results/GP010016"):
-#     print("head_true set to False")
-#     head_true = False
-# else:
-#     head_true = True
-#     print("head_true set to True")
-
-
 start, end, step, _, _ = methods.frame_to_time(info_video)
-print("The video recording was started at: ", start, "\nThe video recording was ended at: ", end,
-      "\nThis information might not be precise as it depends on your computer file system")
+print("Recording was started at: ", start, "\nRecording was ended at: ", end,
+      "\nThis information might not be precise as it depends on your computer file system, and file meta information")
 
 while vid.isOpened():
     _, img = vid.read()
@@ -522,8 +517,8 @@ while vid.isOpened():
 
     percentage_vid = (target_frame + counter) / length_vid * 100
     text = "Video {0:.1f} %".format(percentage_vid)
-    cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
-    cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 1)
+    cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+    cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
     # counter_f += 1
     # print("Frame count ", counter_f)
