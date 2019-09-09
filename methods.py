@@ -501,12 +501,12 @@ class CrabNames(object):
         else:
             filename = info_video
         file = open(filename, "rb")
-        temp_dict = pickle.load(file)
-        for instances in temp_dict:
-            # print(instances.crab_name)
-            res = instances.crab_name
-        file.close()
-        return res
+        temp_list = pickle.load(file)
+        temp_names_list = []
+        for i in temp_list:
+            temp_names_list.append(i.crab_name)
+
+        return temp_names_list
 
     __repr__ = __str__
 
