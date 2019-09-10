@@ -422,8 +422,8 @@ def data_writer(video_path, info_video, head_true):
                         info_video["tracker"]])
             wr.writerow(["\n"])
             wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
-                         "Crab_ID", "Crab_position_x", "Crab_position_y", "Species", "Sex", "Handedness",
-                         "Width", "Height", "Area"])
+                         "Crab_ID", "Crab_position_x", "Crab_position_y", "Crab_position_cx", "Crab_position_cy",
+                         "Species", "Sex", "Handedness", "Width", "Height", "Area"])
 
     if not head_true:
         # save track_info to file
@@ -432,6 +432,7 @@ def data_writer(video_path, info_video, head_true):
 
             wr.writerow([info_video["Frame"], info_video["Time_absolute"], info_video["Time_since_start"],
                          info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"],
+                         info_video["Crab_Position_cx"], info_video["Crab_Position_cy"],
                          info_video["Species"], info_video["Sex"], info_video["Handedness"],
                          info_video["Width"], info_video["Height"], info_video["Area"]])
 

@@ -262,7 +262,7 @@ while vid.isOpened():
     if ok:
         p1 = (int(bbox[0]), int(bbox[1]))
         p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-        # cv2.rectangle(result, p1, p2, (204, 204, 100), 2)
+        cv2.rectangle(result, p1, p2, (204, 204, 100), 2)
         cv2.rectangle(masked, p1, p2, (204, 204, 0))
         # cv2.circle(result, (180,180), 3, (0, 204, 100), 3)
 
@@ -428,7 +428,7 @@ while vid.isOpened():
         # if (cx, cy) is not None:
         cv2.circle(result, (cx, cy), 3, (240, 240, 255), -1)
         cv2.circle(result, (cx, cy), 20, (180, 210, 10), 1)
-        print(cx, cy)
+        # print(cx, cy)
 
     crab_size = cv2.Canny(blob, threshold1=100, threshold2=200)
     _, cnts_size, _ = cv2.findContours(crab_size, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -503,6 +503,8 @@ while vid.isOpened():
                 methods.CompileInformation("Crab_ID", name),
                 methods.CompileInformation("Crab_Position_x", ""),
                 methods.CompileInformation("Crab_Position_y", ""),
+                methods.CompileInformation("Crab_Position_cx", ""),
+                methods.CompileInformation("Crab_Position_cy", ""),
                 methods.CompileInformation("Counter", counter),
                 methods.CompileInformation("Species", species),
                 methods.CompileInformation("Sex", sex),
@@ -519,6 +521,8 @@ while vid.isOpened():
                 methods.CompileInformation("Crab_ID", name),
                 methods.CompileInformation("Crab_Position_x", center[0]),
                 methods.CompileInformation("Crab_Position_y", center[1]),
+                methods.CompileInformation("Crab_Position_cx", cx),
+                methods.CompileInformation("Crab_Position_cy", cy),
                 methods.CompileInformation("Counter", counter),
                 methods.CompileInformation("Species", species),
                 methods.CompileInformation("Sex", sex),
