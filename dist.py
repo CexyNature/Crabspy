@@ -262,7 +262,7 @@ while vid.isOpened():
     if ok:
         p1 = (int(bbox[0]), int(bbox[1]))
         p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-        cv2.rectangle(result, p1, p2, (204, 204, 100), 2)
+        # cv2.rectangle(result, p1, p2, (204, 204, 100), 2)
         cv2.rectangle(masked, p1, p2, (204, 204, 0))
         # cv2.circle(result, (180,180), 3, (0, 204, 100), 3)
 
@@ -420,6 +420,15 @@ while vid.isOpened():
         labeled_img[label_hue == 0] = 0
         cv2.imshow('labeled.png', labeled_img)
 
+        M_blob = cv2.moments(blob)
+        Mx_blob = int(M_blob["m10"] / M_blob["m00"])
+        My_blob = int(M_blob["m01"] / M_blob["m00"])
+        cx = Mx_blob + int(bbox[0])
+        cy = My_blob + int(bbox[1])
+        # if (cx, cy) is not None:
+        cv2.circle(result, (cx, cy), 3, (240, 240, 255), -1)
+        cv2.circle(result, (cx, cy), 20, (180, 210, 10), 1)
+        print(cx, cy)
 
     crab_size = cv2.Canny(blob, threshold1=100, threshold2=200)
     _, cnts_size, _ = cv2.findContours(crab_size, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
