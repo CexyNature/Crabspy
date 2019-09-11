@@ -8,6 +8,13 @@ import cv2
 import os
 from skimage import feature, exposure
 
+import numpy as np # linear algebra
+import json
+from matplotlib import pyplot as plt
+from skimage import color
+from skimage.feature import hog
+from sklearn import svm
+from sklearn.metrics import classification_report,accuracy_score
 
 def main():
     # img_res = "results/snapshots/GP010016_HOG/GP010016_right_defender"
@@ -34,7 +41,7 @@ def main():
         fullpath = os.path.join(img_res, 'hog_' + img)
         # misc.imsave(fullpath, new_hog)
 
-        new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 20))
+        # new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 20))
         cv2.imshow("Original", frame)
         cv2.imshow("HSL", hsl)
         cv2.imshow("Sat", two)
