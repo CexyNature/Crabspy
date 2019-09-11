@@ -79,7 +79,7 @@ cv2.destroyAllWindows()
 # From warp.py
 # fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20, detectShadows=False)
 # fgbg2 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=100)
-fgbg3 = cv2.createBackgroundSubtractorKNN(history=120, dist2Threshold=250)
+fgbg3 = cv2.createBackgroundSubtractorKNN(history=5000, dist2Threshold=250)
 for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
 for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7,7))
 
