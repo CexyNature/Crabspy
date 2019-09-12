@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Module for tracking one individual in a video using the mouse pointer.
+Consult and prune database
 """
 
 import pickle
