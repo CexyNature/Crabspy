@@ -101,26 +101,6 @@ def click(event, x, y, flags, param):
     if event == cv2.EVENT_MOUSEMOVE:
         posmouse = (x, y)
 
-
-#####
-
-# # Set up tracker.
-# # Instead of MIL, you can also use
-# # BOOSTING, MIL, KCF, TLD, MEDIANFLOW or GOTURN
-# # tracker = cv2.Tracker_create("BOOSTING")
-# # tracker = cv2.TrackerBoosting_create()
-# # tracker = cv2.TrackerMedianFlow_create()
-# tracker = cv2.TrackerMIL_create()
-# # tracker = cv2.TrackerKCF_create()
-# # print(tracker)
-# # Define an initial bounding box
-# # bbox = (650, 355, 25, 25)
-# bbox = cv2.selectROI("tracking select", frame, fromCenter=False)
-# crab_center = (int(bbox[0] + bbox[2] / 2), int(bbox[1] + bbox[3] / 2))
-# print(crab_center)
-# # Initialize tracker with first frame and bounding box
-# ok = tracker.init(frame, bbox)
-
 # initialize the list of tracked points, the frame counter,
 # and the coordinate deltas
 pts = deque(maxlen=100000)
@@ -130,8 +110,6 @@ posy = deque(maxlen=constant.DECK)
 counter = 0
 (dX, dY) = (0, 0)
 startTime = datetime.now()
-
-# cv2.destroyAllWindows()
 
 # From warp.py
 fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20)
@@ -233,11 +211,8 @@ while vid.isOpened():
 
     if img is None:
         break
-
     else:
-
         if pause:
-
             while True:
                 # posmouse = (0, 0)
                 key2 = cv2.waitKey(1) & 0xff
@@ -245,7 +220,6 @@ while vid.isOpened():
                 cv2.setMouseCallback('Manual tracking', click)
                 result = cv2.warpPerspective(img, M, (side, side))
                 cv2.imshow('Manual tracking', result)
-
                 if key2 == ord('p'):
                     pause = False
                     break
