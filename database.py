@@ -1,5 +1,15 @@
+#!/usr/bin/env python3
+
+"""
+Module for tracking one individual in a video using the mouse pointer.
+"""
+
 import pickle
 import methods
+
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
 
 prune = True
 video_name = "GP010016_fast"
