@@ -6,16 +6,20 @@ import numpy as np
 from skimage import color
 from sklearn import svm
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+import pickle
+from datetime import datetime
 
+time_start = datetime.now()
 hog_images = []
 hog_features =[]
+model_name = "handedness_model.sav"
 
 # img_path = "results/snapshots/GP010016/GP010016_right_defender"
 img_path = "results/snapshots/SVM_LR"
 left = np.array(("left"))
-left = np.repeat(left, 990)
+left = np.repeat(left, 1162)
 right = np.array(("right"))
-right = np.repeat(right, 1389)
+right = np.repeat(right, 1272)
 labels = np.hstack((left, right))
 
 for img in os.listdir(img_path):
@@ -50,6 +54,10 @@ for img in os.listdir(img_path):
     # if key == 27:
     #     break
 
+print("Calculation of HOG images finalized.\n"
+      "Starting SVM training")
+print("Time elapsed: {}".format(datetime.now()-time_start))
+
 clf = svm.SVC(gamma="scale")
 hog_features = np.array(hog_features)
 labels = labels.reshape(len(labels),1)
@@ -66,7 +74,11 @@ x_train, x_test = data_frame[:partition,:-1],  data_frame[partition:,:-1]
 y_train, y_test = data_frame[:partition,-1:].ravel() , data_frame[partition:,-1:].ravel()
 
 clf.fit(x_train,y_train)
+print("Training finished. Saving the model.")
+print("Time elapsed: {}".format(datetime.now()-time_start))
+pickle.dump(clf, open(model_name, 'wb'))
 
+print("Starting prediction")
 y_pred = clf.predict(x_test)
 
 print("Accuracy: "+ str(accuracy_score(y_test, y_pred)))
@@ -74,3 +86,4 @@ print('\n')
 print(classification_report(y_test, y_pred))
 print('########### ############')
 print(confusion_matrix(y_test, y_pred))
+print("Time elapsed: {}".format(datetime.now()-time_start))
