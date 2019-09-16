@@ -26,6 +26,7 @@ ap.add_argument("-s", "--seconds", default=None,
 ap.add_argument("-z", "--zoom", default=1.5, type=float, help="Provide zoom factor e.g. zoom out 0.5, zoom in 2")
 args = vars(ap.parse_args())
 
+current_time = time.strftime("%d%m%Y") + "_" + time.strftime("%H%M")
 
 def save_measures(video_path, info_capture, head_true):
     """
@@ -56,7 +57,7 @@ def save_measures(video_path, info_capture, head_true):
     # create file name with name
     name = os.path.basename(video_path)
     vid_name, file_extension = os.path.splitext(name)
-    name_result_file = "results/measures/" + vid_name + "_measures_" +  time.strftime("%d%m%Y") + "_" + time.strftime("%H%M") + ".csv"
+    name_result_file = "results/measures/" + vid_name + "_measures_" + current_time + ".csv"
 
     if head_true:
         with open(name_result_file, "w", newline="\n") as result_file:
