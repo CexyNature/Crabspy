@@ -178,7 +178,7 @@ if os.path.isfile("results/" + video_name):
             species = str(input("* Please enter species name for this individual: "))
             sex = str(input("* Please enter sex for this individual: "))
             handedness = str(input(" *Please enter handedness for this individual: "))
-            crab_id = methods.CrabNames(name, str("Manual_tracking"), species, sex, handedness)
+            crab_id = methods.CrabNames(name, str("NULL (This is a Manual_tracking)"), species, sex, handedness)
             print(crab_id)
             head_true = True
             methods.data_writer(args["video"], info_video, head_true)
