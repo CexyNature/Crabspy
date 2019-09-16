@@ -414,16 +414,15 @@ def data_writer(video_path, info_video, head_true):
             time_now = time.strftime("%H%M")
             wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
                          "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
-                         "projected_q_side", "q_conversion_factor_distance", "tracker_method"])
+                         "projected_q_side", "q_conversion_factor_distance"])
 
             wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
                         info_video["target_frame"], quadratpts[0], quadratpts[1],
-                        quadratpts[2], quadratpts[3], info_video["side"], info_video["conversion"],
-                        info_video["tracker"]])
+                        quadratpts[2], quadratpts[3], info_video["side"], info_video["conversion"]])
             wr.writerow(["\n"])
             wr.writerow(["Frame_number", "Time_absolute", "Time_lapsed_since_start(secs)",
                          "Crab_ID", "Crab_position_x", "Crab_position_y", "Crab_position_cx", "Crab_position_cy",
-                         "Species", "Sex", "Handedness", "Width", "Height", "Area"])
+                         "Species", "Sex", "Handedness", "Width", "Height", "Area", "tracker_method"])
 
     if not head_true:
         # save track_info to file
@@ -434,7 +433,7 @@ def data_writer(video_path, info_video, head_true):
                          info_video["Crab_ID"], info_video["Crab_Position_x"], info_video["Crab_Position_y"],
                          info_video["Crab_Position_cx"], info_video["Crab_Position_cy"],
                          info_video["Species"], info_video["Sex"], info_video["Handedness"],
-                         info_video["Width"], info_video["Height"], info_video["Area"]])
+                         info_video["Width"], info_video["Height"], info_video["Area"], info_video["tracker"]])
 
     # return result_file
 
