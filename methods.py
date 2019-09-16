@@ -609,7 +609,7 @@ def multi_target_track(vid, resize = True, type_tracker = "MIL", number=2):
 
     return  multitrackers
 
-def select_color():
+def select_color(n):
 
     """
 
@@ -628,9 +628,12 @@ def select_color():
                  "best_color": (230,191,0),
                  "phytoalgae": (0,102,102),
                  "kid_diaper": (204,255,213),
-                 "worker_blue": (102,51,0)}
+                 "worker_blue": (102,51,0),
+                 "rose_pas": (109, 85, 248),
+                 "ss": (192,0,153),
+                 "d2d": (192,208,8)}
 
-    return random.choice(list(MY_COLORS.items()))
+    return random.sample(list(MY_COLORS.items()), n)
 
 
 
