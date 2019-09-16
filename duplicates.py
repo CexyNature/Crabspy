@@ -18,4 +18,13 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-f", "--file", default="tracking_file.csv", help="Provide video name")
 args = vars(ap.parse_args())
 
-video_name = os.path.splitext(args["video"])[0]
+video_name = os.path.splitext(args["video"])[0].format()
+
+
+# Find overlapping frames
+# Count how many sections overlap
+# Find the tracking method used for each section
+# Plot overlapping sections side by side
+# Request user to select one
+# Keep selection and delete overlap
+
