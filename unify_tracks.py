@@ -46,7 +46,8 @@ for f in my_files:
         df_m["Individual"] = f
         tracks_meta.append(df_m)
     else:
-        print("Duplicate positions for a specific time were found in file associated to {}".format(f))
+        print("Duplicate positions were found in file: {}".format(f),
+              "Please run the script 'fixing_duplicates'")
 
 # print(len(tracks))
 # print(tracks[0].shape)
