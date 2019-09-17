@@ -51,47 +51,51 @@ target = 1
 vid.set(1, target)
 counter = target
 # color1 = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
-name_color, color1 = methods.select_color()
+color1 = methods.select_color(1)
 # print(name_color)
 
 
 while vid.isOpened():
-    _, img = vid.read()
-    result = cv2.warpPerspective(img, M, (side, side))
-    result2 = result.copy()
+    ret, img = vid.read()
 
-    if counter <= len(track.index)-1:
+    if ret:
+        result = cv2.warpPerspective(img, M, (side, side))
+        result2 = result.copy()
 
-        try:
-            # print(counter, track["Frame_number"].values[counter])
-            # coord_x = int(track["Crab_position_x"].iloc[[counter-15, counter+15]].mean())
-            # coord_y = int(track["Crab_position_y"].iloc[[counter-15, counter+15]].mean())
-            coord_x = int(track["Crab_position_x"].values[counter])
-            coord_y = int(track["Crab_position_y"].values[counter])
-            center = (coord_x, coord_y)
-            pts.appendleft(center)
+        if counter <= len(track.index)-1:
 
-            for i in np.arange(1, len(pts)):
-                cv2.line(result, pts[i - 1], pts[i], color1, 1)
-                cv2.circle(result, (coord_x, coord_y), 15, color1, 2)
-        except (ValueError, IndexError):
+            try:
+                # print(counter, track["Frame_number"].values[counter])
+                # coord_x = int(track["Crab_position_x"].iloc[[counter-15, counter+15]].mean())
+                # coord_y = int(track["Crab_position_y"].iloc[[counter-15, counter+15]].mean())
+                coord_x = int(track["Crab_position_x"].values[counter])
+                coord_y = int(track["Crab_position_y"].values[counter])
+                center = (coord_x, coord_y)
+                pts.appendleft(center)
+
+                for i in np.arange(1, len(pts)):
+                    cv2.line(result, pts[i - 1], pts[i], color1[0][1], 1)
+                    cv2.circle(result, (coord_x, coord_y), 15, color1[0][1], 2)
+            except (ValueError, IndexError):
+                pass
+        else:
             pass
+
+        percentage_vid = counter/track_meta["length_video"].values[0]*100
+        text = "Video {0:.1f} %".format(percentage_vid)
+        cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+        cv2.putText(result, "Frame n. {0:d}".format(counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+
+        result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
+
+
+        cv2.imshow("result", result2)
+        counter += 1
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == 27:
+            break
     else:
-        pass
-
-    percentage_vid = counter/track_meta["length_video"].values[0]*100
-    text = "Video {0:.1f} %".format(percentage_vid)
-    cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
-    cv2.putText(result, "Frame n. {0:d}".format(counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
-
-    result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
-
-
-    cv2.imshow("result", result2)
-    counter += 1
-
-    key = cv2.waitKey(1) & 0xFF
-    if key == 27:
         break
 
 vid.release()
