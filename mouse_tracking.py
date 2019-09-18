@@ -427,9 +427,9 @@ while vid.isOpened():
                     (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
         cv2.imshow('Manual tracking', result)
-        cv2.imshow("background substraction", fb_res_two3)
+        # cv2.imshow("background substraction", fb_res_two3)
         cv2.imshow("masked", masked)
-        cv2.imshow("result", result)
+        # cv2.imshow("result", result)
 
         counter += 1
 
