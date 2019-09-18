@@ -22,7 +22,7 @@ args = vars(ap.parse_args())
 
 # video_name = os.path.splitext(args["video"])[0].format()
 track = pd.read_csv("results/" + args["file"], header=2, skiprows=range(0, 1))
-track_meta = pd.read_csv("results/" + args["file"], header=None, nrows=2)
+track_meta = pd.read_csv("results/" + args["file"], header=None, nrows=4)
 duplicates = track[track.duplicated(["Frame_number"], keep=False)]
 
 # Find overlapping frames
@@ -66,6 +66,7 @@ else:
 # print(track.shape)
 track = track.drop(index_2_del)
 # print(track.shape)
+print(track_meta.head())
 
 os.makedirs("results/processed_tracks/", exist_ok=True)
 
@@ -78,12 +79,11 @@ track.to_csv(new_file, index=False)
 meta_information = track_meta.values.tolist()
 print(meta_information)
 print("######################## ##################### ################")
-empty = list()
 
 with open(new_file, "r") as result_in:
     reader = list(csv.reader(result_in))
     # print(reader[:10])
-    reader.insert(0, empty)
+    reader.insert(0, meta_information[2])
     reader.insert(0, meta_information[1])
     reader.insert(0, meta_information[0])
     # print(reader[:10])
