@@ -13,6 +13,7 @@ import sys
 from datetime import datetime
 from statistics import mean
 import math
+import time
 
 import methods
 import constant
@@ -27,6 +28,7 @@ ap.add_argument("-s", "--seconds", default=None,
                 help="Provide the targeted time in seconds of video section you want to jump to")
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
+ap.add_argument("-t", "--timesleep", default=0, type=float, help="Provide time in seconds to wait before showing next frame")
 # ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
@@ -426,11 +428,12 @@ while vid.isOpened():
         cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter),
                     (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
-        cv2.imshow('Manual tracking', result)
+
         # cv2.imshow("background substraction", fb_res_two3)
         cv2.imshow("masked", masked)
+        cv2.imshow('Manual tracking', result)
         # cv2.imshow("result", result)
-
+        time.sleep(args["timesleep"])
         counter += 1
 
         key = cv2.waitKey(1) & 0xFF
