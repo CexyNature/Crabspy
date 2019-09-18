@@ -121,7 +121,7 @@ def read_video(video_path):
     return videoname, vid, vid_length, vid_fps, vid_width, vid_height, vid_duration, vid_fourcc
 
 
-def set_video_star(vid, seconds, fps):
+def set_video_star(vid, seconds, frame, fps):
 
     """
     Calculates the frame where video stream should start.
@@ -133,6 +133,8 @@ def set_video_star(vid, seconds, fps):
         A video stream gotten using cv2.VideoCapture function.
     seconds:
         A time in seconds where user want to start video stream. Please observe default value is None.
+    frame:
+        Frame number where user want to start video stream.
     fps:
         A frame rate per second. It is used to multiply target time in seconds.
 
@@ -144,8 +146,15 @@ def set_video_star(vid, seconds, fps):
         an integer representing the frame number where video stream should start
     """
 
-    if seconds is None:
+    if seconds is None and frame is None:
         target_frame = 1
+
+    elif seconds is None and frame is not None:
+        target_frame = frame
+
+    elif seconds is not None and frame is not None:
+        target_frame = frame
+
     else:
         target_frame = int(int(seconds) * fps)
 

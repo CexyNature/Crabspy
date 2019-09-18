@@ -24,7 +24,9 @@ __license__ = "GNU GPL"
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", default="GP010016.mov", help="Provide path to video file")
 ap.add_argument("-s", "--seconds", default=None,
-                help="Provide time in seconds of target video section showing the key points")
+                help="Provide the targeted time in seconds of video section you want to jump to")
+ap.add_argument("-f", "--frame", default=None, type=int,
+                help="Provide the targeted frame of video section you want to jump to")
 # ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
@@ -32,7 +34,7 @@ args = vars(ap.parse_args())
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
 local_creation, creation = methods.get_file_creation(args["video"])
 # Set frame where video should start to be read
-vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
+vid, target_frame = methods.set_video_star(vid, args["seconds"], args["frame"], fps)
 
 if target_frame > length_vid:
     print("You have provided a time beyond the video duration.\n"
