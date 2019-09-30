@@ -122,7 +122,7 @@ def mouse_do_nothing(*args, **kwargs):
 print('Loading video, please wait')
 _, vid, length_vid, fps, vid_width, vid_height, vid_duration, _ = methods.read_video(args["video"])
 # Set frame where video should start to be read
-vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
+vid, target_frame = methods.set_video_star(vid, args["seconds"], None, fps)
 print('Total number of frames in video = ' + str(length_vid))
 
 print('\n' '(1) Use the bar to navigate through frames. Click, hold and move bar marker using the mouse pointer.',
