@@ -47,6 +47,9 @@ SNAPSHOT: bool
     If True snapshots (one per frame) from tracked individual will be saved inside directory /results/snapshot/VIDEO-FILE-NAME/INDIVIDUAL-NAME/
     If False snapshots will not be saved.
 
+RESIZE: numeric
+    Resize value for applying to image.
+    Value equal one (1) will conserve original image's dimension.
 """
 
 DIM = [80, 80, 80, 80]
@@ -60,3 +63,4 @@ ERODE = (3, 3)
 DILATE = (7, 5)
 DECK = 10
 SNAPSHOT = True
+RESIZE = 1
