@@ -41,12 +41,12 @@ if target_frame > length_vid:
           "Video duration is {} seconds".format(round(vid_duration, 2)))
     sys.exit("Crabspy halted")
 
-
+resz_val = constant.RESIZE
 
 
 while vid.isOpened():
     ret, frame = vid.read()
-
+    frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
     methods.enable_point_capture(constant.CAPTURE_VERTICES)
     frame = methods.draw_points_mousepos(frame, methods.quadratpts, methods.posmouse)
     cv2.imshow("Vertices selection", frame)
@@ -70,6 +70,7 @@ mini = np.amin(vertices_draw, axis=0)
 maxi = np.amax(vertices_draw, axis=0)
 
 ok, frame = vid.read()
+frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
 frame = cv2.warpPerspective(frame, M, (side, side))
 
 if not ok:
@@ -216,7 +217,7 @@ print("Recording was started at: ", start, "\nRecording was ended at: ", end,
 while vid.isOpened():
     ret, img = vid.read()
     # print(img.shape)
-    # img = cv2.resize(img, (640,400))
+    img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
 
     if ret:
         crop_img = img[mini[1]-10:maxi[1]+10, mini[0]-10:maxi[0]+10]
@@ -293,7 +294,7 @@ while vid.isOpened():
             for i in info:
                 info_video[i.name] = i.value
 
-            crab = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+            crab = crab_frame[center[1] - int(bbox[2]):center[1] + int(bbox[2]), center[0] - int(bbox[3]):center[0] + int(bbox[3])]
             crab_snapshot = crab.copy()
             # crab = masked[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
             # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
@@ -405,7 +406,7 @@ while vid.isOpened():
 
             # Back transform and show tracker and data in original image
 
-        blob = fb_res_two3[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+        blob = fb_res_two3[center[1] - int(bbox[2]):center[1] + int(bbox[2]), center[0] - int(bbox[2]):center[0] + int(bbox[2])]
         ret, blob = cv2.threshold(blob, 150, 255, cv2.THRESH_BINARY)
         output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
         num_labels = output[0]
@@ -427,8 +428,8 @@ while vid.isOpened():
             M_blob = cv2.moments(blob)
             Mx_blob = int(M_blob["m10"] / M_blob["m00"])
             My_blob = int(M_blob["m01"] / M_blob["m00"])
-            cx = Mx_blob + int(bbox[0])
-            cy = My_blob + int(bbox[1])
+            cx = Mx_blob + int(bbox[0] - int(bbox[2]/2))
+            cy = My_blob + int(bbox[1] - int(bbox[3]/2))
             # if (cx, cy) is not None:
             cv2.circle(result, (cx, cy), 3, (240, 240, 255), -1)
             cv2.circle(result, (cx, cy), 20, (180, 210, 10), 1)
