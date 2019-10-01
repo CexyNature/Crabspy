@@ -27,13 +27,15 @@ ap.add_argument("-v", "--video", default="VIRB0037-3.MP4", help="Provide path to
 ap.add_argument("-s", "--seconds", default=640,
                 help="Provide time in seconds of target video section showing the key points")
 ap.add_argument("-n", "--nth_frame", default=12, help="Number of frames to skip")
+ap.add_argument("-f", "--frame", default=None, type=int,
+                help="Provide the targeted frame of video section you want to jump to")
 ap.add_argument("-t", "--tracking_mode", default="single", help="Choose either 'single' or 'multiple' trackers")
 args = vars(ap.parse_args())
 
 tracking_mode = args["tracking_mode"]
 
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
-vid, target_frame = methods.set_video_star(vid, args["seconds"], fps)
+vid, target_frame = methods.set_video_star(vid, args["seconds"], args["frame"], fps)
 
 if tracking_mode == "single":
     tracker, _ = methods.single_target_track(vid)
