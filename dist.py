@@ -217,9 +217,10 @@ print("Recording was started at: ", start, "\nRecording was ended at: ", end,
 while vid.isOpened():
     ret, img = vid.read()
     # print(img.shape)
-    img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
+
 
     if ret:
+        img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
         crop_img = img[mini[1]-10:maxi[1]+10, mini[0]-10:maxi[0]+10]
 
         result = cv2.warpPerspective(img, M, (side, side))
