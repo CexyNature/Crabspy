@@ -64,14 +64,14 @@ print(crab_colors)
 dict_ind = dict(tuple(tracks.groupby("Crab_ID")))
 # for i in individuals:
 #     print(len(dict_ind[i]))
-f_number = dict(tuple(tracks.groupby("Crab_frame")))
+f_number = dict(tuple(tracks.groupby("Frame_number")))
 # for i in range(0, 1):
 #     # print(len(f_number[i]))
 #     df = f_number[i]
 #     for index, row in df.iterrows():
 #         print(row["x_coord"], row["y_coord"])
 
-f_max = tracks["Crab_frame"].max()
+f_max = tracks["Frame_number"].max()
 # print(f_max)
 
 while vid.isOpened():
@@ -84,13 +84,19 @@ while vid.isOpened():
         if counter <= f_max:
 
             df_f = f_number[counter]
-            for index, row in df_f.iterrows():
-                crab = row["Crab_ID"]
-                x = int(row["x_coord"]/conversion)
-                y = int(row["y_coord"]/conversion)
-                bgr = crab_colors[crab][1]
-                cv2.circle(result, (x, y), 15, bgr, 2)
 
+
+            for index, row in df_f.iterrows():
+
+                try:
+                    crab = row["Crab_ID"]
+                    x = int(row["Crab_position_x"])
+                    y = int(row["Crab_position_y"])
+                    bgr = crab_colors[crab][1]
+                    cv2.circle(result, (x, y), 15, bgr, 2)
+                    print(crab, x, row["Crab_position_x"], y, row["Crab_position_y"], bgr)
+                except ValueError:
+                    pass
             # try:
             #     # print(counter, track["Frame_number"].values[counter])
             #     # coord_x = int(track["Crab_position_x"].iloc[[counter-15, counter+15]].mean())
