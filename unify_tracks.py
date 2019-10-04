@@ -52,7 +52,7 @@ for f in my_files:
 # print(len(tracks))
 # print(tracks[0].shape)
 tracks_unify = pd.concat(tracks)
-tracks_meta_unify = pd.concat(tracks_meta)
+tracks_meta_unify = pd.concat(tracks_meta, sort=True)
 # print(len(tracks_unify))
 # print(tracks_unify.shape)
 os.makedirs("results/unified_tracks/", exist_ok=True)
