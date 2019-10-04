@@ -94,7 +94,7 @@ while vid.isOpened():
                     y = int(row["Crab_position_y"])
                     bgr = crab_colors[crab][1]
                     cv2.circle(result, (x, y), 15, bgr, 2)
-                    print(crab, x, row["Crab_position_x"], y, row["Crab_position_y"], bgr)
+                    # print(crab, x, row["Crab_position_x"], y, row["Crab_position_y"], bgr)
                 except ValueError:
                     pass
             # try:
