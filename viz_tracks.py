@@ -58,7 +58,7 @@ counter = target
 individuals = tracks.Crab_ID.unique()
 colours = methods.select_color(len(individuals))
 crab_colors = dict(zip(individuals, colours))
-print(crab_colors)
+print("\n".join("{}\t{}".format(k, v) for k, v in crab_colors.items()))
 
 # print(individuals)
 dict_ind = dict(tuple(tracks.groupby("Crab_ID")))
