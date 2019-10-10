@@ -104,6 +104,14 @@ start, end, step, _, _ = methods.frame_to_time(info_video)
 print("Recording was started at: ", start, "\nRecording was ended at: ", end,
       "\nThis information might not be precise as it depends on your computer file system, and file meta information")
 
+
+os.makedirs("results/processed_videos/", exist_ok=True)
+file_blob = "results/processed_videos/" + video_name + "_blob.avi"
+file_mask = "results/processed_videos/" + video_name + "_mask.avi"
+out_blob = cv2.VideoWriter(file_blob, cv2.VideoWriter_fourcc('M','J','P','G'), fps, (side, side))
+out_mask = cv2.VideoWriter(file_mask, cv2.VideoWriter_fourcc('M','J','P','G'), fps, (side, side))
+
+
 while vid.isOpened():
     _, img = vid.read()
 
@@ -133,6 +141,12 @@ while vid.isOpened():
         cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
         cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter), (10, 40),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+
+        model_32 = cv2.cvtColor(model, cv2.COLOR_GRAY2BGR)
+
+        out_blob.write(model_32)
+        out_mask.write(masked)
+
         cv2.imshow("original", result)
         cv2.imshow("model", model)
         cv2.imshow("result", masked)
