@@ -639,7 +639,11 @@ def select_color(n):
                  "worker_blue": (102,51,0),
                  "rose_pas": (109, 85, 248),
                  "ss": (192,0,153),
-                 "d2d": (192,208,8)}
+                 "d2d": (192,208,8),
+                 "black": (0, 0, 0),
+                 "#d3d25f": (95, 210, 210),
+                 "gray01": (100, 100, 100),
+                 "dark_gray": (50, 50, 50)}
 
     return random.sample(list(MY_COLORS.items()), n)
 
