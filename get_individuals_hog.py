@@ -4,6 +4,7 @@
 Module for assessing handedness in male crabs"
 """
 
+import argparse
 import cv2
 import os
 from skimage import feature, exposure
@@ -16,11 +17,16 @@ from skimage.feature import hog
 from sklearn import svm
 from sklearn.metrics import classification_report,accuracy_score
 
+ap = argparse.ArgumentParser()
+ap.add_argument("-v", "--video", help="Provide path to video file")
+ap.add_argument("-c", "--crab_id", help="Provide a name for the crab to be tracked")
+args = vars(ap.parse_args())
+
+
 def main():
-    # img_res = "results/snapshots/GP010016_HOG/GP010016_right_defender"
-    img_res = "results/snapshots/GP010016_HOG/GP010016_left_wandering"
-    # img_path = "results/snapshots/GP010016/GP010016_right_defender"
-    img_path = "results/snapshots/GP010016/GP010016_left_wandering"
+    videoname, _ = os.path.splitext(args["video"])
+    img_path = "results/snapshots/" + videoname + "/" + args["crab_id"]
+    img_res = "results/snapshots/" + videoname + "_HOG/" + args["crab_id"]
 
     for img in os.listdir(img_path):
         # print(img)
