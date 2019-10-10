@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Module for assessing handedness in male crabs"
+Module for get HOG from individual's pictures
 """
 
 import argparse
