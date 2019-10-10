@@ -67,6 +67,19 @@ Fork or clone. Set virtual environment. Type:
 python run.py
 ```
 
+## Code in Progress (yet not working as expected)
+
+- correct_hc.py
+- fast_track.py
+- draw_track.py
+- manual_tracking.py
+- scoop_feed.py
+- scoop_feed_v1.py
+- snaps_dict.py
+- svm_hog.py
+- test.py
+
+
 
 ## How to collaborate
 
