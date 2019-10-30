@@ -158,6 +158,8 @@ M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
 
 while True:
     key = cv2.waitKey(1) & 0XFF
+    selected_f = cv2.getTrackbarPos('Selector', 'Measure object length')
+    vid.set(1, selected_f)
     ret, frame = vid.read()
 
     frame = cv2.warpPerspective(frame, M, (side, side))
