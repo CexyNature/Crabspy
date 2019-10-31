@@ -125,6 +125,27 @@ _, vid, length_vid, fps, vid_width, vid_height, vid_duration, _ = methods.read_v
 vid, target_frame = methods.set_video_star(vid, args["seconds"], None, fps)
 print('Total number of frames in video = ' + str(length_vid))
 
+resz_val = constant.RESIZE
+while vid.isOpened():
+    ret, frame = vid.read()
+    frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
+    time.sleep(1)
+    methods.enable_point_capture(constant.CAPTURE_VERTICES)
+    frame = methods.draw_points_mousepos(frame, methods.quadratpts, methods.posmouse)
+    cv2.imshow("Vertices selection", frame)
+
+    if len(methods.quadratpts) == 4:
+        print("Vertices were captured. Coordinates in pixels are: top-left {}, top-right {}, "
+              "bottom-left {}, and bottom-right {}".format(*methods.quadratpts))
+        break
+
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
+        # print("Q - key pressed. Window quit by user")
+        break
+cv2.destroyAllWindows()
+
+
 print('\n' '(1) Use the bar to navigate through frames. Click, hold and move bar marker using the mouse pointer.',
       '\n' '(2) Once you have selected a frame press ESC to initialize measure.',
       '\n' '(3) Press key ''c'' to activate capture mode. Click and hold mouse left button to set measure starting point.',
