@@ -176,7 +176,7 @@ while True:
         bl, gr, re = cv2.split(new_img_bgr)
 
         canny = cv2.Canny(new_sat, 200, 255)
-        cnts, hierarchy = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        _, cnts, hierarchy = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cv2.drawContours(new_img_bgr, cnts, -1, (100, 250, 0), 3)
 
         #Li Threshold
