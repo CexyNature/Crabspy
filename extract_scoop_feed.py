@@ -81,8 +81,8 @@ if not ok:
 
 # Define an initial bounding box
 # bbox = (650, 355, 25, 25)
-bbox = cv2.selectROI('tracking select', frame, fromCenter=False)
-# bbox = (357, 431, 182, 108)
+# bbox = cv2.selectROI('tracking select', frame, fromCenter=False)
+bbox = (357, 431, 182, 108)
 
 print(bbox)
 cv2.destroyAllWindows()
@@ -171,33 +171,38 @@ while True:
                                       cells_per_block=(5, 5), transform_sqrt=False, visualize=True, multichannel=False)
         new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 10))
 
+
         # cv2.putText(crab_color, tag, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
         cv2.imshow("res", res)
         cv2.imshow("Crab color", crab_color)
         cv2.imshow("Crab color2", new_hog.astype("uint8")*255)
 
+        tag = tag_claw_up
+        cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
+        cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8") * 255)
 
-        counter += 1
         # time.sleep(0.5)
-
         # Exit if ESC pressed
         k = cv2.waitKey(1) & 0xff
         if k == 27:
             break
         elif k == ord("u"):
             tag = tag_claw_up
-            cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
-            cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8")*255)
+            # cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
+            # cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8")*255)
         elif k == ord("d"):
             tag = tag_claw_down
-            cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
-            cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8")*255)
+            # cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
+            # cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8")*255)
         else:
-            tag = "unknown"
+            tag = tag_claw_up
+        counter += 1
 
-# plt.draw()
-# plt.show()
+
+        cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
+        cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8") * 255)
+
 vid.release()
 cv2.destroyAllWindows()
 print(datetime.now() - startTime)
