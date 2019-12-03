@@ -1,3 +1,4 @@
+import argparse
 import cv2
 import os
 # from matplotlib import pyplot as plt
@@ -9,16 +10,20 @@ from sklearn.metrics import classification_report, accuracy_score, confusion_mat
 import pickle
 from datetime import datetime
 
+ap = argparse.ArgumentParser()
+ap.add_argument('-f', '--folder', default="VIRB0037-3", help='Provide path to video file')
+args = vars(ap.parse_args())
+
 time_start = datetime.now()
 hog_images = []
 hog_features =[]
 model_name = "scoop_feed_model.sav"
 
-img_path = "train_data/scoop_feed"
+img_path = "train_data/scoop_feed/" + args["folder"]
 claw_down = np.array(("claw_down"))
-claw_down = np.repeat(claw_down, 1162)
+claw_down = np.repeat(claw_down, 86)
 claw_up = np.array(("claw_up"))
-claw_up = np.repeat(claw_up, 1272)
+claw_up = np.repeat(claw_up, 133)
 labels = np.hstack((claw_down, claw_up))
 
 for img in os.listdir(img_path):
@@ -31,8 +36,9 @@ for img in os.listdir(img_path):
     # new_img = cv2.merge([new_sat, two, three])
     canny = cv2.Canny(new_sat, 200, 255)
     new_fd, new_hog = feature.hog(canny, orientations=9, pixels_per_cell=(20, 20), block_norm="L1",
-                                  cells_per_block=(3, 3), transform_sqrt=False, visualise=True, multichannel=False,
+                                  cells_per_block=(3, 3), transform_sqrt=False, visualize=True, multichannel=False,
                                   feature_vector=True)
+    print(new_fd.shape)
     new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 20))
     hog_images.append(new_hog)
     hog_features.append(new_fd)
