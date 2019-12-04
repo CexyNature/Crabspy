@@ -21,20 +21,10 @@ from skimage.future import graph
 from sklearn import svm
 from joblib import load
 
-import matplotlib.pyplot as plt
-from matplotlib import animation
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from matplotlib import colors
-import matplotlib.gridspec as gridspec
-import time
-
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
-
-clf = load("scoop_feed_model.sav")
 
 
 '''
@@ -45,6 +35,8 @@ ap.add_argument('-v', '--video', default="VIRB0037-3.MP4", help='Provide path to
 ap.add_argument('-s', '--seconds', default=640,
                 help='Provide time in seconds of target video section showing the key points')
 args = vars(ap.parse_args())
+
+clf = load("scoop_feed_model_v3.sav")
 
 # Read video
 # vid = cv2.VideoCapture(args['video'])
@@ -126,12 +118,6 @@ hull_list = []
 
 element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
 
-# fig = plt.figure()
-# grid = gridspec.GridSpec(ncols=2, nrows=2)
-# ax1 = fig.add_subplot(grid[:-1,:], projection = "3d")
-# ax2 = fig.add_subplot(grid[-1,:-1])
-# ax3 = fig.add_subplot(grid[-1,-1])
-
 while True:
     # Read a new frame
     ok, frame_ori = vid.read()
@@ -166,6 +152,12 @@ while True:
         # crab_color = frame[center[1] - 100:center[1] + 100, center[0] - 100:center[0] + 100]
         crab_red = red[center[1] - 100:center[1] + 100, center[0] - 100:center[0] + 100]
 
+        crab_ori = crab.copy()
+        crab = cv2.resize(crab, (200, 200), interpolation=cv2.INTER_CUBIC)
+        crab_color_ori = crab_color.copy()
+        crab_color = cv2.resize(crab_color, (200, 200), interpolation=cv2.INTER_CUBIC)
+
+
         opening = cv2.morphologyEx(crab, cv2.MORPH_OPEN, (11, 11))
         blur = cv2.GaussianBlur(opening, (5, 5), 0)
         blur1 = cv2.GaussianBlur(opening, (9, 9), 0)
@@ -189,89 +181,11 @@ while True:
         result = clf.predict(new_fd)[0]
         print(result)
 
-        # # RAG
-        # labels = segmentation.slic(opening, compactness=30, n_segments=200)
-        # edges = filters.sobel(opening)
-        # edges_rgb = color.gray2rgb(edges)
-        # g = graph.rag_boundary(labels, edges)
-        # lc = graph.show_rag(labels, g, edges_rgb, img_cmap=None, edge_cmap='viridis', edge_width=1.2)
-
-
-        # skel = np.zeros(crab.shape, np.uint8)
-        # eroded = cv2.erode(crab, element)
-        # dilated =cv2.dilate(eroded, element)
-        # result = cv2.subtract(crab, dilated)
-        # skel = cv2.bitwise_or(skel, result)
-
         pts.appendleft(center)
 
-        # cv2.imshow("Tracking", frame)
-        # cv2.imshow('Crab', crab)
-
-        # cv2.imshow('eroded', eroded)
-        # cv2.imshow('dilated', dilated)
-        # cv2.imshow('result', result)
-        # cv2.imshow('Skel', skel)
-
-        # cv2.imshow("opening", opening)
-        # cv2.imshow("blur", blur)
-        # cv2.imshow("th4", th4)
-        # cv2.imshow("th5", th5)
-        # cv2.imshow("image", image)
-        # cv2.imshow("skeleton", skeleton)
-
-
-        cv2.putText(crab_color, result, (10, 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 10), 1)
-        cv2.imshow("Crab color", crab_color)
         cv2.imshow("Crab color2", new_hog.astype("uint8")*255)
-        # cv2.imshow("Crab color3", new_gamma.astype("uint8")*255)
-        # cv2.imshow("Crab color3", new_log.astype("uint8")*255)
-        # cv2.imshow("Crab color3", new_sigmoid.astype("uint8")*255)
-        # cv2.imshow("Crab red", crab_red)
-
-        # crab_color2 = frame_norec[p1[1]:p2[1], p1[0]:p2[0]]
-        # hsv = cv2.cvtColor(crab_color2, cv2.COLOR_BGR2HSV)
-        # hsv = cv2.GaussianBlur(hsv, (21,21), 0)
-        # one, two, three = cv2.split(hsv)
-        #
-        # crab_color2 = cv2.cvtColor(crab_color2, cv2.COLOR_BGR2RGB)
-        # # one, two, three = cv2.split(crab_color2)
-        # crab_color2 = cv2.GaussianBlur(crab_color2, (21, 21), 0)
-        # pixel_colors = crab_color2.reshape((np.shape(crab_color2)[0] * np.shape(crab_color2)[1], 3))
-        # norm = colors.Normalize(vmin=-1., vmax=1.)
-        # norm.autoscale(pixel_colors)
-        # pixel_colors = norm(pixel_colors).tolist()
-        # ax1.clear()
-        # ax1.scatter(one.flatten(), two.flatten(), three.flatten(), facecolors=pixel_colors, marker=".")
-        # ax1.set_xlabel("Hue")
-        # # ax1.set_xlabel("Red")
-        # ax1.set_ylabel("Saturation")
-        # # ax1.set_ylabel("Green")
-        # ax1.set_zlabel("Value")
-        # # ax1.set_zlabel("Blue")
-        # # plt.pause(0.00001)
-        # # Hue: 0-180
-        # # Saturation: 0-255
-        # # Value: 0-255
-        # lower_hsv1 = np.array([0, 0, 0])
-        # upper_hsv1 = np.array([180, 50, 40])
-        # lower_hsv2 = np.array([0, 50, 80])
-        # upper_hsv2 = np.array([180, 100, 120])
-        # # mask1 = cv2.inRange(hsv, lower_hsv1, upper_hsv1)
-        # mask1 = cv2.inRange(crab_color2, lower_hsv1, upper_hsv1)
-        # # mask2 = cv2.inRange(hsv, lower_hsv2, upper_hsv2)
-        # mask2 = cv2.inRange(crab_color2, lower_hsv2, upper_hsv2)
-        # mask = cv2.bitwise_or(mask1, mask2)
-        # # result_plt = cv2.bitwise_not(crab_color2, crab_color2, mask=mask1)
-        # result_plt = cv2.bitwise_and(crab_color2, crab_color2, mask=mask)
-        #
-        # ax2.clear()
-        # ax2.imshow(cv2.bitwise_not(mask), cmap="gray")
-        #
-        # ax3.clear()
-        # ax3.imshow(result_plt)
-        #
-        # plt.pause(0.001)
+        cv2.putText(crab_color_ori, result, (10, 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 10), 1)
+        cv2.imshow("Crab color", crab_color_ori)
 
         counter += 1
 
@@ -280,9 +194,6 @@ while True:
         if k == 27:
             break
 
-# plt.draw()
-# plt.show()
 vid.release()
 cv2.destroyAllWindows()
 print(datetime.now() - startTime)
-
