@@ -174,8 +174,9 @@ while True:
         new_sigmoid = exposure.adjust_sigmoid(opening, cutoff=0.1, gain=15, inv=False)
 
         # HOG
-        new_fd, new_hog = feature.hog(new_sigmoid, orientations=5, pixels_per_cell=(22, 22), block_norm="L1",
-                                      cells_per_block=(5, 5), transform_sqrt=False, visualize=True, multichannel=False)
+        new_fd, new_hog = feature.hog(new_sigmoid, orientations=9, pixels_per_cell=(20, 20), block_norm="L1",
+                                      cells_per_block=(3, 3), transform_sqrt=False, visualize=True, multichannel=False,
+                                      feature_vector=True)
         new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 10))
 
 
