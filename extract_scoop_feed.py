@@ -137,6 +137,13 @@ while True:
         crab = three[int(bbox[1]) + 5 : int(bbox[1] + bbox[3]) - 5 , int(bbox[0]) + 5: int(bbox[0] + bbox[2]) - 5]
         # crab = three[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
         crab_color = frame[int(bbox[1]) + 5 : int(bbox[1] + bbox[3]) - 5 , int(bbox[0]) + 5: int(bbox[0] + bbox[2]) - 5]
+
+        crab_ori = crab.copy()
+        crab = cv2.resize(crab, (200, 200), interpolation = cv2.INTER_CUBIC)
+        crab_color_ori = crab_color.copy()
+        crab_color = cv2.resize(crab_color, (200, 200), interpolation = cv2.INTER_CUBIC)
+
+
         # crab_color = frame[center[1] - 100:center[1] + 100, center[0] - 100:center[0] + 100]
         crab_red = red[center[1]-100:center[1]+100, center[0]-100:center[0]+100]
 
@@ -175,8 +182,9 @@ while True:
         # cv2.putText(crab_color, tag, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
         cv2.imshow("res", res)
-        cv2.imshow("Crab color", crab_color)
-        cv2.imshow("Crab color2", new_hog.astype("uint8")*255)
+        cv2.imshow("Scaled", crab_color)
+        cv2.imshow("RAW", crab_color_ori)
+        cv2.imshow("HOG", new_hog.astype("uint8")*255)
 
         tag = tag_claw_up
         cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
