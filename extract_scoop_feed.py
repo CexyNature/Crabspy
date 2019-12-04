@@ -37,6 +37,16 @@ print(filename)
 
 tag_claw_up = "clawUp"
 tag_claw_down = "clawDown"
+condition = tag_claw_up
+
+def change_condition(event, x, y, flags, params):
+    global condition
+    if event == cv2.EVENT_LBUTTONDOWN:
+        if condition == tag_claw_up:
+            condition = tag_claw_down
+        else:
+            condition = tag_claw_up
+
 
 res_dir = "train_data/scoop_feed" + "/" + filename
 res_dir2 = "train_data/scoop_feed" + "/" + filename + "_HOG"
@@ -114,6 +124,9 @@ while True:
         break
 
     if ok:
+
+        cv2.setMouseCallback('RAW', change_condition)
+
         frame = cv2.resize(frame_ori, (0, 0), fx=0.5, fy=0.5)
         frame_norec = frame.copy()
 
@@ -180,37 +193,23 @@ while True:
         new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 10))
 
 
-        # cv2.putText(crab_color, tag, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+        cv2.putText(crab_color_ori, condition, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
         cv2.imshow("res", res)
         cv2.imshow("Scaled", crab_color)
         cv2.imshow("RAW", crab_color_ori)
         cv2.imshow("HOG", new_hog.astype("uint8")*255)
 
-        tag = tag_claw_up
-        cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
-        cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8") * 255)
+        cv2.imwrite(res_dir + "/" + condition + "_" + str(counter) + ".jpeg", crab_color)
+        cv2.imwrite(res_dir2 + "/" + condition + "_" + str(counter) + ".jpeg", new_hog.astype("uint8") * 255)
 
         # time.sleep(0.5)
-        # Exit if ESC pressed
         k = cv2.waitKey(1) & 0xff
         if k == 27:
             break
-        elif k == ord("u"):
-            tag = tag_claw_up
-            # cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
-            # cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8")*255)
-        elif k == ord("d"):
-            tag = tag_claw_down
-            # cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
-            # cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8")*255)
-        else:
-            tag = tag_claw_up
+
         counter += 1
 
-
-        cv2.imwrite(res_dir + "/" + tag + "_" + str(counter) + ".jpeg", crab_color)
-        cv2.imwrite(res_dir2 + "/" + tag + "_" + str(counter) + ".jpeg", new_hog.astype("uint8") * 255)
 
 vid.release()
 cv2.destroyAllWindows()
