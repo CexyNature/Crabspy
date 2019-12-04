@@ -11,7 +11,9 @@ import pickle
 from datetime import datetime
 
 ap = argparse.ArgumentParser()
-ap.add_argument('-f', '--folder', default="VIRB0037-3", help='Provide path to video file')
+ap.add_argument("-f", "--folder", default="VIRB0037-3", help="Provide name of folder containing images")
+ap.add_argument("-u", "--upclaw", help="Provide number of images where the claw is up")
+ap.add_argument("-d", "--downclaw", help="Provide number of images where the claw is down")
 args = vars(ap.parse_args())
 
 time_start = datetime.now()
@@ -21,13 +23,13 @@ model_name = "scoop_feed_model.sav"
 
 img_path = "train_data/scoop_feed/" + args["folder"]
 claw_down = np.array(("claw_down"))
-claw_down = np.repeat(claw_down, 86)
+claw_down = np.repeat(claw_down, args["upclaw"])
 claw_up = np.array(("claw_up"))
-claw_up = np.repeat(claw_up, 133)
+claw_up = np.repeat(claw_up, args["downclaw"])
 labels = np.hstack((claw_down, claw_up))
 
 for img in os.listdir(img_path):
-    # print(img)
+    print("Reading images and extracting HOG")
     frame = cv2.imread(os.path.join(img_path, img))
     frame = cv2.resize(frame, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_LANCZOS4)
     hsl = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS_FULL)
@@ -38,7 +40,7 @@ for img in os.listdir(img_path):
     new_fd, new_hog = feature.hog(canny, orientations=9, pixels_per_cell=(20, 20), block_norm="L1",
                                   cells_per_block=(3, 3), transform_sqrt=False, visualize=True, multichannel=False,
                                   feature_vector=True)
-    print(new_fd.shape)
+    # print(new_fd.shape)
     new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 20))
     hog_images.append(new_hog)
     hog_features.append(new_fd)
