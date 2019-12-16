@@ -95,22 +95,15 @@ Add features, work in features, fix bugs, provide crab images.
 
 Funding and other sources allocated to C. Herrera which made possible this project
 
-<img src="images/logos/JCU.jpg" width="150" height="150">
+<img src="images/logos/JCU.jpg" height="150">
+
+<img src="images/logos/ECWE.jpeg" width="75" height="75"> <img src="images/logos/SICEM.png" width="75" height="75">
 
 
-<img src="images/logos/ECWE.jpeg" width="75" height="75">
-<img src="images/logos/SICEM.png" width="75" height="75">
+<img src="images/logos/ESA_logo.png" height="75"> <img src="images/logos/Holsworth.png" height="75">
 
 
-<img src="images/logos/ESA_logo.png" width="75" height="75">
-<img src="images/logos/Holsworth.png" width="75" height="75">
+<img src="images/logos/nectardirectorate-logo.png" height="75"> <img src="images/logos/qcif.png" height="75"> <img src="images/logos/qris-logo.png" height="75">
 
-
-<img src="images/logos/nectardirectorate-logo.png" width="75" height="75">
-<img src="images/logos/qcif.png" width="75" height="75">
-<img src="images/logos/qris-logo.png" width="75" height="75">
-
-
-<img src="images/logos/Mdatatech.png" width="75" height="75">
-<img src="images/logos/TropWATER.jpg" width="75" height="75">
+<img src="images/logos/Mdatatech.PNG" height="75"> <img src="images/logos/TropWATER.jpg" height="75">
 
