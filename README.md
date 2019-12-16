@@ -98,18 +98,18 @@ Funding and other sources allocated to C. Herrera which made possible this proje
 <img src="images/logos/JCU.jpg" width="150" height="150">
 
 
-<!-- End -->
-
-
 <img src="images/logos/ECWE.jpeg" width="75" height="75">
 <img src="images/logos/SICEM.png" width="75" height="75">
+
 
 <img src="images/logos/ESA_logo.png" width="75" height="75">
 <img src="images/logos/Holsworth.png" width="75" height="75">
 
+
 <img src="images/logos/nectardirectorate-logo.png" width="75" height="75">
 <img src="images/logos/qcif.png" width="75" height="75">
 <img src="images/logos/qris-logo.png" width="75" height="75">
+
 
 <img src="images/logos/Mdatatech.png" width="75" height="75">
 <img src="images/logos/TropWATER.jpg" width="75" height="75">
