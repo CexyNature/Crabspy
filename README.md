@@ -12,7 +12,9 @@
 <img src="images/logos/pseudo_logo.jpg" width="150" height="150"> CrabSpy
 ==========
 
-Code collection for crabs' detection, tracking, measure and count
+An heuristic toolbox for spying<sup>*</sup> intertidal crabs in their environment; built in Python. In continuous development.
+
+<sup>*</sup> Furtively collect information about crabs functional biology and ecology: species identity, movement patterns, change in coloration, feeding rates, bioturbation, and more. 
 
 
 > *"Until comparatively recently, ecologists were content to describe how nature “looks” (sometimes by means of fantastic
