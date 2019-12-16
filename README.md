@@ -93,7 +93,7 @@ Add features, work in features, fix bugs, provide crab images.
 
 ## Acknowledgement
 
-Funding and other sources allocated to C. Herrera which made possible this project
+Organizations which made possible this project by funding or allocating other sources (computing, expertise) to C. Herrera
 
 <img src="images/logos/JCU.jpg" height="150">
 
@@ -107,3 +107,4 @@ Funding and other sources allocated to C. Herrera which made possible this proje
 
 <img src="images/logos/Mdatatech.PNG" height="75"> <img src="images/logos/TropWATER.jpg" height="75">
 
+[ASPP-APAC 2019](https://scipy-school.org/)
