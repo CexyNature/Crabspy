@@ -117,6 +117,6 @@ __pycache__/
 *.MP4
 *.avi
 *.csv
-results/Log/
+crabspy/results/Log/
 results/snapshots/
 video/

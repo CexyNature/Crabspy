@@ -25,7 +25,7 @@ if PYTHON_VERSION < PYTHON_REQUIRED:
 """.format(*(PYTHON_REQUIRED + PYTHON_VERSION)))
     sys.exit(1)
 
-with open("../README.md") as file:
+with open("README.md") as file:
     LONG_DESCRIPTION = file.read()
 
 setup(
