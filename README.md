@@ -1,3 +1,6 @@
+[![GitHub license][license]][lic_file] [![GitHub forks][forks]][network] [![GitHub stars][stars]][stargazers]
+
+
 <!-- Created by Cesar Herrera -->
 [![alt text][1.2]][1]
 [![alt text][2.2]][2]
