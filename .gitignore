@@ -111,7 +111,7 @@ fabric.properties
 # End of https://www.gitignore.io/api/macos,pycharm
 
 # Files and folders add by Cesar Herrera
-.idea/
+../.idea/
 __pycache__/
 *.mp4
 *.MP4
