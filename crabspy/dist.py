@@ -5,16 +5,17 @@ Module for tracking one individual in a video.
 """
 
 import os
-import cv2
-import numpy as np
 import argparse
-from collections import deque
 import sys
+import math
+from collections import deque
 from datetime import datetime
 from statistics import mean
-import math
+import numpy as np
+import cv2
 
-import methods, constant
+import methods
+import constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
@@ -26,7 +27,6 @@ ap.add_argument("-s", "--seconds", default=None,
                 help="Provide the targeted time in seconds of video section you want to jump to")
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
-# ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
 # Return video information
@@ -171,7 +171,8 @@ if os.path.isfile("results/" + video_name):
                     sex = i.sex
                     species = i.species
                     handedness = i.handedness
-                    # print("This is a {} from species {} and {} handed".format(sex, species, handedness))
+                    # print("This is a {} from species {} and {}
+                    # handed".format(sex, species, handedness))
                 else:
                     pass
             # head_true = False
@@ -210,8 +211,10 @@ methods.CrabNames.save_crab_names(methods.CrabNames.instances, info_video)
 # result_file.close()
 
 start, end, step, _, _ = methods.frame_to_time(info_video)
-print("Recording was started at: ", start, "\nRecording was ended at: ", end,
-      "\nThis information might not be precise as it depends on your computer file system, and file meta information")
+print("Recording was started at: ",
+      start, "\nRecording was ended at: ", end,
+      "\nThis information might not be precise as it depends"
+      " on your computer file system, and file meta information")
 
 while vid.isOpened():
     ret, img = vid.read()
@@ -294,13 +297,15 @@ while vid.isOpened():
             for i in info:
                 info_video[i.name] = i.value
 
-            crab = crab_frame[center[1] - int(bbox[2]):center[1] + int(bbox[2]), center[0] - int(bbox[3]):center[0] + int(bbox[3])]
+            crab = crab_frame[center[1] - int(bbox[2]):center[1] + int(bbox[2]),
+                              center[0] - int(bbox[3]):center[0] + int(bbox[3])]
             crab_snapshot = crab.copy()
             # crab = masked[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
             # crab = frame[int(bbox[0] + bbox[2]/2):100, int(bbox[1] + bbox[3]/2):100]
             # crab = frame[100:(100 + 50), 250:(250 + 50)]
             # filename = os.path.join(dirname, fname, str(center), startTime1)
-            # cv2.imwrite(dirname + "/" + filename + "_" + startTime1 + str(center) + "_" + ".jpg", crab)
+            # cv2.imwrite(dirname + "/" + filename + "_" +
+            #             startTime1 + str(center) + "_" + ".jpg", crab)
 
             # crab_edge = cv2.Canny(crab, threshold1=100, threshold2=200)
             # _, cnts, _ = cv2.findContours(crab_edge, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -406,7 +411,8 @@ while vid.isOpened():
 
             # Back transform and show tracker and data in original image
 
-        blob = fb_res_two3[center[1] - int(bbox[2]):center[1] + int(bbox[2]), center[0] - int(bbox[2]):center[0] + int(bbox[2])]
+        blob = fb_res_two3[center[1] - int(bbox[2]):center[1] + int(bbox[2]),
+                           center[0] - int(bbox[2]):center[0] + int(bbox[2])]
         ret, blob = cv2.threshold(blob, 150, 255, cv2.THRESH_BINARY)
         output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
         num_labels = output[0]
@@ -544,7 +550,8 @@ while vid.isOpened():
         percentage_vid = (target_frame + counter) / length_vid * 100
         text = "Video {0:.1f} %".format(percentage_vid)
         cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
-        cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+        cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter),
+                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
         # counter_f += 1
         # print("Frame count ", counter_f)
