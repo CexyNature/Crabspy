@@ -3,17 +3,6 @@
 [![GitHub Start: ](https://img.shields.io/github/forks/CexyNature/Crabspy?label=Starts&style=social)](https://github.com/CexyNature/Crabspy)
 [![Twitter](https://img.shields.io/twitter/follow/CexyNature?style=social)](https://twitter.com/cexynature?lang=en)
 
-<!-- Created by Cesar Herrera -->
-[![alt text][1.2]][1]
-[![alt text][2.2]][2]
-<!-- icons without padding -->
-[1.2]: images/logos/twittericon2.png (icon without padding)
-[2.2]: images/logos/githubicon2.png (github icon without padding)
-<!-- links to accounts -->
-[1]: http://www.twitter.com/CexyNature
-[2]: http://www.github.com/CexyNature
-<!-- End -->
-
 <img src="images/logos/pseudo_logo.jpg" width="150" height="150"> CrabSpy
 ==========
 
@@ -112,16 +101,54 @@ Add features, work in features, fix bugs, provide crab images.
 
 Organizations which made possible this project by funding or allocating other sources (computing, expertise) to C. Herrera
 
-<img src="images/logos/JCU.jpg" height="150">
+<a href="https://www.jcu.edu.au/">
+    <img alt="James Cook University" src="images/logos/JCU.jpg" height="100">
+</a>
 
-<img src="images/logos/ECWE.jpeg" width="75" height="75"> <img src="images/logos/SICEM.png" width="75" height="75">
+<a href="https://research.jcu.edu.au/portfolio/marcus.sheaves/">
+    <img alt="Estuary and Coastal Wetland Ecosystems" src="images/logos/ECWE.jpeg" height="100">
+</a>
+<a href="https://www.jcu.edu.au/sicem">
+    <img alt="Science Integrated Coastal Ecosystem Management" src="images/logos/SICEM.png" height="100">
+</a>
+
+<div class="row">
+    <div class="column">
+        <a href="https://www.ecolsoc.org.au/awards-and-prizes/holsworth-wildlife-research-endowment">
+            <img alt="Holsworth Wildlife Research Endowment" src="images/logos/ESA_logo.png" height="75">
+        </a>
+    </div>
+    <div class="column">
+        <a href="https://www.ecolsoc.org.au/awards-and-prizes/holsworth-wildlife-research-endowment">
+            <img alt="Holsworth Wildlife Research Endowment" src="images/logos/Holsworth.png" height="75">
+        </a>
+    </div>
+</div>
 
 
-<img src="images/logos/ESA_logo.png" height="75"> <img src="images/logos/Holsworth.png" height="75">
+<a >
+    <img src="images/logos/nectardirectorate-logo.png" height="75"> 
+    <img src="images/logos/qcif.png" height="75"> 
+    <img src="images/logos/qris-logo.png" height="75">
+</a>
 
-
-<img src="images/logos/nectardirectorate-logo.png" height="75"> <img src="images/logos/qcif.png" height="75"> <img src="images/logos/qris-logo.png" height="75">
-
-<img src="images/logos/Mdatatech.PNG" height="75"> <img src="images/logos/TropWATER.jpg" height="75">
+<a >
+    <img src="images/logos/Mdatatech.PNG" height="75"> 
+    <img src="images/logos/TropWATER.jpg" height="75">
+</a>
 
 [ASPP-APAC 2019](https://scipy-school.org/)
+
+
+
+
+<!-- Created by Cesar Herrera -->
+[![alt text][1.2]][1]
+[![alt text][2.2]][2]
+<!-- icons without padding -->
+[1.2]: images/logos/twittericon2.png (icon without padding)
+[2.2]: images/logos/githubicon2.png (github icon without padding)
+<!-- links to accounts -->
+[1]: http://www.twitter.com/CexyNature
+[2]: http://www.github.com/CexyNature
+<!-- End -->
