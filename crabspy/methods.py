@@ -16,7 +16,6 @@ import datetime
 import pickle
 import string
 import random
-import itertools
 
 import constant
 

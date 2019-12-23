@@ -6,6 +6,7 @@ Consult and prune database
 
 import argparse
 import pickle
+
 import methods
 
 __author__ = "Cesar Herrera"

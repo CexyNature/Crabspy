@@ -8,9 +8,8 @@ import argparse
 import pandas as pd
 from collections import deque
 import cv2
-import numpy as np
 
-import methods
+from crabspy import methods
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

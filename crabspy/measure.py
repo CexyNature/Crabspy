@@ -11,8 +11,7 @@ import cv2
 import math
 import argparse
 
-import methods
-import constant
+import methods, constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
@@ -68,8 +67,8 @@ def save_measures(video_path, info_capture, head_true):
                          "vertice_1", "vertice_2", "vertice_3", "vertice_4"])
 
             wr.writerow([name, date_now, time_now,
-                        methods.quadratpts[0], methods.quadratpts[1],
-                        methods.quadratpts[2], methods.quadratpts[3]])
+                         methods.quadratpts[0], methods.quadratpts[1],
+                         methods.quadratpts[2], methods.quadratpts[3]])
             wr.writerow(["\n"])
             wr.writerow(["frame_number", "coordinate_0", "coordinate_1",
                          "length_pixels", "conversion_factor", "length_cm"])

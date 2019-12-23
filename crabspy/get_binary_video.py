@@ -8,14 +8,10 @@ import os
 import cv2
 import numpy as np
 import argparse
-from collections import deque
 import sys
 from datetime import datetime
-from statistics import mean
-import math
 
-import methods
-import constant
+import methods, constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

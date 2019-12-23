@@ -1,6 +1,4 @@
 import methods
-import os
-import pickle
 
 # class CrabNames(object):
 #
