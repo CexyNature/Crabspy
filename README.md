@@ -71,7 +71,7 @@ Furthermore, many species are disappearing before we can even catalogue them or 
 
 - joblib >= 0.13.2
 
-- pywt >= 1.0.3
+- pyWavelets >= 1.0.3
 
 - sklearn >= 0.21.3
 

@@ -49,4 +49,4 @@ setup(
         "scikit-learn >= 0.21.3",
         "matplotlib >= 2.2.0",
         "joblib >= 0.13.2",
-        "pywt >= 1.0.3"])
+        "pyWavelets >= 1.0.3"])
