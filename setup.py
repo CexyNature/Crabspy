@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
+"""
+Crabspy lives on GitHub <https://github.com/CexyNature/Crabspy>
+"""
+
 import sys
+from setuptools import setup
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 VERSION = "0.8"
-DESCRIPTION = """Crabspy is a python library that provides a programming interface for tracking, counting and measuring 
-crabs and other small creatures in videos recorded on natural and artificial settings. 
-Crabspy is distributed under a GNU GPL license."""
+DESCRIPTION = """Crabspy is a python library that provides a programming interface for tracking,
+counting and measuring crabs and other small creatures in videos recorded on natural and 
+artificial settings. Crabspy is distributed under a GNU GPL license."""
 
 PYTHON_VERSION = sys.version_info[:2]
 PYTHON_REQUIRED = (3, 5)
