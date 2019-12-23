@@ -108,40 +108,41 @@ Organizations which made possible this project by funding or allocating other so
 <a href="https://research.jcu.edu.au/portfolio/marcus.sheaves/">
     <img alt="Estuary and Coastal Wetland Ecosystems" src="images/logos/ECWE.jpeg" height="100">
 </a>
+
 <a href="https://www.jcu.edu.au/sicem">
     <img alt="Science Integrated Coastal Ecosystem Management" src="images/logos/SICEM.png" height="100">
 </a>
-
-
+<br>
 <a href="https://www.ecolsoc.org.au/awards-and-prizes/holsworth-wildlife-research-endowment">
-    <img alt="Holsworth Wildlife Research Endowment" src="images/logos/ESA_logo.png" height="100">
-</a>
-<a href="https://www.ecolsoc.org.au/awards-and-prizes/holsworth-wildlife-research-endowment">
-    <img alt="Holsworth Wildlife Research Endowment" src="images/logos/Holsworth.png" height="100">
+    <img alt="Holsworth Wildlife Research Endowment" src="images/logos/ESA_logo.png" height="75">
 </a>
 
-
+<a href="https://www.ecolsoc.org.au/awards-and-prizes/holsworth-wildlife-research-endowment">
+    <img alt="Holsworth Wildlife Research Endowment" src="images/logos/Holsworth.png" height="75">
+</a>
+<br>
 <a href="https://nectar.org.au/">
-    <img alt="The National eResearch Collaboration Tools and Resources project" src="images/logos/nectardirectorate-logo.png" height="75">
+    <img alt="The National eResearch Collaboration Tools and Resources project" src="images/logos/nectardirectorate-logo.png" height="50">
 </a>
+
 <a href="https://www.qcif.edu.au/">
-    <img alt="The Queensland Cyber Infrastructure Foundation" src="images/logos/qcif.png" height="75">
+    <img alt="The Queensland Cyber Infrastructure Foundation" src="images/logos/qcif.png" height="50">
 </a>
+
 <a href="https://www.qriscloud.org.au/">
-    <img alt="QRIScloud" src="images/logos/qris-logo.png" height="75">
+    <img alt="QRIScloud" src="images/logos/qris-logo.png" height="50">
 </a>
-
-
+<br>
 <a href="https://www.mdatatechjcu.com/">
-    <img alt="JCU's Marine Data Technology Hub" src="images/logos/Mdatatech.PNG" height="75">
+    <img alt="JCU's Marine Data Technology Hub" src="images/logos/Mdatatech.PNG" height="50">
 </a>
+
 <a href="https://www.tropwater.com/"> 
-    <img alt="JCU's TropWATER" src="images/logos/TropWATER.jpg" height="75">
+    <img alt="JCU's TropWATER" src="images/logos/TropWATER.jpg" height="50">
 </a>
-
-
+<br>
 [ASPP-APAC 2019](https://scipy-school.org/)
-
+<br>
 
 <!-- Created by Cesar Herrera -->
 [![alt text][1.2]][1]
