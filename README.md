@@ -1,5 +1,7 @@
-[![GitHub license][license]][lic_file] [![GitHub forks][forks]][network] [![GitHub stars][stars]][stargazers]
-
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![GitHub Fork: ](https://img.shields.io/github/forks/CexyNature/Crabspy?label=Fork&style=social)](https://github.com/CexyNature/Crabspy)
+[![GitHub Start: ](https://img.shields.io/github/forks/CexyNature/Crabspy?label=Starts&style=social)](https://github.com/CexyNature/Crabspy)
+[![Twitter](https://img.shields.io/twitter/follow/CexyNature?style=social)](https://twitter.com/cexynature?lang=en)
 
 <!-- Created by Cesar Herrera -->
 [![alt text][1.2]][1]
