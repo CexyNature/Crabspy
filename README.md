@@ -43,12 +43,13 @@ An heuristic toolbox for spying<sup>*</sup> intertidal crabs in their environmen
 
 ## General description
 
-CrabSpy 
+Crabspy is proposing an alternative workflow to collect biological and ecological data from intertidal crabs using computer vision and learning. Crabspy aims to provide a toolbox which can accelerate and improve information collection, enabling rapid and actionable scientific and policy response by means of a faster data streamline.
 
 
 ## Why CrabSpy and similar initiatives are important?
 
-Describe traditional sampling methods, and the need to collect and analyze biodiversity data faster.
+Traditional methods to collect data on the ecology of crabs and their role within ecosystems are often time consuming, invasive and can alter the natural habitat of the study site. The development of new technologies therefore presents an ideal opportunity to innovate and improve on traditional techniques to scale up data collection to the levels required.
+Furthermore, many species are disappearing before we can even catalogue them or describe them. Thus, natural scientists are faced with challenge of needing to rapidly increase their efforts to gather reliable species and ecosystem information at broader spatial and temporal scales.
 
 ## How to use
 
@@ -62,6 +63,17 @@ Describe traditional sampling methods, and the need to collect and analyze biodi
 
 - numpy >= 1.14.2
 
+- skimage >= 0.15.0
+
+- matplotlib >= 2.2.0
+
+- pandas >= 0.23.4
+
+- joblib >= 0.13.2
+
+- pywt >= 1.0.3
+
+- sklearn >= 0.21.3
 
 ## Installation
 

@@ -41,9 +41,12 @@ setup(
     packages=["crabspy"],
     python_requires=">=3.5",
     install_requires=[
-        "numpy>=1.13",
+        "numpy>=1.14.2",
         "opencv-python>=3.3",
         "opencv-contrib-python>=3.3",
-        "pandas>=0.21.0",
-        "scikit-image >= 0.13.1",
-        "scikit-learn >= 0.21.3"])
+        "pandas>=0.23.4",
+        "scikit-image >= 0.15.0",
+        "scikit-learn >= 0.21.3",
+        "matplotlib >= 2.2.0",
+        "joblib >= 0.13.2",
+        "pywt >= 1.0.3"])
