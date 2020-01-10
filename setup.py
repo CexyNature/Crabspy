@@ -56,4 +56,5 @@ setup(
         "pyWavelets >= 1.0.3",
         "pylint >=2.4.4",
         "pytest >=5.3.2",
-        "pytest-cov >=2.8.1"])
+        "pytest-cov >=2.8.1",
+        "scipy >=1.0.0"])
