@@ -8,7 +8,6 @@ import argparse
 import pandas as pd
 from collections import deque
 import cv2
-import numpy as np
 
 import methods
 
@@ -22,10 +21,7 @@ args = vars(ap.parse_args())
 
 track_meta = pd.read_csv("results/" + args["file"], header=0, nrows=1)
 track = pd.read_csv("results/" + args["file"], header=2, skiprows=range(0, 1))
-# track = track.replace(np.nan, "", regex=True)
-# print(track.head())
-# print(track.tail())
-# print(track_meta.head())
+
 file_name = track_meta["file_name"].values[0]
 quadrat_vertices = [track_meta["vertice_1"].values[0],
                     track_meta["vertice_2"].values[0],
@@ -40,8 +36,7 @@ quadrat_vertices = [(int(df.iloc[0, 0]), int(df.iloc[0, 1])),
                     (int(df.iloc[1, 0]), int(df.iloc[1, 1])),
                     (int(df.iloc[2, 0]), int(df.iloc[2, 1])),
                     (int(df.iloc[3, 0]), int(df.iloc[3, 1]))]
-# print(df)
-# print(quadrat_vertices)
+
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(file_name)
 M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 
@@ -50,9 +45,15 @@ pts = deque(maxlen=int(track_meta["length_video"].values[0])+250)
 target = 1
 vid.set(1, target)
 counter = target
-# color1 = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
-color1 = methods.select_color(1)
-# print(name_color)
+
+individuals = track.Crab_ID.unique()
+colours = methods.select_color(len(individuals))
+crab_colors = dict(zip(individuals, colours))
+print("\n".join("{}\t{}".format(k, v) for k, v in crab_colors.items()))
+
+dict_ind = dict(tuple(track.groupby("Crab_ID")))
+f_number = dict(tuple(track.groupby("Frame_number")))
+f_max = track["Frame_number"].max()
 
 
 while vid.isOpened():
@@ -62,22 +63,21 @@ while vid.isOpened():
         result = cv2.warpPerspective(img, M, (side, side))
         result2 = result.copy()
 
-        if counter <= len(track.index)-1:
+        if counter <= f_max:
 
-            try:
-                # print(counter, track["Frame_number"].values[counter])
-                # coord_x = int(track["Crab_position_x"].iloc[[counter-15, counter+15]].mean())
-                # coord_y = int(track["Crab_position_y"].iloc[[counter-15, counter+15]].mean())
-                coord_x = int(track["Crab_position_x"].values[counter])
-                coord_y = int(track["Crab_position_y"].values[counter])
-                center = (coord_x, coord_y)
-                pts.appendleft(center)
+            df_f = f_number[counter]
 
-                for i in np.arange(1, len(pts)):
-                    cv2.line(result, pts[i - 1], pts[i], color1[0][1], 1)
-                    cv2.circle(result, (coord_x, coord_y), 15, color1[0][1], 2)
-            except (ValueError, IndexError):
-                pass
+            for index, row in df_f.iterrows():
+
+                try:
+                    crab = row["Crab_ID"]
+                    x = int(row["Crab_position_x"])
+                    y = int(row["Crab_position_y"])
+                    bgr = crab_colors[crab][1]
+                    cv2.circle(result, (x, y), 15, bgr, 2)
+
+                except (ValueError, IndexError):
+                    pass
         else:
             pass
 
@@ -88,13 +88,13 @@ while vid.isOpened():
 
         result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
 
-
         cv2.imshow("result", result2)
         counter += 1
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
             break
+
     else:
         break
 
