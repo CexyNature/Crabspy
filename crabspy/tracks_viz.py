@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Display all tracked individuals in teh video
+Display all tracked individuals in the video
 """
 
 import argparse
