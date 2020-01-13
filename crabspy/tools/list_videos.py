@@ -17,7 +17,7 @@ __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--path", default="GP010016.mov", help="Provide path to folder containing video(s)")
+ap.add_argument("-p", "--path", help="Provide path to folder containing video(s)")
 args = vars(ap.parse_args())
 
 now = datetime.now()
