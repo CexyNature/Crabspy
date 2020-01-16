@@ -382,12 +382,12 @@ def frame_to_time(info_video):
     step = vid_duration / info_video["length_vid"]
 
     if "Counter" in info_video:
-        time_absolute = start + (datetime.timedelta(0, step * (info_video["Frame"]+1)))
+        time_absolute = start + (datetime.timedelta(0, step * (info_video["Frame"])))
         time_absolute = time_absolute.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
-        time_since_start = step * (info_video["Frame"]+1)
+        time_since_start = step * (info_video["Frame"])
 
     else:
-        time_absolute = start + (datetime.timedelta(0, step * (info_video["target_frame"] + 1)))
+        time_absolute = start + (datetime.timedelta(0, step * (info_video["target_frame"])))
         time_absolute = time_absolute.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
         # time_absolute = start.strftime('%Y-%m-%d %H:%M:%S.%f').rstrip('0')
         time_since_start = 0
