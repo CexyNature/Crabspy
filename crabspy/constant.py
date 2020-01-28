@@ -41,7 +41,7 @@ DILATE: tuple
     Kernel size for dilation morphological command.
 
 DECK: integer
-    Size of double ended queue for smoothing track coordinate using a movinf average.
+    Size of double ended queue for smoothing track coordinate using a moving average.
 
 SNAPSHOT: bool
     If True snapshots (one per frame) from tracked individual will be saved inside directory /results/snapshot/VIDEO-FILE-NAME/INDIVIDUAL-NAME/
