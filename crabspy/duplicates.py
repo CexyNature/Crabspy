@@ -16,12 +16,12 @@ __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-f", "--file", default="tracking_file.csv", help="Provide video name")
+ap.add_argument("-t", "--track_file", default="tracking_file.csv", help="Provide video name")
 args = vars(ap.parse_args())
 
 # video_name = os.path.splitext(args["video"])[0].format()
-track = pd.read_csv("results/" + args["file"], header=2, skiprows=range(0, 1))
-track_meta = pd.read_csv("results/" + args["file"], header=None, nrows=3)
+track = pd.read_csv("results/" + args["track_file"], header=2, skiprows=range(0, 1))
+track_meta = pd.read_csv("results/" + args["track_file"], header=None, nrows=3)
 duplicates = track[track.duplicated(["Frame_number"], keep=False)]
 
 # Find breaking points: index where
@@ -105,7 +105,7 @@ if len(duplicates) > 0:
 
     os.makedirs("results/processed_tracks/", exist_ok=True)
 
-    new_file = "results/processed_tracks/Pro_" + args["file"]
+    new_file = "results/processed_tracks/Pro_" + args["track_file"]
     track.to_csv(new_file, index=False)
 
     # with open("results/" + args["file"], "r") as file:
