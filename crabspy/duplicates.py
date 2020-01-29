@@ -41,30 +41,37 @@ else:
 # Keep selection and delete overlap
 if len(duplicates) > 0:
     if (duplicates["tracker_method"] == "Manual_tracking").any():
-        index_2_del = duplicates.index[duplicates.tracker_method != "Manual_tracking"].tolist()
-        print("Priority is given to track positions (i.e. rows) that were tracked using the method 'Manual_tracking'")
 
-        fig = plt.figure()
-        ax1 = fig.add_subplot(1, 2, 1)
-        ax2 = fig.add_subplot(1, 2, 2, sharex=ax1, sharey=ax1)
+        if (duplicates["tracker_method"] == "Manual_tracking").all():
+            print("All duplicated lines were done using the method 'Manual_tracking'")
+            # I will deal with this case later
+            # Ideally this whole chunk should be done case by case.
+        else:
 
-        ax1.plot(duplicates.loc[duplicates.tracker_method == "Manual_tracking", "Crab_position_x"],
-                 duplicates.loc[duplicates.tracker_method == "Manual_tracking", "Crab_position_y"])
-        ax1.title.set_text("Points got by manual tracking")
-        ax1.set_xlabel('Position X')
-        ax1.set_ylabel('Position Y')
-        ax1.set_aspect("equal", "box")
+            index_2_del = duplicates.index[duplicates.tracker_method != "Manual_tracking"].tolist()
+            print("Priority is given to track positions (i.e. rows) that were tracked using the method 'Manual_tracking'")
 
-        ax2.plot(duplicates.loc[duplicates.tracker_method != "Manual_tracking", "Crab_position_x"],
-                 duplicates.loc[duplicates.tracker_method != "Manual_tracking", "Crab_position_y"])
-        ax2.title.set_text("Points got by MIL tracking (to be deleted)")
-        ax2.set_xlabel('Position X')
-        ax2.set_aspect("equal", "box")
+            fig = plt.figure()
+            ax1 = fig.add_subplot(1, 2, 1)
+            ax2 = fig.add_subplot(1, 2, 2, sharex=ax1, sharey=ax1)
 
-        plt.gca().invert_yaxis()
-        plt.show()
+            ax1.plot(duplicates.loc[duplicates.tracker_method == "Manual_tracking", "Crab_position_x"],
+                     duplicates.loc[duplicates.tracker_method == "Manual_tracking", "Crab_position_y"])
+            ax1.title.set_text("Points got by manual tracking")
+            ax1.set_xlabel('Position X')
+            ax1.set_ylabel('Position Y')
+            ax1.set_aspect("equal", "box")
 
-        # duplicates = duplicates[duplicates.tracker_method == "Manual_tracking"]
+            ax2.plot(duplicates.loc[duplicates.tracker_method != "Manual_tracking", "Crab_position_x"],
+                     duplicates.loc[duplicates.tracker_method != "Manual_tracking", "Crab_position_y"])
+            ax2.title.set_text("Points got by MIL tracking (to be deleted)")
+            ax2.set_xlabel('Position X')
+            ax2.set_aspect("equal", "box")
+
+            plt.gca().invert_yaxis()
+            plt.show()
+
+            # duplicates = duplicates[duplicates.tracker_method == "Manual_tracking"]
     else:
         print("You have duplicates, but none of these came from the method 'Manual_tracking'.\n"
               "Priority will be given to the last duplicates.")
@@ -94,7 +101,7 @@ if len(duplicates) > 0:
             plt.gca().invert_yaxis()
             plt.show()
 
-    # print(duplicates)
+    print(duplicates)
     # print(index_2_del)
     # print(len(index_2_del))
     # print(track.shape)
