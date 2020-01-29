@@ -17,6 +17,10 @@ __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-t", "--track_file", default="GP010016_Us_focal_01.csv", help="Provide path to file")
+ap.add_argument("-s", "--seconds", default=None,
+                help="Provide the targeted time in seconds of video section you want to jump to")
+ap.add_argument("-f", "--frame", default=None, type=int,
+                help="Provide the targeted frame of video section you want to jump to")
 args = vars(ap.parse_args())
 
 track_meta = pd.read_csv("results/" + args["track_file"], header=0, nrows=1)
@@ -38,13 +42,12 @@ quadrat_vertices = [(int(df.iloc[0, 0]), int(df.iloc[0, 1])),
                     (int(df.iloc[3, 0]), int(df.iloc[3, 1]))]
 
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(file_name)
+vid, target_frame = methods.set_video_star(vid, args["seconds"], args["frame"], fps)
 M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 
 pts = deque(maxlen=int(track_meta["length_video"].values[0])+250)
 (dX, dY) = (0, 0)
-target = 1
-vid.set(1, target)
-counter = target
+counter = target_frame
 
 individuals = track.Crab_ID.unique()
 colours = methods.select_color(len(individuals))
