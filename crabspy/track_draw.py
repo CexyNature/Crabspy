@@ -58,7 +58,6 @@ dict_ind = dict(tuple(track.groupby("Crab_ID")))
 f_number = dict(tuple(track.groupby("Frame_number")))
 f_max = track["Frame_number"].max()
 
-
 while vid.isOpened():
     ret, img = vid.read()
 
@@ -68,19 +67,25 @@ while vid.isOpened():
 
         if counter <= f_max:
 
-            df_f = f_number[counter]
+            try:
 
-            for index, row in df_f.iterrows():
+                df_f = f_number[counter]
 
-                try:
-                    crab = row["Crab_ID"]
-                    x = int(row["Crab_position_x"])
-                    y = int(row["Crab_position_y"])
-                    bgr = crab_colors[crab][1]
-                    cv2.circle(result, (x, y), 15, bgr, 2)
+                for index, row in df_f.iterrows():
 
-                except (ValueError, IndexError):
-                    pass
+                    try:
+                        crab = row["Crab_ID"]
+                        x = int(row["Crab_position_x"])
+                        y = int(row["Crab_position_y"])
+                        bgr = crab_colors[crab][1]
+                        cv2.circle(result, (x, y), 15, bgr, 2)
+
+                    except (ValueError, IndexError):
+                        pass
+
+            except KeyError:
+                pass
+
         else:
             pass
 
