@@ -579,12 +579,11 @@ while vid.isOpened():
 
         # cv2.imshow("result_1", result_1)
         # cv2.imshow("original", img)
-        # cv2.imshow("cropped", crop_img)
+        cv2.imshow("cropped", crop_img)
         # crab = cv2.resize(crab, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4)
         crab = cv2.resize(crab, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_LANCZOS4)
         cv2.imshow("Crab", crab)
         # cv2.imshow("Crab Edge", crab_edge)
-        # cv2.imshow("result", result)
         cv2.imshow("Blob", blob)
 
         # From warp.py
