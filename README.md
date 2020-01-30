@@ -92,7 +92,7 @@ Furthermore, many species are disappearing before we can even catalogue them or 
 python setup.py
 ```
 
-## Code in Progress (yet not working as expected)
+## Work in Progress (yet not working as expected)
 
 - correct_hc.py
 - fast_track.py
