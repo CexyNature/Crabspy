@@ -430,6 +430,7 @@ while vid.isOpened():
 
         # cv2.imshow("background substraction", fb_res_two3)
         cv2.imshow("masked", masked)
+        cv2.imshow("cropped", crop_img)
         cv2.imshow('Manual tracking', result)
         # cv2.imshow("result", result)
         time.sleep(args["timesleep"])
