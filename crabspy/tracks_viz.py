@@ -16,12 +16,16 @@ __copyright__ = "Copyright (C) 2019 Cesar Herrera"
 __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-f", "--file", default="GP010016_fast_60MA.csv", help="Provide path to file")
-ap.add_argument("-m", "--metafile", default="GP010016_fast_18112018_1806.csv", help="Provide path to metafile")
+ap.add_argument("-u", "--uni_file", default="Unify_tracks_GP010016_05022020_115125.csv", help="Provide path to file")
+ap.add_argument("-m", "--metafile", default="Unify_metaInfo_GP010016_05022020_115125.csv", help="Provide path to metafile")
+ap.add_argument("-s", "--seconds", default=None,
+                help="Provide the targeted time in seconds of video section you want to jump to")
+ap.add_argument("-f", "--frame", default=None, type=int,
+                help="Provide the targeted frame of video section you want to jump to")
 args = vars(ap.parse_args())
 
 tracks_meta = pd.read_csv("results/unified_tracks/" + args["metafile"], header=0, nrows=1)
-tracks = pd.read_csv("results/unified_tracks/" + args["file"], header=0, skiprows=0)
+tracks = pd.read_csv("results/unified_tracks/" + args["uni_file"], header=0, skiprows=0)
 
 file_name = tracks_meta["file_name"].values[0]
 quadrat_vertices = [tracks_meta["vertice_1"].values[0],
@@ -41,6 +45,7 @@ quadrat_vertices = [(int(df.iloc[0, 0]), int(df.iloc[0, 1])),
 # print(quadrat_vertices)
 # print(file_name)
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(file_name)
+vid, target_frame = methods.set_video_star(vid, args["seconds"], args["frame"], fps)
 M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 q_factor = 0.107758620689655
 # print(video_name)
@@ -50,9 +55,9 @@ print("Pixel to centimeter conversion factor: ", conversion)
 
 pts = deque(maxlen=int(tracks_meta["length_video"].values[0])+250)
 (dX, dY) = (0, 0)
-target = 1
-vid.set(1, target)
-counter = target
+# target = 1
+# vid.set(1, target)
+counter = target_frame
 
 individuals = tracks.Crab_ID.unique()
 colours = methods.select_color(len(individuals))
