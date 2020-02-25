@@ -663,6 +663,38 @@ def save_snapshot(image, video_path, info_video):
     cv2.imwrite(name_result_file, image)
 
 
+def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number, header):
+
+    """
+
+    :param video_name:
+    :param individual:
+    :param head_true:
+    :param bins:
+    :param hist_values:
+    :param frame_number:
+    :return:
+    """
+
+    # create file name with name
+    name_result_file = "results/HistoData_" + video_name + individual[0] + ".csv"
+
+    if header:
+        with open(name_result_file, "w", newline="\n") as result_file:
+            wr1 = csv.writer(result_file, delimiter=",")
+            bin_lab = np.arange(0, bins,1)
+            # date_now = time.strftime("%d%m%Y")
+            # time_now = time.strftime("%H%M")
+            # wr1.writerow(["Frame number", bin_lab])
+            wr1.writerow(["Video", "Individual", "Bins_number", "Pixels", "frame_number"] + list(bin_lab.ravel()))
+
+    if not header:
+        # save track_info to file
+        with open(name_result_file, "a+", newline="\n") as result_file:
+            wr1 = csv.writer(result_file, delimiter=",")
+            wr1.writerow([video_name, individual[0], bins, pixels, frame_number] + list(hist_values.ravel()))
+
+
 
 # '''
 # Function that defines the end of tracking
