@@ -89,7 +89,7 @@ Furthermore, many species are disappearing before we can even catalogue them or 
 4. Run
 
 ```
-python setup.py
+python setup.py install
 ```
 
 ## Work in Progress (yet not working as expected)
