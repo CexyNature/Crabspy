@@ -16,6 +16,7 @@ import datetime
 import pickle
 import string
 import random
+from itertools import product
 
 import constant
 
@@ -683,16 +684,21 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
         with open(name_result_file, "w", newline="\n") as result_file:
             wr1 = csv.writer(result_file, delimiter=",")
             bin_lab = np.arange(0, bins,1)
+            channels = ["r-", "g-", "b-"]
+            bin_lab_ch = ["{}{}".format(a_, b_) for a_, b_ in product(channels, bin_lab)]
+            # flatten_bin_lab_ch = [val for sublist in bin_lab for val in sublist]
+            # print("This is the new bins labels {}".format(flatten_bin_lab_ch))
             # date_now = time.strftime("%d%m%Y")
             # time_now = time.strftime("%H%M")
             # wr1.writerow(["Frame number", bin_lab])
-            wr1.writerow(["Video", "Individual", "Bins_number", "Pixels", "frame_number"] + list(bin_lab.ravel()))
+            wr1.writerow(["Video", "Individual", "Bins_number", "Pixels", "frame_number"] + bin_lab_ch)
 
     if not header:
         # save track_info to file
         with open(name_result_file, "a+", newline="\n") as result_file:
             wr1 = csv.writer(result_file, delimiter=",")
-            wr1.writerow([video_name, individual[0], bins, pixels, frame_number] + list(hist_values.ravel()))
+            hist_values_col = np.concatenate(hist_values).ravel()
+            wr1.writerow([video_name, individual[0], bins, pixels, frame_number] + list(hist_values_col.ravel()))
 
 
 

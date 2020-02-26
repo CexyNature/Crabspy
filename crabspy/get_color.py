@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Display a tracked individual in the video.
+Extract crab color histogram from its track
 """
 
 import argparse
@@ -163,6 +163,8 @@ while vid.isOpened():
                         ch_blue.set_ydata(hist_b)
                         ch_green.set_ydata(hist_g)
 
+                        hist_val = [hist_r, hist_g, hist_b]
+
                         lr_red.set_ydata(hist_lr_r)
                         lr_blue.set_ydata(hist_lr_b)
                         lr_green.set_ydata(hist_lr_g)
@@ -190,7 +192,7 @@ while vid.isOpened():
         cv2.imshow("Light reference", light_ref)
         fig.canvas.draw()
 
-        methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist_b, counter, header = False)
+        methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist_val, counter, header = False)
 
         counter += 1
 
