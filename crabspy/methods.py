@@ -678,7 +678,7 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
     """
 
     # create file name with name
-    name_result_file = "results/HistoData_" + video_name + individual[0] + ".csv"
+    name_result_file = "results/HistoData_bin" + str(bins) + "_" + video_name + individual[0] + ".csv"
 
     if header:
         with open(name_result_file, "w", newline="\n") as result_file:

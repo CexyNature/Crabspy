@@ -24,6 +24,8 @@ ap.add_argument("-s", "--seconds", default=None,
                 help="Provide the targeted time in seconds of video section you want to jump to")
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
+ap.add_argument("-b", "--bins_number", default=10, type=int,
+                help="Provide number of wished bins")
 args = vars(ap.parse_args())
 
 resz_val = constant.RESIZE
@@ -71,7 +73,7 @@ ax1.set_title("Histogram of light reference")
 ax1.set_xlabel("Color intensity")
 ax1.set_ylabel("Frequency")
 
-bins_num = 80
+bins_num = args["bins_number"]
 
 ch_red, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'r', lw = 2, alpha = 0.65)
 ch_blue, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'b', lw = 2, alpha = 0.65)
