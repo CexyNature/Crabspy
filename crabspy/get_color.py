@@ -149,8 +149,10 @@ while vid.isOpened():
 
                         lr_total_pixels = np.prod(light_ref.shape[:2])
                         # print(pixels)
+                        crab_window = cv2.cvtColor(crab_window, cv2.COLOR_BGR2HLS_FULL)
                         (b, g, r) = cv2.split(crab_window)
-                        (lr_b, lr_g, lr_r) = cv2.split(crab_window)
+                        light_ref = cv2.cvtColor(light_ref, cv2.COLOR_BGR2HLS_FULL)
+                        (lr_b, lr_g, lr_r) = cv2.split(light_ref)
 
                         if total_pixels != 0:
                             hist_b = cv2.calcHist([b], [0], None, [bins_num], [10, 256]) / total_pixels
@@ -161,15 +163,27 @@ while vid.isOpened():
                             hist_lr_g = cv2.calcHist([lr_g], [0], None, [bins_num], [10, 256]) / lr_total_pixels
                             hist_lr_r = cv2.calcHist([lr_r], [0], None, [bins_num], [10, 256]) / lr_total_pixels
 
-                        ch_red.set_ydata(hist_r)
-                        ch_blue.set_ydata(hist_b)
-                        ch_green.set_ydata(hist_g)
+                        try:
+                            val_r = hist_r - hist_lr_r
+                            val_b = hist_b - hist_lr_b
+                            val_g = hist_g - hist_lr_g
 
-                        hist_val = [hist_r, hist_g, hist_b]
+                            # ch_red.set_ydata(hist_r)
+                            ch_red.set_ydata(val_r)
+                            # ch_blue.set_ydata(hist_b)
+                            ch_blue.set_ydata(val_b)
+                            # ch_green.set_ydata(hist_g)
+                            ch_green.set_ydata(val_g)
 
-                        lr_red.set_ydata(hist_lr_r)
-                        lr_blue.set_ydata(hist_lr_b)
-                        lr_green.set_ydata(hist_lr_g)
+                            # hist_val = [hist_r, hist_g, hist_b]
+                            hist_val = [val_r, val_g, val_b]
+
+                            lr_red.set_ydata(hist_lr_r)
+                            lr_blue.set_ydata(hist_lr_b)
+                            lr_green.set_ydata(hist_lr_g)
+
+                        except (ValueError):
+                            pass
 
                     except (ValueError, IndexError):
                         pass
@@ -197,6 +211,10 @@ while vid.isOpened():
         methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist_val, counter, header = False)
 
         counter += 1
+
+        ch_red.set_ydata(np.zeros(bins_num))
+        ch_blue.set_ydata(np.zeros(bins_num))
+        ch_green.set_ydata(np.zeros(bins_num))
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
