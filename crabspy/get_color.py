@@ -182,6 +182,13 @@ while vid.isOpened():
                             lr_blue.set_ydata(hist_lr_b)
                             lr_green.set_ydata(hist_lr_g)
 
+                            cv2.imshow("Crab window", crab_window)
+                            cv2.imshow("Light reference", light_ref)
+                            fig.canvas.draw()
+
+                            methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist_val, counter,
+                                                header=False)
+
                         except (ValueError):
                             pass
 
@@ -204,11 +211,11 @@ while vid.isOpened():
         cv2.imshow("result", result2)
         # cv2.imshow("background substraction", fb_res_two3)
         cv2.imshow("masked", masked)
-        cv2.imshow("Crab window", crab_window)
-        cv2.imshow("Light reference", light_ref)
-        fig.canvas.draw()
+        # cv2.imshow("Crab window", crab_window)
+        # cv2.imshow("Light reference", light_ref)
+        # fig.canvas.draw()
 
-        methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist_val, counter, header = False)
+        # methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist_val, counter, header = False)
 
         counter += 1
 
