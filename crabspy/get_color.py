@@ -147,56 +147,27 @@ while vid.isOpened():
 
                         light_ref = result2[320:350, 395:425]
                         lr_total_pixels = np.prod(light_ref.shape[:2])
-                        # print(pixels)
 
-                        # crab_window = cv2.cvtColor(crab_window, cv2.COLOR_BGR2HLS_FULL)
-                        # (b, g, r) = cv2.split(crab_window)
-                        # light_ref = cv2.cvtColor(light_ref, cv2.COLOR_BGR2HLS_FULL)
-                        # (lr_b, lr_g, lr_r) = cv2.split(light_ref)
                         channels0, mat0 = methods.split_colour(crab_window, "HSV")
                         channels1, mat1 = methods.split_colour(light_ref, "HSV")
 
-                        hist0 = methods.get_hist(channels0, bins_num, total_pixels, normalize=True)
-                        hist1 = methods.get_hist(channels1, bins_num, total_pixels, normalize=True)
-
-                        print("This is ch0 {}".format(hist0[0]))
-                        print("This is ch1 {}".format(hist0[1]))
-                        print("This is ch2 {}".format(hist0[2]))
-
-                        if total_pixels != 0:
-                            hist_b = cv2.calcHist([channels0[0]], [0], None, [bins_num], [10, 256]) / total_pixels
-                            hist_g = cv2.calcHist([channels0[1]], [0], None, [bins_num], [10, 256]) / total_pixels
-                            hist_r = cv2.calcHist([channels0[2]], [0], None, [bins_num], [10, 256]) / total_pixels
-
-                            hist_lr_b = cv2.calcHist([channels1[0]], [0], None, [bins_num], [10, 256]) / lr_total_pixels
-                            hist_lr_g = cv2.calcHist([channels1[1]], [0], None, [bins_num], [10, 256]) / lr_total_pixels
-                            hist_lr_r = cv2.calcHist([channels1[2]], [0], None, [bins_num], [10, 256]) / lr_total_pixels
-
+                        hist0 = methods.get_hist(channels0, crab_window_blob, bins_num, total_pixels, normalize=True)
+                        hist1 = methods.get_hist(channels1, crab_window_blob, bins_num, lr_total_pixels, normalize=True)
 
                         try:
-                            val_r = hist_r - hist_lr_r
-                            val_b = hist_b - hist_lr_b
-                            val_g = hist_g - hist_lr_g
+                            ch_red.set_ydata(hist0[0])
+                            ch_blue.set_ydata(hist0[1])
+                            ch_green.set_ydata(hist0[2])
 
-                            # ch_red.set_ydata(hist_r)
-                            ch_red.set_ydata(val_r)
-                            # ch_blue.set_ydata(hist_b)
-                            ch_blue.set_ydata(val_b)
-                            # ch_green.set_ydata(hist_g)
-                            ch_green.set_ydata(val_g)
+                            lr_red.set_ydata(hist1[0])
+                            lr_blue.set_ydata(hist1[1])
+                            lr_green.set_ydata(hist1[2])
 
-                            # hist_val = [hist_r, hist_g, hist_b]
-                            hist_val = [val_r, val_g, val_b]
-
-                            lr_red.set_ydata(hist_lr_r)
-                            lr_blue.set_ydata(hist_lr_b)
-                            lr_green.set_ydata(hist_lr_g)
-
-                            cv2.imshow("Crab window", crab_window)
-                            cv2.imshow("Light reference", light_ref)
+                            cv2.imshow("Crab window", mat0)
+                            cv2.imshow("Light reference", mat1)
                             fig.canvas.draw()
 
-                            methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist_val, counter,
+                            methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist0, counter,
                                                 header=False)
 
                         except (ValueError):

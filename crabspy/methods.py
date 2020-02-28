@@ -708,7 +708,7 @@ def split_colour(image, colour_profile):
             return (ch0, ch1, ch2), new_img
 
 
-def get_hist(channels, bins, total_pixels, normalize):
+def get_hist(channels, mask, bins, total_pixels, normalize):
 
     """
 
@@ -731,8 +731,10 @@ def get_hist(channels, bins, total_pixels, normalize):
         if total_pixels != 0:
 
             for ch in channels:
-                hist_ch = cv2.calcHist([ch], [0], None, [bins], None) / total_pixels
+                hist_ch = cv2.calcHist([ch], [0], None, [bins], None, mask) / total_pixels
                 hist.append(hist_ch)
+                print(ch.shape)
+                print(mask.shape)
 
         else:
             pass
@@ -742,7 +744,7 @@ def get_hist(channels, bins, total_pixels, normalize):
         if total_pixels != 0:
 
             for ch in channels:
-                hist_ch = cv2.calcHist([ch], [0], None, [bins], None)
+                hist_ch = cv2.calcHist(ch, [0], None, [bins], None, mask)
                 hist.append(hist_ch)
 
         else:
