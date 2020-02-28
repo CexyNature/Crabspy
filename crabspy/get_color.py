@@ -146,22 +146,32 @@ while vid.isOpened():
                         total_pixels = sum(stats[1:, 4])
 
                         light_ref = result2[320:350, 395:425]
-
                         lr_total_pixels = np.prod(light_ref.shape[:2])
                         # print(pixels)
-                        crab_window = cv2.cvtColor(crab_window, cv2.COLOR_BGR2HLS_FULL)
-                        (b, g, r) = cv2.split(crab_window)
-                        light_ref = cv2.cvtColor(light_ref, cv2.COLOR_BGR2HLS_FULL)
-                        (lr_b, lr_g, lr_r) = cv2.split(light_ref)
+
+                        # crab_window = cv2.cvtColor(crab_window, cv2.COLOR_BGR2HLS_FULL)
+                        # (b, g, r) = cv2.split(crab_window)
+                        # light_ref = cv2.cvtColor(light_ref, cv2.COLOR_BGR2HLS_FULL)
+                        # (lr_b, lr_g, lr_r) = cv2.split(light_ref)
+                        channels0, mat0 = methods.split_colour(crab_window, "HSV")
+                        channels1, mat1 = methods.split_colour(light_ref, "HSV")
+
+                        hist0 = methods.get_hist(channels0, bins_num, total_pixels, normalize=True)
+                        hist1 = methods.get_hist(channels1, bins_num, total_pixels, normalize=True)
+
+                        print("This is ch0 {}".format(hist0[0]))
+                        print("This is ch1 {}".format(hist0[1]))
+                        print("This is ch2 {}".format(hist0[2]))
 
                         if total_pixels != 0:
-                            hist_b = cv2.calcHist([b], [0], None, [bins_num], [10, 256]) / total_pixels
-                            hist_g = cv2.calcHist([g], [0], None, [bins_num], [10, 256]) / total_pixels
-                            hist_r = cv2.calcHist([r], [0], None, [bins_num], [10, 256]) / total_pixels
+                            hist_b = cv2.calcHist([channels0[0]], [0], None, [bins_num], [10, 256]) / total_pixels
+                            hist_g = cv2.calcHist([channels0[1]], [0], None, [bins_num], [10, 256]) / total_pixels
+                            hist_r = cv2.calcHist([channels0[2]], [0], None, [bins_num], [10, 256]) / total_pixels
 
-                            hist_lr_b = cv2.calcHist([lr_b], [0], None, [bins_num], [10, 256]) / lr_total_pixels
-                            hist_lr_g = cv2.calcHist([lr_g], [0], None, [bins_num], [10, 256]) / lr_total_pixels
-                            hist_lr_r = cv2.calcHist([lr_r], [0], None, [bins_num], [10, 256]) / lr_total_pixels
+                            hist_lr_b = cv2.calcHist([channels1[0]], [0], None, [bins_num], [10, 256]) / lr_total_pixels
+                            hist_lr_g = cv2.calcHist([channels1[1]], [0], None, [bins_num], [10, 256]) / lr_total_pixels
+                            hist_lr_r = cv2.calcHist([channels1[2]], [0], None, [bins_num], [10, 256]) / lr_total_pixels
+
 
                         try:
                             val_r = hist_r - hist_lr_r

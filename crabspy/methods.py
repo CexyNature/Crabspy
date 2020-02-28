@@ -664,6 +664,93 @@ def save_snapshot(image, video_path, info_video):
     cv2.imwrite(name_result_file, image)
 
 
+def split_colour(image, colour_profile):
+    """
+
+    Parameters
+    ----------
+    image
+        a image
+    colour_profile
+        a string indicating desired colour profile. Options are: RGB, HSV, HSL, CieLab, Luv and Gray
+    Returns
+    -------
+    channels
+        split channels for desired colour profile
+    new_img
+        original image in the new color profile
+
+    """
+    profiles = {"RGB": cv2.COLOR_BGR2RGB,
+                "HSV": cv2.COLOR_BGR2HSV_FULL, # Hue 0-360, S and V 0-225
+                "HSL": cv2.COLOR_BGR2HLS_FULL, # Hue 0-360, S and L 0-255
+                "CieLab": cv2.COLOR_BGR2LAB, # Light 0-100, a nd b -127-127
+                "Luv": cv2.COLOR_BGR2Luv, # Light 0-100, u -134-220, v -140-122
+                "BW": cv2.COLOR_BGR2GRAY}
+
+    if colour_profile in profiles:
+        new_img = cv2.cvtColor(image, profiles[colour_profile])
+
+        if len(new_img) > 2:
+            (ch0, ch1, ch2) = cv2.split(new_img)
+            return (ch0, ch1, ch2), new_img
+
+        else:
+            ch0 = new_img
+            return ch0, new_img
+
+    else:
+        print("Please use one of the colour profiles available {}".format(profiles.keys()))
+        print("Using HSV as default")
+        new_img = cv2.cvtColor(image, profiles["HSV"])
+        if len(new_img) > 2:
+            (ch0, ch1, ch2) = cv2.split(new_img)
+            return (ch0, ch1, ch2), new_img
+
+
+def get_hist(channels, bins, total_pixels, normalize):
+
+    """
+
+    Parameters
+    ----------
+    channels
+    bins
+    clip_in
+    clip_out
+    normalize
+    total_pixels
+
+    Returns
+    -------
+
+    """
+    hist = []
+    if normalize:
+
+        if total_pixels != 0:
+
+            for ch in channels:
+                hist_ch = cv2.calcHist([ch], [0], None, [bins], None) / total_pixels
+                hist.append(hist_ch)
+
+        else:
+            pass
+
+    else:
+
+        if total_pixels != 0:
+
+            for ch in channels:
+                hist_ch = cv2.calcHist([ch], [0], None, [bins], None)
+                hist.append(hist_ch)
+
+        else:
+            pass
+
+    return hist
+
+
 def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number, header):
 
     """
@@ -678,7 +765,7 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
     """
 
     # create file name with name
-    name_result_file = "results/HistoData_bin" + str(bins) + "_" + video_name + individual[0] + ".csv"
+    name_result_file = "results/HistoData_bin" + str(bins) + "_" + individual[0] + ".csv"
 
     if header:
         with open(name_result_file, "w", newline="\n") as result_file:
@@ -699,7 +786,6 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
             wr1 = csv.writer(result_file, delimiter=",")
             hist_values_col = np.concatenate(hist_values).ravel()
             wr1.writerow([video_name, individual[0], bins, pixels, frame_number] + list(hist_values_col.ravel()))
-
 
 
 # '''
