@@ -84,9 +84,9 @@ lr_blue, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'b', lw = 2,
 lr_green, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'g', lw = 2, alpha = 0.65)
 
 ax0.set_xlim(0, bins_num-1)
-ax0.set_ylim(0, 1)
+ax0.set_ylim(0, 10)
 ax1.set_xlim(0, bins_num-1)
-ax1.set_ylim(0, 1)
+ax1.set_ylim(0, 10)
 plt.ion()
 plt.show()
 
@@ -148,11 +148,11 @@ while vid.isOpened():
                         light_ref = result2[320:350, 395:425]
                         lr_total_pixels = np.prod(light_ref.shape[:2])
 
-                        channels0, mat0 = methods.split_colour(crab_window, "HSV")
-                        channels1, mat1 = methods.split_colour(light_ref, "HSV")
+                        channels0, mat0 = methods.split_colour(crab_window, "BW")
+                        channels1, mat1 = methods.split_colour(light_ref, "BW")
 
                         hist0 = methods.get_hist(channels0, crab_window_blob, bins_num, total_pixels, normalize=True)
-                        hist1 = methods.get_hist(channels1, crab_window_blob, bins_num, lr_total_pixels, normalize=True)
+                        hist1 = methods.get_hist(channels1, None, bins_num, lr_total_pixels, normalize=True)
 
                         try:
                             ch_red.set_ydata(hist0[0])

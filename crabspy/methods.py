@@ -681,7 +681,8 @@ def split_colour(image, colour_profile):
         original image in the new color profile
 
     """
-    profiles = {"RGB": cv2.COLOR_BGR2RGB,
+    profiles = {"BGR": None,
+                "RGB": cv2.COLOR_BGR2RGB,
                 "HSV": cv2.COLOR_BGR2HSV_FULL, # Hue 0-360, S and V 0-225
                 "HSL": cv2.COLOR_BGR2HLS_FULL, # Hue 0-360, S and L 0-255
                 "CieLab": cv2.COLOR_BGR2LAB, # Light 0-100, a nd b -127-127
@@ -689,15 +690,20 @@ def split_colour(image, colour_profile):
                 "BW": cv2.COLOR_BGR2GRAY}
 
     if colour_profile in profiles:
-        new_img = cv2.cvtColor(image, profiles[colour_profile])
 
-        if len(new_img) > 2:
-            (ch0, ch1, ch2) = cv2.split(new_img)
-            return (ch0, ch1, ch2), new_img
+        if profiles[colour_profile] is None:
+            (ch0, ch1, ch2) = cv2.split(image)
+            return (ch0, ch1, ch2), image
 
         else:
-            ch0 = new_img
-            return ch0, new_img
+            new_img = cv2.cvtColor(image, profiles[colour_profile])
+
+            if len(new_img.shape) > 2:
+                (ch0, ch1, ch2) = cv2.split(new_img)
+                return (ch0, ch1, ch2), new_img
+
+            else:
+                return (new_img, new_img, new_img), new_img
 
     else:
         print("Please use one of the colour profiles available {}".format(profiles.keys()))
@@ -731,10 +737,16 @@ def get_hist(channels, mask, bins, total_pixels, normalize):
         if total_pixels != 0:
 
             for ch in channels:
-                hist_ch = cv2.calcHist([ch], [0], None, [bins], None, mask) / total_pixels
+                hist_ch = cv2.calcHist([ch], [0], mask, [bins], None) / total_pixels
                 hist.append(hist_ch)
-                print(ch.shape)
-                print(mask.shape)
+                # print("Image hist sum is {}".format(sum(hist_ch)))
+
+                if mask is  None:
+                    pass
+
+                else:
+                    # print("Mask dim is {}".format(mask.shape))
+                    pass
 
         else:
             pass
@@ -744,7 +756,7 @@ def get_hist(channels, mask, bins, total_pixels, normalize):
         if total_pixels != 0:
 
             for ch in channels:
-                hist_ch = cv2.calcHist(ch, [0], None, [bins], None, mask)
+                hist_ch = cv2.calcHist(ch, [0], mask, [bins], None)
                 hist.append(hist_ch)
 
         else:
