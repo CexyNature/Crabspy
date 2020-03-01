@@ -693,17 +693,21 @@ def split_colour(image, colour_profile):
 
         if profiles[colour_profile] is None:
             (ch0, ch1, ch2) = cv2.split(image)
-            return (ch0, ch1, ch2), image
+            col_space = "BGR"
+            return (ch0, ch1, ch2), image, col_space
 
         else:
             new_img = cv2.cvtColor(image, profiles[colour_profile])
 
             if len(new_img.shape) > 2:
                 (ch0, ch1, ch2) = cv2.split(new_img)
-                return (ch0, ch1, ch2), new_img
+                col_space = colour_profile
+                return (ch0, ch1, ch2), new_img, col_space
 
             else:
-                return (new_img, new_img, new_img), new_img
+                col_space = colour_profile
+                return (new_img, new_img, new_img), new_img, col_space
+
 
     else:
         print("Please use one of the colour profiles available {}".format(profiles.keys()))
@@ -711,7 +715,10 @@ def split_colour(image, colour_profile):
         new_img = cv2.cvtColor(image, profiles["HSV"])
         if len(new_img) > 2:
             (ch0, ch1, ch2) = cv2.split(new_img)
-            return (ch0, ch1, ch2), new_img
+            col_space = "HSV"
+            return (ch0, ch1, ch2), new_img, col_space
+
+
 
 
 def get_hist(channels, mask, bins, total_pixels, normalize):
@@ -765,7 +772,7 @@ def get_hist(channels, mask, bins, total_pixels, normalize):
     return hist
 
 
-def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number, header):
+def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number, col_space, average_ch, header):
 
     """
 
@@ -785,21 +792,21 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
         with open(name_result_file, "w", newline="\n") as result_file:
             wr1 = csv.writer(result_file, delimiter=",")
             bin_lab = np.arange(0, bins,1)
-            channels = ["r-", "g-", "b-"]
+            channels = ["ch0-", "ch1-", "ch2-"]
             bin_lab_ch = ["{}{}".format(a_, b_) for a_, b_ in product(channels, bin_lab)]
             # flatten_bin_lab_ch = [val for sublist in bin_lab for val in sublist]
             # print("This is the new bins labels {}".format(flatten_bin_lab_ch))
             # date_now = time.strftime("%d%m%Y")
             # time_now = time.strftime("%H%M")
             # wr1.writerow(["Frame number", bin_lab])
-            wr1.writerow(["Video", "Individual", "Bins_number", "Pixels", "frame_number"] + bin_lab_ch)
+            wr1.writerow(["Video", "Individual", "Colour_space", "Bins_number", "Pixels", "frame_number", "mean_ch"] + bin_lab_ch)
 
     if not header:
         # save track_info to file
         with open(name_result_file, "a+", newline="\n") as result_file:
             wr1 = csv.writer(result_file, delimiter=",")
             hist_values_col = np.concatenate(hist_values).ravel()
-            wr1.writerow([video_name, individual[0], bins, pixels, frame_number] + list(hist_values_col.ravel()))
+            wr1.writerow([video_name, individual[0], col_space, bins, pixels, frame_number, average_ch] + list(hist_values_col.ravel()))
 
 
 # '''

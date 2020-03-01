@@ -65,28 +65,44 @@ dict_ind = dict(tuple(track.groupby("Crab_ID")))
 f_number = dict(tuple(track.groupby("Frame_number")))
 f_max = track["Frame_number"].max()
 
-fig, (ax0, ax1) = plt.subplots(ncols=2)
-ax0.set_title("Histogram of crab colour")
+gridsize = (3, 2)
+fig = plt.figure(figsize = (10, 6))
+
+ax2 = plt.subplot2grid(gridsize, (0,0), colspan=2, rowspan=2)
+ax0 = plt.subplot2grid(gridsize, (2,0))
+ax1 = plt.subplot2grid(gridsize, (2,1))
+
+# ax0.set_title("Histogram of crab colour")
+ax0.text(0.55, 0.8, "Histogram of crab colour")
 ax0.set_xlabel("Color intensity")
 ax0.set_ylabel("Frequency")
-ax1.set_title("Histogram of light reference")
+# ax1.set_title("Histogram of light reference")
+ax1.text(0.55, 0.8, "Histogram of light reference")
 ax1.set_xlabel("Color intensity")
 ax1.set_ylabel("Frequency")
+ax2.set_title("Change in colour intensity")
+ax2.set_xlabel("Time")
+ax2.set_ylabel("Average colour intensity")
 
 bins_num = args["bins_number"]
 
-ch_red, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'r', lw = 2, alpha = 0.65)
-ch_blue, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'b', lw = 2, alpha = 0.65)
-ch_green, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'g', lw = 2, alpha = 0.65)
+ch_0, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'r', lw = 2, alpha = 0.65)
+ch_1, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'b', lw = 2, alpha = 0.65)
+ch_2, = ax0.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'g', lw = 2, alpha = 0.65)
 
-lr_red, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'r', lw = 2, alpha = 0.65)
-lr_blue, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'b', lw = 2, alpha = 0.65)
-lr_green, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'g', lw = 2, alpha = 0.65)
+lr_ch_0, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'r', lw = 2, alpha = 0.65)
+lr_ch_1, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'b', lw = 2, alpha = 0.65)
+lr_ch_2, = ax1.plot(np.arange(bins_num), np.zeros((bins_num)),  c = 'g', lw = 2, alpha = 0.65)
+
+x_vals = []
+y_vals0 = []
+y_vals1 = []
 
 ax0.set_xlim(0, bins_num-1)
-ax0.set_ylim(0, 10)
+ax0.set_ylim(0, 1)
 ax1.set_xlim(0, bins_num-1)
-ax1.set_ylim(0, 10)
+ax1.set_ylim(0, 1)
+# ax2.set_ylim(0, 255)
 plt.ion()
 plt.show()
 
@@ -95,10 +111,10 @@ fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20)
 fgbg2 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=100)
 fgbg3 = cv2.createBackgroundSubtractorKNN(history=5000, dist2Threshold=250)
 
-for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, constant.ERODE)
-for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+for_er = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+for_di = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (17, 15))
 
-methods.hist_writer(video_name, individuals, bins_num, None, None, None, header = True)
+methods.hist_writer(video_name, individuals, bins_num, None, None, None, None, None, header = True)
 
 while vid.isOpened():
     ret, img = vid.read()
@@ -145,29 +161,47 @@ while vid.isOpened():
                         stats = output[2]
                         total_pixels = sum(stats[1:, 4])
 
-                        light_ref = result2[320:350, 395:425]
+                        light_ref = result2[330:340, 405:415]
                         lr_total_pixels = np.prod(light_ref.shape[:2])
 
-                        channels0, mat0 = methods.split_colour(crab_window, "BW")
-                        channels1, mat1 = methods.split_colour(light_ref, "BW")
+                        channels0, mat0, color_space0 = methods.split_colour(crab_window, "BW")
+                        channels1, mat1, color_space1 = methods.split_colour(light_ref, "BW")
+
+                        # print(color_space0)
 
                         hist0 = methods.get_hist(channels0, crab_window_blob, bins_num, total_pixels, normalize=True)
                         hist1 = methods.get_hist(channels1, None, bins_num, lr_total_pixels, normalize=True)
 
+                        # average0 = channels0[0].mean(axis=0).mean(axis=0)
+                        average0 = np.mean(channels0[0])
+                        average1 = channels1[0].mean(axis=0).mean(axis=0)
+
+
+
+
+                        x_vals.append(counter)
+                        y_vals0.append(average0)
+                        y_vals1.append(average1)
+
                         try:
-                            ch_red.set_ydata(hist0[0])
-                            ch_blue.set_ydata(hist0[1])
-                            ch_green.set_ydata(hist0[2])
+                            ch_0.set_ydata(hist0[0])
+                            ch_1.set_ydata(hist0[1])
+                            ch_2.set_ydata(hist0[2])
 
-                            lr_red.set_ydata(hist1[0])
-                            lr_blue.set_ydata(hist1[1])
-                            lr_green.set_ydata(hist1[2])
+                            lr_ch_0.set_ydata(hist1[0])
+                            lr_ch_1.set_ydata(hist1[1])
+                            lr_ch_2.set_ydata(hist1[2])
 
-                            cv2.imshow("Crab window", mat0)
-                            cv2.imshow("Light reference", mat1)
+                            ax2.plot(x_vals, y_vals0, c = 'r', lw = 2, alpha = 0.65)
+                            ax2.plot(x_vals, y_vals1, c = 'b', lw = 2, alpha = 0.65)
+
+
+                            cv2.imshow("Crab window", cv2.resize(mat0, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4))
+                            cv2.imshow("Light reference", cv2.resize(mat1, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4))
                             fig.canvas.draw()
 
                             methods.hist_writer(video_name, individuals, bins_num, total_pixels, hist0, counter,
+                                                color_space0, average0,
                                                 header=False)
 
                         except (ValueError):
@@ -200,9 +234,9 @@ while vid.isOpened():
 
         counter += 1
 
-        ch_red.set_ydata(np.zeros(bins_num))
-        ch_blue.set_ydata(np.zeros(bins_num))
-        ch_green.set_ydata(np.zeros(bins_num))
+        ch_0.set_ydata(np.zeros(bins_num))
+        ch_1.set_ydata(np.zeros(bins_num))
+        ch_2.set_ydata(np.zeros(bins_num))
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
