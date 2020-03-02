@@ -785,8 +785,13 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
     :return:
     """
 
+    try:
+        os.mkdir("results/histograms")
+    except FileExistsError:
+        pass
+
     # create file name with name
-    name_result_file = "results/HistoData_bin" + str(bins) + "_" + individual[0] + ".csv"
+    name_result_file = "results/histograms/HistoData_bin" + str(bins) + "_" + individual[0] + ".csv"
 
     if header:
         with open(name_result_file, "w", newline="\n") as result_file:
