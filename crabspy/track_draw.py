@@ -89,6 +89,9 @@ while vid.isOpened():
         else:
             pass
 
+        result_1 = cv2.warpPerspective(result, IM, (img.shape[1], img.shape[0]))
+        result_1 = cv2.addWeighted(img, 0.5, result_1, 0.5, 0)
+
         percentage_vid = counter/track_meta["length_video"].values[0]*100
         text = "Video {0:.1f} %".format(percentage_vid)
         cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
@@ -96,7 +99,8 @@ while vid.isOpened():
 
         result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
 
-        cv2.imshow("result", result2)
+        cv2.imshow("Original FoV", result_1)
+        cv2.imshow("Perspective FoV", result2)
         counter += 1
 
         key = cv2.waitKey(1) & 0xFF

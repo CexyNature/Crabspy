@@ -99,9 +99,6 @@ while vid.isOpened():
                     bgr = crab_colors[crab][1]
                     cv2.circle(result, (x, y), 15, bgr, 2)
 
-                    result_1 = cv2.warpPerspective(result, IM, (img.shape[1], img.shape[0]))
-                    result_1 = cv2.addWeighted(img, 0.5, result_1, 0.5, 0)
-
                     # print(crab, x, row["Crab_position_x"], y, row["Crab_position_y"], bgr)
                 except ValueError:
                     pass
@@ -128,10 +125,11 @@ while vid.isOpened():
         # cv2.putText(result, "Frame n. {0:d}".format(counter), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
         # result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
+        result_1 = cv2.warpPerspective(result, IM, (img.shape[1], img.shape[0]))
+        result_1 = cv2.addWeighted(img, 0.5, result_1, 0.5, 0)
 
-
-        cv2.imshow("result", result)
-        cv2.imshow("result1", result_1)
+        cv2.imshow("Original FoV", result_1)
+        cv2.imshow("Perspective FoV", result)
         counter += 1
 
         key = cv2.waitKey(1) & 0xFF
