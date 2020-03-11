@@ -131,7 +131,7 @@ if os.path.isfile("results/" + video_name + "_burrows_map.csv"):
         # print(burrows_coord)
         for i, rows in burrows_coord.iterrows():
             row_values = [(int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Frame_number)]
-            print(row_values)
+            # print(row_values)
             existing_burrows.append(row_values)
 
     except (TypeError, RuntimeError):
@@ -238,10 +238,15 @@ vid.release()
 cv2.destroyAllWindows()
 
 head_true = False
-print('Writing new coordinates to file.')
-for i in burrows:
-    try:
-        methods.burrow_writer(args["video"], info_video, i, head_true)
-    except (TypeError, RuntimeError):
-        print('A TypeError or RuntimeError was caught while writing burrows coordinates')
-        pass
+
+if len(burrows) > 0:
+    print('Writing new coordinates to file.')
+    for i in burrows:
+        try:
+            methods.burrow_writer(args["video"], info_video, i, head_true)
+        except (TypeError, RuntimeError):
+            print('A TypeError or RuntimeError was caught while writing burrows coordinates')
+            pass
+else:
+    print('No new coordinates to write.')
+    pass
