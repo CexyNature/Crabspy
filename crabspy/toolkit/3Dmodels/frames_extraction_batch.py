@@ -1,7 +1,16 @@
+#!/usr/bin/python
+
+"""
+This script recursively runs frames_extraction.py in all videos inside the specified directory.
+"""
+
 import os
 import argparse
-import time
 from datetime import datetime
+
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
 
 start_time = datetime.now()
 
@@ -21,6 +30,6 @@ for root, dirs, files in os.walk(args['directory']):
 
 for video in video_files:
     print('Extracting frames for video {}'.format(video))
-    os.system ('python save_frame.py -p {} -f {}'.format(video, args['frames']))
+    os.system ('python frames_extraction.py -p {} -f {}'.format(video, args['frames']))
 
 print('Total time {}'.format(datetime.now() - start_time))

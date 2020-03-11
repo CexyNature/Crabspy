@@ -1,12 +1,16 @@
 #!/usr/bin/python
 
 """
-This code takes a video and it returns the video's frames
+This scripts takes a video and it returns every nth frame
 """
 
 import cv2
 import argparse
 import os
+
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--path', '-p', type=str, help='A path to the video')

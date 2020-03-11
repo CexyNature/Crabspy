@@ -1,6 +1,16 @@
+#!/usr/bin/python
+
+"""
+This script recursively runs VisualSFM feature detection, image matching and spare and dense reconstruction in all folder inside the selected directory.
+"""
+
 import os
 import subprocess
 from datetime import datetime
+
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
 
 start_time = datetime.now()
 
