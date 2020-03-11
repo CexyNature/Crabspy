@@ -1,18 +1,23 @@
 Crabspy Tools
 ===================
 
-Useful tools for processing videos and images
+Useful tools for processing videos and images.
 
-Requirements:
+## Content:
 
-- ffmpeg
+- [Listing all video files](#Listing-all-video-files)
+- [3D models workflow](#3D-models-workflow)
 
-## Tools:
+## Listing all video files
 ```
 python list_videos.py
 ```
 
 Module for recursively listing all videos in a folder and extracting meta information associated to videos
+
+Requirements:
+
+- ffmpeg
 
 The resulting file would look like:
 
@@ -28,3 +33,7 @@ Please observe that this command will not populate all columns in the resulting 
   * files are corrupted
   * files cannot be opened
   * or, where ```ffprobe``` keys do not exist in multimedia streams associated to the file
+
+## 3D models workflow 
+
+More information in the [3Dmodels](https://github.com/CexyNature/Crabspy/tree/master/crabspy/toolkit/3Dmodels) folder
