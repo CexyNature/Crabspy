@@ -828,6 +828,50 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
             wr1.writerow([video_name, individual[0], col_space, bins, pixels, frame_number, average_ch] + list(hist_values_col.ravel()))
 
 
+def burrow_writer(video_path, info_video, burrow_position, head_true):
+
+    """
+
+    Parameters
+    ----------
+    video_path
+    info_video
+    burrow_position
+    head_true
+
+    Returns
+    -------
+
+    """
+
+    # create file name with name
+    name = os.path.basename(video_path)
+    name_result_file = "results/" + info_video["name_video"] + "_burrows_map.csv"
+
+    if head_true:
+        with open(name_result_file, "w", newline="\n") as result_file:
+            wr = csv.writer(result_file, delimiter=",")
+            date_now = time.strftime("%d%m%Y")
+            time_now = time.strftime("%H%M")
+            wr.writerow(["file_name", "processed_at_date", "processed_at_time", "length_video", "fps_video",
+                         "target_frame_used", "vertice_1", "vertice_2", "vertice_3", "vertice_4",
+                         "projected_q_side", "q_conversion_factor_distance"])
+
+            wr.writerow([name, date_now, time_now, info_video["length_vid"], info_video["fps"],
+                        info_video["target_frame"], quadratpts[0], quadratpts[1],
+                        quadratpts[2], quadratpts[3], info_video["side"], info_video["conversion"]])
+            wr.writerow(["\n"])
+            wr.writerow(["Burrow_coord_x", "Burrow_coord_y","Frame_number"])
+
+    if not head_true:
+        # save track_info to file
+        with open(name_result_file, "a+", newline="\n") as result_file:
+            wr = csv.writer(result_file, delimiter=",")
+
+            wr.writerow([burrow_position[0][0], burrow_position[0][1], burrow_position[1]])
+
+
+
 # '''
 # Function that defines the end of tracking
 # '''
