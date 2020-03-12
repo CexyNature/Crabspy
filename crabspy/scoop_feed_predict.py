@@ -115,7 +115,8 @@ for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 # out = cv2.VideoWriter('Uca_detection+tracking.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 24, (960,720))
 # BG_MODEL = cv2.imread('BG_model.jpg')
 hull_list = []
-
+feeding_counter = 0
+switch = False
 element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
 
 while True:
@@ -179,12 +180,27 @@ while True:
         new_fd = new_fd.reshape(1, -1)
         # print(new_fd.shape)
         result = clf.predict(new_fd)[0]
-        print(result)
 
+        if switch:
+            if result == "claw_down":
+                pass
+            else:
+                switch = False
+        else:
+            if result == "claw_up":
+                pass
+            else:
+                feeding_counter =+ 1
+                switch = True
+
+        print(result, "__", switch)
+
+        text = "Feeding scoop counter {}".format(feeding_counter)
         pts.appendleft(center)
-
+        # print(text)
         cv2.imshow("Crab color2", new_hog.astype("uint8")*255)
-        cv2.putText(crab_color_ori, result, (10, 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 10), 1)
+        # crab_color_ori = cv2.resize(crab_color_ori, (0, 0), fx=2.5, fy=2.5)
+        cv2.putText(crab_color_ori, str(feeding_counter), (10, 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 10), 1)
         cv2.imshow("Crab color", crab_color_ori)
 
         counter += 1
