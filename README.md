@@ -157,6 +157,7 @@ Organizations which made possible this project by funding or allocating other so
     <img alt="JCU's TropWATER" src="images/logos/TropWATER.jpg" height="50">
 </a>
 <br>
+
 [ASPP-APAC 2019](https://scipy-school.org/)
 <br>
 
