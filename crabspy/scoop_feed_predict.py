@@ -114,7 +114,7 @@ for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 
 # out = cv2.VideoWriter('Uca_detection+tracking.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 24, (960,720))
 # BG_MODEL = cv2.imread('BG_model.jpg')
-hull_list = []
+prediction_list = []
 feeding_counter = 0
 switch = False
 element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
@@ -181,19 +181,18 @@ while True:
         # print(new_fd.shape)
         result = clf.predict(new_fd)[0]
 
-        if switch:
-            if result == "claw_down":
+        if len(prediction_list) > 5:
+            if result == prediction_list[-1]:
+                print("here")
                 pass
             else:
-                switch = False
-        else:
-            if result == "claw_up":
-                pass
-            else:
-                feeding_counter =+ 1
-                switch = True
+                print("there")
+                feeding_counter += 1
 
-        print(result, "__", switch)
+            print(result, " and previous element ", prediction_list[-1])
+
+
+        prediction_list.append(result)
 
         text = "Feeding scoop counter {}".format(feeding_counter)
         pts.appendleft(center)
