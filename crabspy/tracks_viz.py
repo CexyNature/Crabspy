@@ -4,6 +4,7 @@
 Display all tracked individuals in the video
 """
 
+import os
 import argparse
 import pandas as pd
 from collections import deque
@@ -22,7 +23,10 @@ ap.add_argument("-s", "--seconds", default=None,
                 help="Provide the targeted time in seconds of video section you want to jump to")
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
+ap.add_argument("-o", "--outcome", default="",
+                help="Should the video outcome be saved")
 args = vars(ap.parse_args())
+
 
 tracks_meta = pd.read_csv("results/unified_tracks/" + args["metafile"], header=0, nrows=1)
 tracks = pd.read_csv("results/unified_tracks/" + args["uni_file"], header=0, skiprows=0)
@@ -52,6 +56,14 @@ q_factor = 0.107758620689655
 print("Quadrat size: ", side)
 # print(vertices_draw)
 print("Pixel to centimeter conversion factor: ", conversion)
+
+if args["outcome"] is True:
+    os.makedirs("results/processed_videos/", exist_ok=True)
+    file_outcome = "results/processed_videos/" + video_name + "_tracks_viz.avi"
+    out_vid = cv2.VideoWriter(file_outcome, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (side, side))
+else:
+    pass
+
 
 pts = deque(maxlen=int(tracks_meta["length_video"].values[0])+250)
 (dX, dY) = (0, 0)
@@ -127,6 +139,9 @@ while vid.isOpened():
         # result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
         result_1 = cv2.warpPerspective(result, IM, (img.shape[1], img.shape[0]))
         result_1 = cv2.addWeighted(img, 0.5, result_1, 0.5, 0)
+
+        if args["outcome"] is True:
+            out_vid.write(result)
 
         cv2.imshow("Original FoV", result_1)
         cv2.imshow("Perspective FoV", result)
