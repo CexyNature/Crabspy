@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+"""
+This code trains a SVM classifier on images
+"""
+
 import cv2
 import os
 # from matplotlib import pyplot as plt
@@ -9,6 +15,10 @@ from sklearn.metrics import classification_report, accuracy_score, confusion_mat
 import pickle
 from datetime import datetime
 
+__author__ = "Cesar Herrera"
+__copyright__ = "Copyright (C) 2019 Cesar Herrera"
+__license__ = "GNU GPL"
+
 time_start = datetime.now()
 hog_images = []
 hog_features =[]
@@ -17,9 +27,9 @@ model_name = "handedness_model.sav"
 # img_path = "results/snapshots/GP010016/GP010016_right_defender"
 img_path = "results/snapshots/SVM_LR"
 left = np.array(("left"))
-left = np.repeat(left, 1162)
+left = np.repeat(left, 353)
 right = np.array(("right"))
-right = np.repeat(right, 1272)
+right = np.repeat(right, 964)
 labels = np.hstack((left, right))
 
 for img in os.listdir(img_path):
@@ -32,7 +42,7 @@ for img in os.listdir(img_path):
     # new_img = cv2.merge([new_sat, two, three])
     canny = cv2.Canny(new_sat, 200, 255)
     new_fd, new_hog = feature.hog(canny, orientations=5, pixels_per_cell=(2, 2), block_norm="L1",
-                                  cells_per_block=(3, 3), transform_sqrt=False, visualise=True,
+                                  cells_per_block=(3, 3), transform_sqrt=False, visualize=True,
                                   feature_vector=True)
     hog_images.append(new_hog)
     hog_features.append(new_fd)
@@ -70,10 +80,10 @@ np.random.shuffle(data_frame)
 percentage = 80
 partition = int(len(hog_features)*percentage/100)
 print(data_frame.shape)
-x_train, x_test = data_frame[:partition,:-1],  data_frame[partition:,:-1]
-y_train, y_test = data_frame[:partition,-1:].ravel() , data_frame[partition:,-1:].ravel()
+x_train, x_test = data_frame[:partition, :-1],  data_frame[partition:, :-1]
+y_train, y_test = data_frame[:partition, -1:].ravel(), data_frame[partition:, -1:].ravel()
 
-clf.fit(x_train,y_train)
+clf.fit(x_train, y_train)
 print("Training finished. Saving the model.")
 print("Time elapsed: {}".format(datetime.now()-time_start))
 pickle.dump(clf, open(model_name, 'wb'))
