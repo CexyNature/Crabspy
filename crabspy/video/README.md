@@ -2,8 +2,8 @@
 
 Ideally, videos to be analyzed should be placed here. Otherwise, you will have to change relative paths in Crabspy scripts.
 
-<img src="images/examples/example_vid_raw.gif" width="640">
+![](/images/examples/example_vid_raw.gif)
 
-<img src="images/examples/example_vid_persp_transform.gif" width="400">
+![](/images/examples/example_vid_persp_transform.gif)
 
 
