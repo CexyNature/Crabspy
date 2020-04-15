@@ -42,13 +42,11 @@ Crabspy is proposing an alternative workflow to collect biological and ecologica
 
 ## Why CrabSpy and similar initiatives are important?
 
-Traditional methods to collect data on the ecology of crabs and their role within ecosystems are often time consuming, invasive and can alter the natural habitat of the study site. The development of new technologies therefore presents an ideal opportunity to innovate and improve on traditional techniques to scale up data collection to the levels required.
-Furthermore, many species are disappearing before we can even catalogue them or describe them. Thus, natural scientists are faced with challenge of needing to rapidly increase their efforts to gather reliable species and ecosystem information at broader spatial and temporal scales. Crabspy seeks to ease some of these challenges by incorporating automation on data collection.
+Traditional methods to collect data on the ecology of crabs and their role within ecosystems are often time consuming, invasive and can alter the natural habitat of the study site. The development of new technologies therefore presents an ideal opportunity to innovate and improve on traditional techniques to scale up data collection to the levels required. Furthermore, many species are disappearing before we can even catalogue them or describe them. Thus, natural scientists are faced with challenge of needing to rapidly increase their efforts to gather reliable species and ecosystem information at broader spatial and temporal scales. Crabspy seeks to ease some of these challenges by incorporating automation on data collection.
 
 ## Introduction
 
-
-
+Crabspy was created to enable scientist to create their own image databases and train their own detection and classification models. Thus, most routines in Crabspy use simple off-the-shelf algorithms to extract data (e.g. OpenCV tracking methods). Manual methods are also included for those situations where simple algorithms are not successful.
 
 
 ## Requirements
@@ -57,9 +55,9 @@ Furthermore, many species are disappearing before we can even catalogue them or 
 
 - joblib==0.13.2
 
-- matplotlib==2.2.0
+- matplotlib>=2.2.0
 
-- numpy==1.14.2
+- numpy>=1.14.2
 
 - opencv-contrib-python==3.4.2.16
 
@@ -75,11 +73,11 @@ Furthermore, many species are disappearing before we can even catalogue them or 
 
 - PyWavelets==1.0.3
 
-- scikit-image==0.15.0
+- scikit-image>=0.15.0
 
-- scikit-learn==0.21.3
+- scikit-learn>=0.21.3
 
-- scipy==1.0.0
+- scipy>=1.0.0
 
 ## Installation
 
