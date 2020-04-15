@@ -1,6 +1,6 @@
 joblib==0.13.2
-matplotlib==2.2.0
-numpy==1.14.2
+matplotlib>=2.2.0
+numpy>=1.14.2
 opencv-contrib-python==3.4.2.16
 opencv-python==3.4.2.16
 pandas==0.23.4
@@ -8,6 +8,6 @@ pylint==2.4.4
 pytest==5.3.2
 pytest-cov==2.8.1
 PyWavelets==1.0.3
-scikit-image==0.15.0
-scikit-learn==0.21.3
-scipy==1.0.0
+scikit-image>=0.15.0
+scikit-learn>=0.21.3
+scipy>=1.0.0
