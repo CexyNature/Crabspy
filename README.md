@@ -48,36 +48,15 @@ Traditional methods to collect data on the ecology of crabs and their role withi
 
 Crabspy was created to enable scientist to create their own image databases and train their own detection and classification models. Thus, most routines in Crabspy use simple off-the-shelf algorithms to extract data (e.g. OpenCV tracking methods). Manual methods are also included for those situations where simple algorithms are not successful.
 
+Crabspy was originally developed to track intertidal crabs in soft sediments. However, other functions have been included such as counting feeding events, extracting individuals' colors, measuring and counting burrows, and more. Some of these routines require training machine learning algorithms.
+
+Crabspy also includes some utilities for [organizing information associated to videos](/crabspy/toolkit/README.md), and a [workflow for extracting frames from videos and running 3D reconstructions using the popular VisualSFM program](/crabspy/toolkit/3Dmodels/README.md).
+
+![](/images/examples/example_vid_output.gif)
 
 ## Requirements
 
-- python >= 3.5
-
-- joblib==0.13.2
-
-- matplotlib>=2.2.0
-
-- numpy>=1.14.2
-
-- opencv-contrib-python==3.4.2.16
-
-- opencv-python==3.4.2.16
-
-- pandas==0.23.4
-
-- pylint==2.4.4
-
-- pytest==5.3.2
-
-- pytest-cov==2.8.1
-
-- PyWavelets==1.0.3
-
-- scikit-image>=0.15.0
-
-- scikit-learn>=0.21.3
-
-- scipy>=1.0.0
+Crabspy requires Python >= 3.5. Full list of dependencies can be found in the [requirements file](requirements.txt)
 
 ## Installation
 
