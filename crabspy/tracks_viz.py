@@ -23,7 +23,7 @@ ap.add_argument("-s", "--seconds", default=None,
                 help="Provide the targeted time in seconds of video section you want to jump to")
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
-ap.add_argument("-o", "--outcome", default="",
+ap.add_argument("-o", "--outcome", default="", type=bool,
                 help="Should the video outcome be saved")
 args = vars(ap.parse_args())
 
