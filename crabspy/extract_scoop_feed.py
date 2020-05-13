@@ -116,6 +116,16 @@ for_di1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 hull_list = []
 element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
 
+
+name = os.path.basename(args["video"])
+videoname, _ = os.path.splitext(name)
+os.makedirs("results/processed_videos/", exist_ok=True)
+file_out = "results/processed_videos/" + videoname + "_track_feed.avi"
+
+out_feed_frame = cv2.VideoWriter(file_out, cv2.VideoWriter_fourcc('M','J','P','G'), fps, (172, 98))
+
+
+
 while True:
     # Read a new frame
     ok, frame_ori = vid.read()
@@ -193,12 +203,15 @@ while True:
         new_hog = exposure.rescale_intensity(new_hog, in_range=(0, 10))
 
 
-        cv2.putText(crab_color_ori, condition, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+        # cv2.putText(crab_color_ori, condition, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
 
         cv2.imshow("res", res)
         cv2.imshow("Scaled", crab_color)
         cv2.imshow("RAW", crab_color_ori)
         cv2.imshow("HOG", new_hog.astype("uint8")*255)
+
+        print(crab_color_ori.shape)
+        out_feed_frame.write(crab_color_ori)
 
         cv2.imwrite(res_dir + "/" + condition + "_" + str(counter) + ".jpeg", crab_color)
         cv2.imwrite(res_dir2 + "/" + condition + "_" + str(counter) + ".jpeg", new_hog.astype("uint8") * 255)
