@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3820270.svg)](https://doi.org/10.5281/zenodo.3820270)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![GitHub Fork: ](https://img.shields.io/github/forks/CexyNature/Crabspy?label=Fork&style=social)](https://github.com/CexyNature/Crabspy)
 [![GitHub Start: ](https://img.shields.io/github/forks/CexyNature/Crabspy?label=Starts&style=social)](https://github.com/CexyNature/Crabspy)
