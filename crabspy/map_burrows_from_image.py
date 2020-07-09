@@ -80,7 +80,7 @@ try:
                 # print(burrows_coord)
 
                 for i, rows in burrows_coord.iterrows():
-                    row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y))]
+                    row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius)]
                     # print(row_values)
                     existing_burrows.append(row_values)
 
@@ -114,7 +114,7 @@ try:
         maxi = np.amax(vertices_draw, axis=0)
 
         img = cv2.imread(args["image"])
-        img = cv2.resize(img, dsize=(0, 0), fx=0.75, fy=0.75)
+        img = cv2.resize(img, dsize=(0, 0), fx=0.5, fy=0.5)
         img = cv2.warpPerspective(img, M, (side, side))
 
         info = [methods.CompileInformation("name_image", image_name),
@@ -186,7 +186,7 @@ while True:
 
     for i, val in enumerate(existing_burrows):
         # print(val)
-        cv2.circle(img_preview, val[1], 3, (255, 5, 205), 1)
+        cv2.circle(img_preview, val[1], val[2], (255, 5, 205), 1)
         cv2.putText(img_preview, "{}".format(val[0]), val[1],
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
         # cv2.circle(masked, val[0], 3, (255, 5, 205), 2)
