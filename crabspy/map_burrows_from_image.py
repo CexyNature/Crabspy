@@ -203,11 +203,19 @@ def open_previous_burrow_maps(current_sampling_time):
 
         try:
             print("Loading burrow positions from previous sampling time: t = 0")
+
+            burrows_meta_previous_0 = pd.read_csv(image_path + "/" + "_burrows_map_0.csv", header=0, nrows=1,
+                                       converters={"vertice_1": ast.literal_eval, "vertice_2": ast.literal_eval,
+                                                   "vertice_3": ast.literal_eval, "vertice_4": ast.literal_eval})
+
+            factor = side / burrows_meta_previous_0.iloc[0]["projected_q_side"]
+
             burrows_coord_previous_0 = pd.read_csv(image_path + "/" + "_burrows_map_0.csv",
                                                    header=2, skiprows=range(0, 1))
 
             for i, rows in burrows_coord_previous_0.iterrows():
-                row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius)]
+                row_values = [int(rows.ID), (int(rows.Burrow_coord_x * factor),
+                                             int(rows.Burrow_coord_y * factor)), int(rows.Radius)]
                 # print(row_values)
                 previous_burrows_0.append(row_values)
 
@@ -220,19 +228,35 @@ def open_previous_burrow_maps(current_sampling_time):
         try:
             print("Loading burrow positions from previous sampling time: t = 0 and t = 1")
 
+            burrows_meta_previous_0 = pd.read_csv(image_path + "/" + "_burrows_map_0.csv", header=0, nrows=1,
+                                                  converters={"vertice_1": ast.literal_eval,
+                                                              "vertice_2": ast.literal_eval,
+                                                              "vertice_3": ast.literal_eval,
+                                                              "vertice_4": ast.literal_eval})
+
+            factor = side / burrows_meta_previous_0.iloc[0]["projected_q_side"]
+
             burrows_coord_previous_0 = pd.read_csv(image_path + "/" + "_burrows_map_0.csv",
                                                    header=2, skiprows=range(0, 1))
 
             for i, rows in burrows_coord_previous_0.iterrows():
-                row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius)]
+                row_values = [int(rows.ID), (int(rows.Burrow_coord_x * factor), int(rows.Burrow_coord_y * factor)), int(rows.Radius)]
                 # print(row_values)
                 previous_burrows_0.append(row_values)
+
+            burrows_meta_previous_0 = pd.read_csv(image_path + "/" + "_burrows_map_1.csv", header=0, nrows=1,
+                                                  converters={"vertice_1": ast.literal_eval,
+                                                              "vertice_2": ast.literal_eval,
+                                                              "vertice_3": ast.literal_eval,
+                                                              "vertice_4": ast.literal_eval})
+
+            factor0 = side / burrows_meta_previous_0.iloc[0]["projected_q_side"]
 
             burrows_coord_previous_1 = pd.read_csv(image_path + "/" + "_burrows_map_1.csv",
                                                    header=2, skiprows=range(0, 1))
 
             for i, rows in burrows_coord_previous_1.iterrows():
-                row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius)]
+                row_values = [int(rows.ID), (int(rows.Burrow_coord_x * factor0), int(rows.Burrow_coord_y * factor0)), int(rows.Radius)]
                 # print(row_values)
                 previous_burrows_1.append(row_values)
 
