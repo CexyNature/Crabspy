@@ -114,7 +114,7 @@ try:
         maxi = np.amax(vertices_draw, axis=0)
 
         img = cv2.imread(args["image"])
-        img = cv2.resize(img, dsize=(0, 0), fx=0.5, fy=0.5)
+        img = cv2.resize(img, dsize=(0, 0), fx=0.75, fy=0.75)
         img = cv2.warpPerspective(img, M, (side, side))
 
         info = [methods.CompileInformation("name_image", image_name),
@@ -171,7 +171,7 @@ def draw_circle(event, x, y, flags, param):
         burrow_info = (int((xi + x) / 2), int((yi + y) / 2))
         burrows.append(burrow_info)
 
-        radius = int(math.sqrt(((xi - x) ** 2) + ((yi - y) ** 2)))
+        radius = int((math.sqrt(((xi - x) ** 2) + ((yi - y) ** 2)))/2)
         radii.append(radius)
 
         print("Radius {}".format(radius))
