@@ -23,8 +23,11 @@ __license__ = "GNU GPL"
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", default="video/test.png", help="Provide path to image file")
+ap.add_argument("-t", "--time", default="0", help="Provide sampling time")
 args = vars(ap.parse_args())
 
+previous_burrows_0 = []
+previous_burrows_1 = []
 existing_burrows = []
 burrows = []
 burrows_counter = 0
@@ -39,6 +42,9 @@ create_new_file = True
 draw = False
 xi, yi = 0, 0
 radii = []
+
+sampling_time = args["time"]
+print(sampling_time)
 
 image_name = args["image"]
 image_path = os.path.dirname(image_name)
@@ -61,15 +67,15 @@ try:
         print(img.shape)
         img = cv2.resize(img, dsize=(0, 0), fx=0.5, fy=0.5)
 
-        if os.path.isfile(image_path + "/" + image_name + "_burrows_map.csv"):
+        if os.path.isfile(image_path + "/" + "_burrows_map_" + sampling_time + ".csv"):
             try:
                 print("Burrows map file found. Burrows coordinates will be loaded.")
                 create_new_file = False
                 head_true = False
-                burrows_meta = pd.read_csv(image_path + "/" + image_name + "_burrows_map.csv", header=0, nrows=1,
+                burrows_meta = pd.read_csv(image_path + "/" + "_burrows_map_" + sampling_time + ".csv", header=0, nrows=1,
                                            converters={"vertice_1": ast.literal_eval, "vertice_2": ast.literal_eval,
                                                        "vertice_3": ast.literal_eval, "vertice_4": ast.literal_eval})
-                burrows_coord = pd.read_csv(image_path + "/" + image_name + "_burrows_map.csv", header=2,
+                burrows_coord = pd.read_csv(image_path + "/" + "_burrows_map_" + sampling_time + ".csv", header=2,
                                             skiprows=range(0, 1))
 
                 quadrat_pts_used = [burrows_meta.iloc[0]["vertice_1"], burrows_meta.iloc[0]["vertice_2"],
@@ -131,7 +137,7 @@ try:
         if create_new_file:
             print("There is not burrows map file for this video, creating one.")
             head_true = True
-            name_result_file = image_path + "/" + info_image["name_image"] + "_burrows_map.csv"
+            name_result_file = image_path + "/" + "_burrows_map_" + sampling_time + ".csv"
 
             if head_true:
                 with open(name_result_file, "w", newline="\n") as result_file:
@@ -163,6 +169,8 @@ def draw_circle(event, x, y, flags, param):
         xi, yi = x, y
 
     elif event == cv2.EVENT_MOUSEMOVE:
+        posmouse = (x, y)
+
         if draw:
             position = (x, y)
 
@@ -180,21 +188,87 @@ def draw_circle(event, x, y, flags, param):
         draw = False
 
 
+def open_previous_burrow_maps(current_sampling_time):
+    """
+
+    :param current_sampling_time:
+    :return:
+    """
+
+    if current_sampling_time == 0:
+
+        pass
+
+    elif current_sampling_time == 1:
+
+        try:
+            print("Loading burrow positions from previous sampling time: t = 0")
+            burrows_coord_previous_0 = pd.read_csv(image_path + "/" + "_burrows_map_0.csv",
+                                                   header=2, skiprows=range(0, 1))
+
+            for i, rows in burrows_coord_previous_0.iterrows():
+                row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius)]
+                # print(row_values)
+                previous_burrows_0.append(row_values)
+
+        except (TypeError, RuntimeError):
+            print("Exiting because of TypeError or RuntimeError")
+            pass
+
+    elif current_sampling_time == 2:
+
+        try:
+            print("Loading burrow positions from previous sampling time: t = 0 and t = 1")
+
+            burrows_coord_previous_0 = pd.read_csv(image_path + "/" + "_burrows_map_0.csv",
+                                                   header=2, skiprows=range(0, 1))
+
+            for i, rows in burrows_coord_previous_0.iterrows():
+                row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius)]
+                # print(row_values)
+                previous_burrows_0.append(row_values)
+
+            burrows_coord_previous_1 = pd.read_csv(image_path + "/" + "_burrows_map_1.csv",
+                                                   header=2, skiprows=range(0, 1))
+
+            for i, rows in burrows_coord_previous_1.iterrows():
+                row_values = [int(rows.ID), (int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius)]
+                # print(row_values)
+                previous_burrows_1.append(row_values)
+
+        except (TypeError, RuntimeError):
+            print("Exiting because of TypeError or RuntimeError")
+            pass
+
+    return previous_burrows_0, previous_burrows_1
+
+
+previous_burrows_0, previous_burrows_1 = open_previous_burrow_maps(int(sampling_time))
+
+
 while True:
     img_preview = img.copy()
     img_preview2 = img.copy()
 
+    if len(previous_burrows_0) > 0:
+        for i, val in enumerate(previous_burrows_0):
+            cv2.circle(img_preview, val[1], val[2], (255, 10, 10), 1)
+
+    if len(previous_burrows_1) > 0:
+        for i, val in enumerate(previous_burrows_1):
+            cv2.circle(img_preview, val[1], val[2], (0, 255, 10), 1)
+
     for i, val in enumerate(existing_burrows):
         # print(val)
-        cv2.circle(img_preview, val[1], val[2], (255, 5, 205), 1)
+        cv2.circle(img_preview, val[1], val[2], (10, 10, 255), 1)
         cv2.putText(img_preview, "{}".format(val[0]), val[1],
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
         # cv2.circle(masked, val[0], 3, (255, 5, 205), 2)
         existing_burrows_counter = i + 1
 
-    for i, val in enumerate(burrows):
+    for i, (val, rad) in enumerate(zip(burrows, radii)):
         # print(val)
-        cv2.circle(img_preview, val, 3, (0, 255, 0), 1)
+        cv2.circle(img_preview, val, rad+1, (0, 100, 100), 1)
         # cv2.circle(masked, val[0], 3, (0, 255, 0), 2)
         new_burrows_counter = i + 1
 
@@ -232,7 +306,7 @@ print(burrows_counter)
 
 if len(burrows) > 0:
     print('Writing new coordinates to file.')
-    name_result_file = image_path + "/" + info_image["name_image"] + "_burrows_map.csv"
+    name_result_file = image_path + "/" + "_burrows_map_" + sampling_time + ".csv"
     for i, j, k in zip(range(existing_burrows_counter, burrows_counter), burrows, radii):
         try:
             print(i+1, " ", j[0], " ", j[1], k)
