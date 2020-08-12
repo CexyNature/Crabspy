@@ -151,7 +151,7 @@ info = [methods.CompileInformation("name_video", video_name),
         methods.CompileInformation("fps", fps),
         methods.CompileInformation("vid_duration", vid_duration),
         methods.CompileInformation("target_frame", target_frame),
-        methods.CompileInformation("side", side),
+        methods.CompileInformation("side", (width, height, side)),
         methods.CompileInformation("conversion", conversion),
         methods.CompileInformation("tracker", "Manual_tracking"),
         methods.CompileInformation("Crab_ID", name)]
