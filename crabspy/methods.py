@@ -336,7 +336,7 @@ def calc_proj(quadrat_pts):
     #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
 
     # print("The selected side vertices is ", side)
-    dest_pts = np.float32([[0, 0], [side, 0], [0, side], [side, side]])
+    dest_pts = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
     M = cv2.getPerspectiveTransform(orig_pts, dest_pts)
     IM = cv2.getPerspectiveTransform(dest_pts, orig_pts)
 
@@ -344,7 +344,7 @@ def calc_proj(quadrat_pts):
     # maxi = np.amax(vertices, axis=0)
     # print(mini, "and ", maxi)
 
-    return M, side, vertices_draw, IM, conversion
+    return M, width, height, side, vertices_draw, IM, conversion
 
 
 def get_file_creation(video_path):
