@@ -63,13 +63,13 @@ while vid.isOpened():
 # vid.release()
 cv2.destroyAllWindows()
 
-M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
+M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
 center = (0, 0)
 mini = np.amin(vertices_draw, axis=0)
 maxi = np.amax(vertices_draw, axis=0)
 
 ok, frame = vid.read()
-frame = cv2.warpPerspective(frame, M, (side, side))
+frame = cv2.warpPerspective(frame, M, (width, height))
 
 if not ok:
     print("Cannot read video file")
@@ -221,7 +221,7 @@ while vid.isOpened():
                 key2 = cv2.waitKey(1) & 0xff
                 cv2.namedWindow('Manual tracking')
                 cv2.setMouseCallback('Manual tracking', click)
-                result = cv2.warpPerspective(img, M, (side, side))
+                result = cv2.warpPerspective(img, M, (width, height))
                 cv2.imshow('Manual tracking', result)
                 if key2 == ord('p'):
                     pause = False
@@ -229,8 +229,8 @@ while vid.isOpened():
 
         crop_img = img[mini[1]-10:maxi[1]+10, mini[0]-10:maxi[0]+10]
 
-        result = cv2.warpPerspective(img, M, (side, side))
-        crab_frame = cv2.warpPerspective(img, M, (side, side))
+        result = cv2.warpPerspective(img, M, (width, height))
+        crab_frame = cv2.warpPerspective(img, M, (width, height))
         methods.draw_quadrat(img, vertices_draw)
         cv2.namedWindow('Manual tracking')
         cv2.setMouseCallback('Manual tracking', click)
