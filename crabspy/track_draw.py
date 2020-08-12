@@ -10,6 +10,7 @@ from collections import deque
 import cv2
 
 import methods
+import constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
@@ -22,6 +23,8 @@ ap.add_argument("-s", "--seconds", default=None,
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
 args = vars(ap.parse_args())
+
+resz_val = constant.RESIZE
 
 track_meta = pd.read_csv("results/" + args["track_file"], header=0, nrows=1)
 track = pd.read_csv("results/" + args["track_file"], header=2, skiprows=range(0, 1))
@@ -43,7 +46,7 @@ quadrat_vertices = [(int(df.iloc[0, 0]), int(df.iloc[0, 1])),
 
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(file_name)
 vid, target_frame = methods.set_video_star(vid, args["seconds"], args["frame"], fps)
-M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
+M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 
 pts = deque(maxlen=int(track_meta["length_video"].values[0])+250)
 (dX, dY) = (0, 0)
@@ -60,9 +63,10 @@ f_max = track["Frame_number"].max()
 
 while vid.isOpened():
     ret, img = vid.read()
+    img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
 
     if ret:
-        result = cv2.warpPerspective(img, M, (side, side))
+        result = cv2.warpPerspective(img, M, (width, height))
         result2 = result.copy()
 
         if counter <= f_max:
