@@ -31,6 +31,8 @@ ap.add_argument("-t", "--timesleep", default=0, type=float,
 # ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
+resz_val = constant.RESIZE
+
 # Return video information
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
 local_creation, creation = methods.get_file_creation(args["video"])
@@ -45,7 +47,7 @@ if target_frame > length_vid:
 
 while vid.isOpened():
     ret, frame = vid.read()
-
+    frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
     methods.enable_point_capture(constant.CAPTURE_VERTICES)
     frame = methods.draw_points_mousepos(frame, methods.quadratpts, methods.posmouse)
     cv2.imshow("Vertices selection", frame)
@@ -63,13 +65,14 @@ while vid.isOpened():
 # vid.release()
 cv2.destroyAllWindows()
 
-M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
+M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
 center = (0, 0)
 mini = np.amin(vertices_draw, axis=0)
 maxi = np.amax(vertices_draw, axis=0)
 
 ok, frame = vid.read()
-frame = cv2.warpPerspective(frame, M, (side, side))
+frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
+frame = cv2.warpPerspective(frame, M, (width, height))
 
 if not ok:
     print("Cannot read video file")
@@ -112,7 +115,7 @@ info = [methods.CompileInformation("name_video", video_name),
         methods.CompileInformation("fps", fps),
         methods.CompileInformation("vid_duration", vid_duration),
         methods.CompileInformation("target_frame", target_frame),
-        methods.CompileInformation("side", side),
+        methods.CompileInformation("side", (width, height, side)),
         methods.CompileInformation("conversion", conversion),
         methods.CompileInformation("tracker", "Manual_tracking"),
         methods.CompileInformation("Crab_ID", None)]
@@ -158,13 +161,14 @@ while vid.isOpened():
     if img is None:
         break
     else:
+        img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
         if pause:
             while True:
 
                 key2 = cv2.waitKey(1) & 0xff
                 cv2.namedWindow('Burrow counter')
                 cv2.setMouseCallback('Burrow counter', click)
-                result = cv2.warpPerspective(img, M, (side, side))
+                result = cv2.warpPerspective(img, M, (width, height))
                 cv2.imshow('Burrow counter', result)
                 if key2 == ord('p'):
                     pause = False
@@ -172,8 +176,8 @@ while vid.isOpened():
 
         crop_img = img[mini[1]-10:maxi[1]+10, mini[0]-10:maxi[0]+10]
 
-        result = cv2.warpPerspective(img, M, (side, side))
-        crab_frame = cv2.warpPerspective(img, M, (side, side))
+        result = cv2.warpPerspective(img, M, (width, height))
+        crab_frame = cv2.warpPerspective(img, M, (width, height))
         methods.draw_quadrat(img, vertices_draw)
         cv2.namedWindow('Burrow counter')
         cv2.setMouseCallback('Burrow counter', click)
