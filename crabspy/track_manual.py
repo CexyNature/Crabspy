@@ -44,7 +44,7 @@ if target_frame > length_vid:
     sys.exit("Crabspy halted")
 
 resz_val = constant.RESIZE
-
+rect_val = constant.RECT_SIZE
 
 while vid.isOpened():
     ret, frame = vid.read()
@@ -233,7 +233,7 @@ while vid.isOpened():
                     pause = False
                     break
 
-        crop_img = img[mini[1]-10:maxi[1]+10, mini[0]-10:maxi[0]+10]
+        crop_img = img[mini[1]:maxi[1], mini[0]:maxi[0]]
 
         result = cv2.warpPerspective(img, M, (width, height))
         crab_frame = cv2.warpPerspective(img, M, (width, height))
@@ -279,8 +279,8 @@ while vid.isOpened():
             if drawing:
                 center_bbox = track_points[-1]
 
-                p1 = (int(center_bbox[0]) - 20, int(center_bbox[1]) - 20)
-                p2 = (int(center_bbox[0]) + 20, int(center_bbox[1]) + 20)
+                p1 = (int(center_bbox[0]) - rect_val, int(center_bbox[1]) - rect_val)
+                p2 = (int(center_bbox[0]) + rect_val, int(center_bbox[1]) + rect_val)
                 cv2.rectangle(result, p1, p2, (204, 204, 100), 2)
                 cv2.rectangle(masked, p1, p2, (204, 204, 0))
                 posx.appendleft(center_bbox[0])
@@ -292,11 +292,11 @@ while vid.isOpened():
                 for i in info:
                     info_video[i.name] = i.value
 
-                crab = crab_frame[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+                crab = crab_frame[center[1] - rect_val:center[1] + rect_val, center[0] - rect_val:center[0] + rect_val]
                 crab_snapshot = crab.copy()
                 pts.appendleft(center)
 
-                blob = fb_res_two3[center[1] - 15:center[1] + 15, center[0] - 15:center[0] + 15]
+                blob = fb_res_two3[center[1] - rect_val:center[1] + rect_val, center[0] - rect_val:center[0] + rect_val]
                 ret, blob = cv2.threshold(blob, 150, 255, cv2.THRESH_BINARY)
                 output = cv2.connectedComponentsWithStats(blob, 4, cv2.CV_32S)
                 num_labels = output[0]
@@ -313,16 +313,16 @@ while vid.isOpened():
                     labeled_img = cv2.cvtColor(labeled_img, cv2.COLOR_HSV2BGR)
                     # set bg label to black
                     labeled_img[label_hue == 0] = 0
-                    cv2.imshow('labeled.png', labeled_img)
+                    cv2.imshow('labeled components', labeled_img)
 
                     M_blob = cv2.moments(blob)
                     Mx_blob = int(M_blob["m10"] / M_blob["m00"])
                     My_blob = int(M_blob["m01"] / M_blob["m00"])
-                    cx = Mx_blob + int(center_bbox[0]-20)
-                    cy = My_blob + int(center_bbox[1]-20)
+                    cx = Mx_blob + int(center_bbox[0]-rect_val)
+                    cy = My_blob + int(center_bbox[1]-rect_val)
                     # if (cx, cy) is not None:
                     cv2.circle(result, (cx, cy), 3, (240, 240, 255), -1)
-                    cv2.circle(result, (cx, cy), 20, (180, 210, 10), 1)
+                    cv2.circle(result, (cx, cy), rect_val, (180, 210, 10), 1)
                     # print(cx, cy)
 
                 crab_size = cv2.Canny(blob, threshold1=100, threshold2=200)
@@ -374,11 +374,11 @@ while vid.isOpened():
                     dist_TBman = math.sqrt(dist_TBx + dist_TBy)
 
                 for label in range(1, num_labels):
-                    blob_area = stats[label, cv2.CC_STAT_AREA] * conversion
+                    blob_area = stats[label, cv2.CC_STAT_AREA] * (conversion[0]*conversion[1])
                     # print("This is the area ", blob_area, "ID=", label)
-                    blob_width = stats[label, cv2.CC_STAT_WIDTH] * conversion
+                    blob_width = stats[label, cv2.CC_STAT_WIDTH] * conversion[0]
                     # print("This is the width ", blob_width, "ID=", label)
-                    blob_height = stats[label, cv2.CC_STAT_HEIGHT] * conversion
+                    blob_height = stats[label, cv2.CC_STAT_HEIGHT] * conversion[1]
                     # print("This is the height ", blob_height, "ID=", label)
                     # print("CV2 width ", blob_width, " height ", blob_height)
 
@@ -422,7 +422,7 @@ while vid.isOpened():
                 if constant.SNAPSHOT == True:
                     methods.save_snapshot(crab_snapshot, args["video"], info_video)
 
-                crab = cv2.resize(crab, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_LANCZOS4)
+                crab = cv2.resize(crab, (0, 0), fx=1, fy=1, interpolation=cv2.INTER_LANCZOS4)
                 cv2.imshow("Crab", crab)
                 cv2.imshow("Blob", blob)
                 methods.data_writer(args["video"], info_video, False)
