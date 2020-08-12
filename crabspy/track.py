@@ -27,6 +27,8 @@ ap.add_argument("-s", "--seconds", default=None,
                 help="Provide the targeted time in seconds of video section you want to jump to")
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
+ap.add_argument("-r", "--rescale", default=1, type=float,
+                help="Provide rescale factor number (float) to resize image, e.g. 0.5 rescale by half")
 args = vars(ap.parse_args())
 
 # Return video information
@@ -63,14 +65,14 @@ while vid.isOpened():
 # vid.release()
 cv2.destroyAllWindows()
 
-M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
+M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
 center = (0, 0)
 mini = np.amin(vertices_draw, axis=0)
 maxi = np.amax(vertices_draw, axis=0)
 
 ok, frame = vid.read()
 frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
-frame = cv2.warpPerspective(frame, M, (side, side))
+frame = cv2.warpPerspective(frame, M, (width, height))
 
 if not ok:
     print("Cannot read video file")
@@ -225,8 +227,8 @@ while vid.isOpened():
         img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
         crop_img = img[mini[1]-10:maxi[1]+10, mini[0]-10:maxi[0]+10]
 
-        result = cv2.warpPerspective(img, M, (side, side))
-        crab_frame = cv2.warpPerspective(img, M, (side, side))
+        result = cv2.warpPerspective(img, M, (width, height))
+        crab_frame = cv2.warpPerspective(img, M, (width, height))
         # result_speed = result
         # print(crop_img.shape)
         # print("Dimensions for result are: ", result.shape)
