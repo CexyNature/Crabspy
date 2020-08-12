@@ -330,7 +330,7 @@ def calc_proj(quadrat_pts):
     # q_h = float(side_b_c + side_d_c) / 2
     # area = q_w * q_h
     side = np.max([width, height], axis=0)
-    conversion = constant.DIM[0] / side
+    conversion = (constant.DIM[0] / width, constant.DIM[0] / height, constant.DIM[0] / side)
 
     # print("Quadrat wide factor is ", q_w, "\nQuadrat height factor is ", q_h,
     #       "\nQuadrat area factor is ", area, "\nDistance coversion factor is ", conversion)
