@@ -11,6 +11,7 @@ from collections import deque
 import cv2
 
 import methods
+import constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
@@ -27,6 +28,7 @@ ap.add_argument("-o", "--outcome", default="", type=bool,
                 help="Should the video outcome be saved")
 args = vars(ap.parse_args())
 
+resz_val = constant.RESIZE
 
 tracks_meta = pd.read_csv("results/unified_tracks/" + args["metafile"], header=0, nrows=1)
 tracks = pd.read_csv("results/unified_tracks/" + args["uni_file"], header=0, skiprows=0)
@@ -50,7 +52,7 @@ quadrat_vertices = [(int(df.iloc[0, 0]), int(df.iloc[0, 1])),
 # print(file_name)
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(file_name)
 vid, target_frame = methods.set_video_star(vid, args["seconds"], args["frame"], fps)
-M, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
+M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 q_factor = 0.107758620689655
 # print(video_name)
 print("Quadrat size: ", side)
@@ -60,7 +62,7 @@ print("Pixel to centimeter conversion factor: ", conversion)
 if args["outcome"] is True:
     os.makedirs("results/processed_videos/", exist_ok=True)
     file_outcome = "results/processed_videos/" + video_name + "_tracks_viz.avi"
-    out_vid = cv2.VideoWriter(file_outcome, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (side, side))
+    out_vid = cv2.VideoWriter(file_outcome, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (width, height))
 else:
     pass
 
@@ -94,7 +96,8 @@ while vid.isOpened():
     ret, img = vid.read()
 
     if ret:
-        result = cv2.warpPerspective(img, M, (side, side))
+        img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
+        result = cv2.warpPerspective(img, M, (width, height))
         result2 = result.copy()
 
         if counter <= f_max:
