@@ -27,8 +27,8 @@ ap.add_argument("-s", "--seconds", default=None,
                 help="Provide the targeted time in seconds of video section you want to jump to")
 ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
-ap.add_argument("-t", "--timesleep", default=0, type=float, help="Provide time in seconds to wait before showing next frame")
-ap.add_argument("-r", "--rescale", default=1, type=float, help="Provide rescale factor number (float) to resize image, e.g. 0.5 rescale by half")
+ap.add_argument("-t", "--timesleep", default=0, type=float,
+                help="Provide time in seconds to wait before showing next frame")
 # ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
@@ -43,11 +43,12 @@ if target_frame > length_vid:
           "Video duration is {} seconds".format(round(vid_duration, 2)))
     sys.exit("Crabspy halted")
 
+resz_val = constant.RESIZE
+
 
 while vid.isOpened():
     ret, frame = vid.read()
-    frame = cv2.resize(frame, (0, 0), fx = args["rescale"], fy = args["rescale"])
-
+    frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
     methods.enable_point_capture(constant.CAPTURE_VERTICES)
     frame = methods.draw_points_mousepos(frame, methods.quadratpts, methods.posmouse)
     cv2.imshow("Vertices selection", frame)
@@ -71,6 +72,7 @@ mini = np.amin(vertices_draw, axis=0)
 maxi = np.amax(vertices_draw, axis=0)
 
 ok, frame = vid.read()
+frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
 frame = cv2.warpPerspective(frame, M, (width, height))
 
 if not ok:
@@ -212,14 +214,15 @@ pause = True
 
 while vid.isOpened():
     _, img = vid.read()
-    img = cv2.resize(img, (0, 0), fx=args["rescale"], fy=args["rescale"])
     key = cv2.waitKey(1) & 0xFF
 
     if img is None:
         break
     else:
+        img = cv2.resize(img, (0, 0), fx=resz_val, fy=resz_val)
         if pause:
             while True:
+
                 # posmouse = (0, 0)
                 key2 = cv2.waitKey(1) & 0xff
                 cv2.namedWindow('Manual tracking')
