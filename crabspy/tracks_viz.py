@@ -9,6 +9,7 @@ import argparse
 import pandas as pd
 from collections import deque
 import cv2
+from ast import literal_eval
 
 import methods
 import constant
@@ -55,7 +56,7 @@ vid, target_frame = methods.set_video_star(vid, args["seconds"], args["frame"], 
 M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(quadrat_vertices)
 q_factor = 0.107758620689655
 # print(video_name)
-print("Quadrat size: ", side)
+print("Quadrat size: ", width, " ", height, " ", side)
 # print(vertices_draw)
 print("Pixel to centimeter conversion factor: ", conversion)
 
@@ -72,6 +73,12 @@ pts = deque(maxlen=int(tracks_meta["length_video"].values[0])+250)
 # target = 1
 # vid.set(1, target)
 counter = target_frame
+# if args["seconds"] != None:
+#     counter = target_frame
+# elif args["frame"] != None:
+#     counter = target_frame
+# else:
+#     counter = tracks["Frame_number"].min()
 
 individuals = tracks.Crab_ID.unique()
 colours = methods.select_color(len(individuals))
@@ -102,35 +109,40 @@ while vid.isOpened():
 
         if counter <= f_max:
 
-            df_f = f_number[counter]
+            try:
+                df_f = f_number[counter]
 
 
-            for index, row in df_f.iterrows():
+                for index, row in df_f.iterrows():
 
-                try:
-                    crab = row["Crab_ID"]
-                    x = int(row["Crab_position_x"])
-                    y = int(row["Crab_position_y"])
-                    bgr = crab_colors[crab][1]
-                    cv2.circle(result, (x, y), 15, bgr, 2)
+                    try:
+                        crab = row["Crab_ID"]
+                        x = int(row["Crab_position_x"])
+                        y = int(row["Crab_position_y"])
+                        radius = tracks.loc[tracks["Crab_ID"] == crab]["Width"].mean() / literal_eval(tracks_meta["q_conversion_factor_distance"].values[0])[0]
+                        bgr = crab_colors[crab][1]
+                        cv2.circle(result, (x, y), int(radius), bgr, 2)
 
-                    # print(crab, x, row["Crab_position_x"], y, row["Crab_position_y"], bgr)
-                except ValueError:
-                    pass
-            # try:
-            #     # print(counter, track["Frame_number"].values[counter])
-            #     # coord_x = int(track["Crab_position_x"].iloc[[counter-15, counter+15]].mean())
-            #     # coord_y = int(track["Crab_position_y"].iloc[[counter-15, counter+15]].mean())
-            #     coord_x = int(tracks["Crab_position_x"].values[counter])
-            #     coord_y = int(tracks["Crab_position_y"].values[counter])
-            #     center = (coord_x, coord_y)
-            #     pts.appendleft(center)
-            #
-            #     for i in np.arange(1, len(pts)):
-            #         cv2.line(result, pts[i - 1], pts[i], color1, 1)
-            #         cv2.circle(result, (coord_x, coord_y), 15, color1, 2)
-            # except (ValueError, IndexError):
-            #     pass
+                        # print(crab, x, row["Crab_position_x"], y, row["Crab_position_y"], bgr)
+                    except ValueError:
+                        pass
+                # try:
+                #     # print(counter, track["Frame_number"].values[counter])
+                #     # coord_x = int(track["Crab_position_x"].iloc[[counter-15, counter+15]].mean())
+                #     # coord_y = int(track["Crab_position_y"].iloc[[counter-15, counter+15]].mean())
+                #     coord_x = int(tracks["Crab_position_x"].values[counter])
+                #     coord_y = int(tracks["Crab_position_y"].values[counter])
+                #     center = (coord_x, coord_y)
+                #     pts.appendleft(center)
+                #
+                #     for i in np.arange(1, len(pts)):
+                #         cv2.line(result, pts[i - 1], pts[i], color1, 1)
+                #         cv2.circle(result, (coord_x, coord_y), 15, color1, 2)
+                # except (ValueError, IndexError):
+                #     pass
+
+            except KeyError as e:
+                print(counter)
         else:
             pass
 
