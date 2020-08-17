@@ -89,24 +89,24 @@ posmouse = (0,0)
 def click(event, x, y, flags, param):
     global drawing, position, posmouse, track_points
 
-    if event == cv2.EVENT_LBUTTONDOWN:
-        drawing = True
-        position = (x, y)
-    elif event== cv2.EVENT_MOUSEMOVE:
+    if event== cv2.EVENT_MOUSEMOVE:
+
+        if drawing == False:
+            posmouse = (x, y)
+            position = (x, y)
+
         if drawing == True:
             position = (x, y)
             track_points.append(position)
-            # info = x, y, vid.get(1)
-            # wr.writerow(info)
-            # wr.writerow([position, vid.get(1)])
-            # resultFile.flush()
-            # print(position)
+
+    elif event == cv2.EVENT_LBUTTONDOWN:
+        drawing = True
+        track_points.append(position)
 
     elif event == cv2.EVENT_LBUTTONUP:
         drawing = False
 
-    if event == cv2.EVENT_MOUSEMOVE:
-        posmouse = (x, y)
+
 
 # initialize the list of tracked points, the frame counter,
 # and the coordinate deltas
@@ -283,6 +283,7 @@ while vid.isOpened():
                 p2 = (int(center_bbox[0]) + rect_val, int(center_bbox[1]) + rect_val)
                 cv2.rectangle(result, p1, p2, (204, 204, 100), 2)
                 cv2.rectangle(masked, p1, p2, (204, 204, 0))
+                cv2.putText(masked, str(track_points[-1]), (300, 300), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (204, 204, 100))
                 posx.appendleft(center_bbox[0])
                 posy.appendleft(center_bbox[1])
                 centx = mean(posx)
