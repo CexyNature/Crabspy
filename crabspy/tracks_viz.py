@@ -72,13 +72,8 @@ pts = deque(maxlen=int(tracks_meta["length_video"].values[0])+250)
 (dX, dY) = (0, 0)
 # target = 1
 # vid.set(1, target)
-counter = target_frame
-# if args["seconds"] != None:
-#     counter = target_frame
-# elif args["frame"] != None:
-#     counter = target_frame
-# else:
-#     counter = tracks["Frame_number"].min()
+
+counter = 0
 
 individuals = tracks.Crab_ID.unique()
 colours = methods.select_color(len(individuals))
@@ -107,10 +102,10 @@ while vid.isOpened():
         result = cv2.warpPerspective(img, M, (width, height))
         result2 = result.copy()
 
-        if counter <= f_max:
+        if counter + target_frame <= f_max:
 
             try:
-                df_f = f_number[counter]
+                df_f = f_number[counter + target_frame]
 
 
                 for index, row in df_f.iterrows():
@@ -142,7 +137,8 @@ while vid.isOpened():
                 #     pass
 
             except KeyError as e:
-                print(counter)
+                # print(counter)
+                pass
         else:
             pass
 
@@ -154,6 +150,13 @@ while vid.isOpened():
         # result2 = cv2.addWeighted(result, 0.6, result2, 0.4, 0)
         result_1 = cv2.warpPerspective(result, IM, (img.shape[1], img.shape[0]))
         result_1 = cv2.addWeighted(img, 0.5, result_1, 0.5, 0)
+
+        percentage_vid = (target_frame + counter) / length_vid * 100
+        text = "Video {0:.1f} %".format(percentage_vid)
+        cv2.putText(result_1, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+        cv2.putText(result_1, "Frame n. {0:d}".format(target_frame + counter),
+                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+
 
         if args["outcome"] is True:
             out_vid.write(result)
