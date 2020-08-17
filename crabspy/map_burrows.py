@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-This script allows users to map burrow positions
+This script allows users to map burrow positions by drawing a circle with variable
+diameter superimposed in the video. Burrow coordinates and radii are saved in a .csv file.
 """
 
 import os
@@ -12,6 +13,7 @@ import sys
 from datetime import datetime
 import time
 import pandas as pd
+import math
 
 import methods
 import constant
@@ -28,10 +30,22 @@ ap.add_argument("-f", "--frame", default=None, type=int,
                 help="Provide the targeted frame of video section you want to jump to")
 ap.add_argument("-t", "--timesleep", default=0, type=float,
                 help="Provide time in seconds to wait before showing next frame")
-# ap.add_argument("-c", "--crab_id", default="crab_", help="Provide a name for the crab to be tracked")
 args = vars(ap.parse_args())
 
 resz_val = constant.RESIZE
+existing_burrows = []
+burrows = []
+burrows_counter = 0
+existing_burrows_counter = 0
+new_burrows_counter = 0
+position = (0, 0)
+posmouse = (0, 0)
+counter = 0
+startTime = datetime.now()
+
+draw = False
+xi, yi = 0, 0
+radii = []
 
 # Return video information
 video_name, vid, length_vid, fps, _, _, vid_duration, _ = methods.read_video(args["video"])
@@ -78,28 +92,45 @@ if not ok:
     print("Cannot read video file")
     sys.exit()
 
-existing_burrows = []
-burrows = []
-burrows_counter = 0
-existing_burrows_counter = 0
-new_burrows_counter = 0
-position = (0, 0)
-posmouse = (0, 0)
 
-def click(event, x, y, flags, param):
-    global burrows, position, posmouse
+# def click(event, x, y, flags, param):
+#     global burrows, position, posmouse
+#
+#     if event == cv2.EVENT_LBUTTONDOWN:
+#         position = (x, y)
+#         burrow_info = position, vid.get(1)
+#         burrows.append(burrow_info)
+#
+#     if event == cv2.EVENT_MOUSEMOVE:
+#         posmouse = (x, y)
+
+
+def draw_circle(event, x, y, flags, param):
+    global xi, yi, radii, draw, burrows, position, posmouse
 
     if event == cv2.EVENT_LBUTTONDOWN:
-        position = (x, y)
-        burrow_info = position, vid.get(1)
-        burrows.append(burrow_info)
+        draw = True
+        xi, yi = x, y
 
-    if event == cv2.EVENT_MOUSEMOVE:
+    elif event == cv2.EVENT_MOUSEMOVE:
         posmouse = (x, y)
 
+        if draw:
+            position = (x, y)
 
-counter = 0
-startTime = datetime.now()
+    elif event == cv2.EVENT_LBUTTONUP:
+
+        burrow_info = (int((xi + x) / 2), int((yi + y) / 2)), vid.get(1)
+        burrows.append(burrow_info)
+
+        radius = int((math.sqrt(((xi - x) ** 2) + ((yi - y) ** 2)))/2)
+        radii.append(radius)
+
+        print("Radius {}".format(radius))
+        # cv2.circle(img, (int((xi + x) / 2), int((yi + y) / 2)), radius, (0, 0, 255), 1)
+
+        draw = False
+
 
 fgbg1 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=20)
 fgbg2 = cv2.createBackgroundSubtractorMOG2(history=5000, varThreshold=100)
@@ -133,7 +164,7 @@ if os.path.isfile("results/" + video_name + "_burrows_map.csv"):
         burrows_coord = pd.read_csv("results/" + video_name + "_burrows_map.csv", header=2, skiprows=range(0, 1))
         # print(burrows_coord)
         for i, rows in burrows_coord.iterrows():
-            row_values = [(int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Frame_number)]
+            row_values = [(int(rows.Burrow_coord_x), int(rows.Burrow_coord_y)), int(rows.Radius), int(rows.Frame_number)]
             # print(row_values)
             existing_burrows.append(row_values)
 
@@ -144,7 +175,7 @@ if os.path.isfile("results/" + video_name + "_burrows_map.csv"):
 else:
     print("There is not burrows map file for this video, creating one.")
     head_true = True
-    methods.burrow_writer(args["video"], info_video, None, head_true)
+    methods.burrow_writer(args["video"], info_video, None, None, head_true)
 
 
 start, end, step, _, _ = methods.frame_to_time(info_video)
@@ -167,7 +198,7 @@ while vid.isOpened():
 
                 key2 = cv2.waitKey(1) & 0xff
                 cv2.namedWindow('Burrow counter')
-                cv2.setMouseCallback('Burrow counter', click)
+                cv2.setMouseCallback('Burrow counter', draw_circle)
                 result = cv2.warpPerspective(img, M, (width, height))
                 cv2.imshow('Burrow counter', result)
                 if key2 == ord('p'):
@@ -180,7 +211,7 @@ while vid.isOpened():
         crab_frame = cv2.warpPerspective(img, M, (width, height))
         methods.draw_quadrat(img, vertices_draw)
         cv2.namedWindow('Burrow counter')
-        cv2.setMouseCallback('Burrow counter', click)
+        cv2.setMouseCallback('Burrow counter', draw_circle)
 
         gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
         hsl = cv2.cvtColor(result, cv2.COLOR_BGR2HLS_FULL)
@@ -198,13 +229,13 @@ while vid.isOpened():
         _, _, _, time_absolute, time_since_start = methods.frame_to_time(info_video)
 
         for i, val in enumerate(existing_burrows):
-            cv2.circle(result, val[0], 3, (255, 5, 205), 2)
-            cv2.circle(masked, val[0], 3, (255, 5, 205), 2)
+            cv2.circle(result, val[0], val[1], (255, 5, 205), 2)
+            cv2.circle(masked, val[0], val[1], (255, 5, 205), 2)
             existing_burrows_counter = i + 1
 
-        for i, val in enumerate(burrows):
-            cv2.circle(result, val[0], 3, (0, 255, 0), 2)
-            cv2.circle(masked, val[0], 3, (0, 255, 0), 2)
+        for i, (val, rad) in enumerate(zip(burrows, radii)):
+            cv2.circle(result, val[0], rad+1, (0, 255, 0), 2)
+            cv2.circle(masked, val[0], rad+1, (0, 255, 0), 2)
             new_burrows_counter = i + 1
 
         burrows_counter = existing_burrows_counter + new_burrows_counter
@@ -245,9 +276,10 @@ head_true = False
 
 if len(burrows) > 0:
     print('Writing new coordinates to file.')
-    for i in burrows:
+    for i, (val, rad) in enumerate(zip(burrows, radii)):
+    # for i in burrows:
         try:
-            methods.burrow_writer(args["video"], info_video, i, head_true)
+            methods.burrow_writer(args["video"], info_video, val, rad, head_true)
         except (TypeError, RuntimeError):
             print('A TypeError or RuntimeError was caught while writing burrows coordinates')
             pass

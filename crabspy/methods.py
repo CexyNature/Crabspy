@@ -828,7 +828,7 @@ def hist_writer(video_name, individual, bins, pixels, hist_values, frame_number,
             wr1.writerow([video_name, individual[0], col_space, bins, pixels, frame_number, average_ch] + list(hist_values_col.ravel()))
 
 
-def burrow_writer(video_path, info_video, burrow_position, head_true):
+def burrow_writer(video_path, info_video, burrow_position, radius, head_true):
 
     """
 
@@ -837,6 +837,7 @@ def burrow_writer(video_path, info_video, burrow_position, head_true):
     video_path
     info_video
     burrow_position
+    radius
     head_true
 
     Returns
@@ -861,14 +862,14 @@ def burrow_writer(video_path, info_video, burrow_position, head_true):
                         info_video["target_frame"], quadratpts[0], quadratpts[1],
                         quadratpts[2], quadratpts[3], info_video["side"], info_video["conversion"]])
             wr.writerow(["\n"])
-            wr.writerow(["Burrow_coord_x", "Burrow_coord_y","Frame_number"])
+            wr.writerow(["Burrow_coord_x", "Burrow_coord_y", "Radius", "Frame_number"])
 
     if not head_true:
         # save track_info to file
         with open(name_result_file, "a+", newline="\n") as result_file:
             wr = csv.writer(result_file, delimiter=",")
 
-            wr.writerow([burrow_position[0][0], burrow_position[0][1], burrow_position[1]])
+            wr.writerow([burrow_position[0][0], burrow_position[0][1], radius, burrow_position[1]])
 
 
 
