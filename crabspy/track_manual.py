@@ -293,8 +293,17 @@ while vid.isOpened():
                 for i in info:
                     info_video[i.name] = i.value
 
-                crab = crab_frame[center[1] - rect_val:center[1] + rect_val, center[0] - rect_val:center[0] + rect_val]
-                crab_snapshot = crab.copy()
+                if center[0]-rect_val <= 0:
+                    crab = crab_frame[center[1] - rect_val:center[1] + rect_val,
+                           0:center[0] + rect_val]
+                    crab_snapshot = crab.copy()
+                elif center[1]-rect_val <= 0:
+                    crab = crab_frame[0:center[1] + rect_val,
+                           center[0] - rect_val:center[0] + rect_val]
+                    crab_snapshot = crab.copy()
+                else:
+                    crab = crab_frame[center[1] - rect_val:center[1] + rect_val, center[0] - rect_val:center[0] + rect_val]
+                    crab_snapshot = crab.copy()
                 pts.appendleft(center)
 
                 blob = fb_res_two3[center[1] - rect_val:center[1] + rect_val, center[0] - rect_val:center[0] + rect_val]
@@ -306,25 +315,28 @@ while vid.isOpened():
                 # Computing the connected components for image, and show them in window.
                 _, label = cv2.connectedComponents(blob)
                 if np.max(label) != 0:
-                    label_hue = np.uint8(179 * label / np.max(label))
-                    # print(stats)
-                    blank_ch = 255 * np.ones_like(label_hue)
-                    labeled_img = cv2.merge([label_hue, blank_ch, blank_ch])
-                    # cvt to BGR for display
-                    labeled_img = cv2.cvtColor(labeled_img, cv2.COLOR_HSV2BGR)
-                    # set bg label to black
-                    labeled_img[label_hue == 0] = 0
-                    cv2.imshow('labeled components', labeled_img)
+                    try:
+                        label_hue = np.uint8(179 * label / np.max(label))
+                        # print(stats)
+                        blank_ch = 255 * np.ones_like(label_hue)
+                        labeled_img = cv2.merge([label_hue, blank_ch, blank_ch])
+                        # cvt to BGR for display
+                        labeled_img = cv2.cvtColor(labeled_img, cv2.COLOR_HSV2BGR)
+                        # set bg label to black
+                        labeled_img[label_hue == 0] = 0
+                        cv2.imshow('labeled components', labeled_img)
 
-                    M_blob = cv2.moments(blob)
-                    Mx_blob = int(M_blob["m10"] / M_blob["m00"])
-                    My_blob = int(M_blob["m01"] / M_blob["m00"])
-                    cx = Mx_blob + int(center_bbox[0]-rect_val)
-                    cy = My_blob + int(center_bbox[1]-rect_val)
-                    # if (cx, cy) is not None:
-                    cv2.circle(result, (cx, cy), 3, (240, 240, 255), -1)
-                    cv2.circle(result, (cx, cy), rect_val, (180, 210, 10), 1)
-                    # print(cx, cy)
+                        M_blob = cv2.moments(blob)
+                        Mx_blob = int(M_blob["m10"] / M_blob["m00"])
+                        My_blob = int(M_blob["m01"] / M_blob["m00"])
+                        cx = Mx_blob + int(center_bbox[0]-rect_val)
+                        cy = My_blob + int(center_bbox[1]-rect_val)
+                        # if (cx, cy) is not None:
+                        cv2.circle(result, (cx, cy), 3, (240, 240, 255), -1)
+                        cv2.circle(result, (cx, cy), rect_val, (180, 210, 10), 1)
+                        # print(cx, cy)
+                    except TypeError as e:
+                        pass
 
                 crab_size = cv2.Canny(blob, threshold1=100, threshold2=200)
                 _, cnts_size, _ = cv2.findContours(crab_size, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -423,16 +435,21 @@ while vid.isOpened():
                 if constant.SNAPSHOT == True:
                     methods.save_snapshot(crab_snapshot, args["video"], info_video)
 
-                crab = cv2.resize(crab, (0, 0), fx=1, fy=1, interpolation=cv2.INTER_LANCZOS4)
-                cv2.imshow("Crab", crab)
-                cv2.imshow("Blob", blob)
+                try:
+                    crab = cv2.resize(crab, (0, 0), fx=1, fy=1, interpolation=cv2.INTER_LANCZOS4)
+                    cv2.imshow("Crab", crab)
+                    cv2.imshow("Blob", blob)
+                except cv2.error as e:
+                    pass
+
+
                 methods.data_writer(args["video"], info_video, False)
 
         percentage_vid = (target_frame + counter) / length_vid * 100
         text = "Video {0:.1f} %".format(percentage_vid)
-        cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+        cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
         cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter),
-                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (10, 10, 10), 2)
+                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
 
 
         # cv2.imshow("background substraction", fb_res_two3)
