@@ -26,6 +26,8 @@ ap.add_argument("-z", "--zoom", default=1.5, type=float, help="Provide zoom fact
 args = vars(ap.parse_args())
 
 current_time = time.strftime("%d%m%Y") + "_" + time.strftime("%H%M")
+resz_val = constant.RESIZE
+
 
 def save_measures(video_path, info_capture, head_true):
     """
@@ -86,11 +88,12 @@ def save_measures(video_path, info_capture, head_true):
 def onChange(trackbarValue):
     vid.set(1, trackbarValue)
     ret, frame = vid.read()
+    frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
     methods.enable_point_capture(constant.CAPTURE_VERTICES)
     frame = methods.draw_points_mousepos(frame, methods.quadratpts, methods.posmouse)
-    M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
-    frame = cv2.warpPerspective(frame, M, (side, side))
-    frame = cv2.resize(frame, dsize=(0, 0), fx=args["zoom"], fy=args["zoom"], interpolation=cv2.INTER_NEAREST)
+    M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
+    frame = cv2.warpPerspective(frame, M, (width, height))
+    # frame = cv2.resize(frame, dsize=(0, 0), fx=args["zoom"], fy=args["zoom"], interpolation=cv2.INTER_NEAREST)
 
     # frame = cv2.resize(frame, (960, 540))
     cv2.imshow('Measure object length', frame)
@@ -124,7 +127,7 @@ _, vid, length_vid, fps, vid_width, vid_height, vid_duration, _ = methods.read_v
 vid, target_frame = methods.set_video_star(vid, args["seconds"], None, fps)
 print('Total number of frames in video = ' + str(length_vid))
 
-resz_val = constant.RESIZE
+
 while vid.isOpened():
     ret, frame = vid.read()
     frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
@@ -174,16 +177,17 @@ frame = methods.draw_points_mousepos(frame, methods.quadratpts, methods.posmouse
 if len(methods.quadratpts) == 4:
     print("Vertices were captured. Coordinates in pixels are: top-left {}, top-right {}, "
           "bottom-left {}, and bottom-right {}".format(*methods.quadratpts))
-M, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
+M, width, height, side, vertices_draw, IM, conversion = methods.calc_proj(methods.quadratpts)
 
 while True:
     key = cv2.waitKey(1) & 0XFF
     selected_f = cv2.getTrackbarPos('Selector', 'Measure object length')
     vid.set(1, selected_f)
     ret, frame = vid.read()
+    frame = cv2.resize(frame, (0, 0), fx=resz_val, fy=resz_val)
+    frame = cv2.warpPerspective(frame, M, (width, height))
 
-    frame = cv2.warpPerspective(frame, M, (side, side))
-    frame = cv2.resize(frame, dsize=(0, 0), fx=args["zoom"], fy=args["zoom"], interpolation=cv2.INTER_NEAREST)
+    # frame = cv2.resize(frame, dsize=(0, 0), fx=args["zoom"], fy=args["zoom"], interpolation=cv2.INTER_NEAREST)
 
     frame_size_zoomed = frame.shape[0]
     new_conversion = constant.DIM[0] / frame_size_zoomed
