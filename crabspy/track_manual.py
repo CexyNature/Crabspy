@@ -447,8 +447,8 @@ while vid.isOpened():
 
         percentage_vid = (target_frame + counter) / length_vid * 100
         text = "Video {0:.1f} %".format(percentage_vid)
-        cv2.putText(result, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
-        cv2.putText(result, "Frame n. {0:d}".format(target_frame + counter),
+        cv2.putText(masked, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
+        cv2.putText(masked, "Frame n. {0:d}".format(target_frame + counter),
                     (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
 
 
