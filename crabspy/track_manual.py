@@ -233,7 +233,7 @@ while vid.isOpened():
                     pause = False
                     break
 
-        crop_img = img[mini[1]:maxi[1], mini[0]:maxi[0]]
+        # crop_img = img[mini[1]:maxi[1], mini[0]:maxi[0]]
 
         result = cv2.warpPerspective(img, M, (width, height))
         crab_frame = cv2.warpPerspective(img, M, (width, height))
@@ -451,10 +451,12 @@ while vid.isOpened():
         cv2.putText(masked, "Frame n. {0:d}".format(target_frame + counter),
                     (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
 
+        result_1 = cv2.warpPerspective(result, IM, (img.shape[1], img.shape[0]))
+        result_1 = cv2.addWeighted(img, 0.5, result_1, 0.5, 0)
 
         # cv2.imshow("background substraction", fb_res_two3)
         cv2.imshow("masked", masked)
-        cv2.imshow("cropped", crop_img)
+        cv2.imshow("cropped", result_1)
         cv2.imshow('Manual tracking', result)
         # cv2.imshow("result", result)
         time.sleep(args["timesleep"])
