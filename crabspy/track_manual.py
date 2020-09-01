@@ -436,7 +436,7 @@ while vid.isOpened():
                     methods.save_snapshot(crab_snapshot, args["video"], info_video)
 
                 try:
-                    crab = cv2.resize(crab, (0, 0), fx=1, fy=1, interpolation=cv2.INTER_LANCZOS4)
+                    crab = cv2.resize(crab, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_LANCZOS4)
                     cv2.imshow("Crab", crab)
                     cv2.imshow("Blob", blob)
                 except cv2.error as e:
@@ -453,6 +453,9 @@ while vid.isOpened():
 
         result_1 = cv2.warpPerspective(result, IM, (img.shape[1], img.shape[0]))
         result_1 = cv2.addWeighted(img, 0.5, result_1, 0.5, 0)
+        cv2.putText(result_1, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
+        cv2.putText(result_1, "Frame n. {0:d}".format(target_frame + counter),
+                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (210, 210, 210), 2)
 
         # cv2.imshow("background substraction", fb_res_two3)
         cv2.imshow("masked", masked)
