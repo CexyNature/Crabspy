@@ -51,7 +51,7 @@ for f in my_files:
 
 # print(len(tracks))
 # print(tracks[0].shape)
-tracks_unify = pd.concat(tracks)
+tracks_unify = pd.concat(tracks, sort=False)
 tracks_meta_unify = pd.concat(tracks_meta, sort=True)
 # print(len(tracks_unify))
 # print(tracks_unify.shape)
