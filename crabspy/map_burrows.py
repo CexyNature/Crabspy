@@ -15,7 +15,8 @@ import time
 import pandas as pd
 import math
 
-from . import methods, constant
+import methods
+import constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

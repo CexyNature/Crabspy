@@ -18,7 +18,7 @@ import string
 import random
 from itertools import product
 
-from . import constant
+import constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

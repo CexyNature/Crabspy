@@ -15,7 +15,7 @@ from statistics import mean
 import math
 import time
 
-from . import methods, constant
+import methods, constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

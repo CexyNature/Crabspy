@@ -1,4 +1,4 @@
-from . import methods
+import methods
 
 # class CrabNames(object):
 #

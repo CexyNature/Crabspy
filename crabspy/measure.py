@@ -11,7 +11,7 @@ import cv2
 import math
 import argparse
 
-from . import methods, constant
+import methods, constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

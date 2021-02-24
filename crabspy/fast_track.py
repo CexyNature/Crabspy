@@ -10,7 +10,7 @@ import argparse
 import cv2
 import csv
 
-from . import methods
+import methods
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
