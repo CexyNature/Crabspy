@@ -7,7 +7,7 @@ Consult and prune database
 import argparse
 import pickle
 
-import methods
+from . import methods
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

@@ -11,8 +11,7 @@ from collections import deque
 import cv2
 from ast import literal_eval
 
-import methods
-import constant
+from . import methods, constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

@@ -15,7 +15,7 @@ import csv
 import ast
 import math
 
-import methods
+from . import methods
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"

@@ -9,8 +9,7 @@ import pandas as pd
 from collections import deque
 import cv2
 
-import methods
-import constant
+from . import methods, constant
 
 __author__ = "Cesar Herrera"
 __copyright__ = "Copyright (C) 2019 Cesar Herrera"
