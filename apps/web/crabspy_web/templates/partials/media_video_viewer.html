@@ -1,4 +1,4 @@
-{# Expects ``media``, ``video_annotations`` (list of Annotation with points), ``file_on_disk`` (bool). #}
+{# Expects ``media``, ``annotations`` (list of Annotation with points), ``file_on_disk`` (bool). #}
 <div
   class="media-viewer media-viewer--video"
   data-media-video-viewer="1"
@@ -11,13 +11,19 @@
   >
     <video controls preload="metadata" src="/media/{{ media.id }}/file"></video>
     <div class="annotation-overlay" data-annotation-overlay aria-hidden="true">
-      {% for ann in video_annotations %}
+      {% for ann in annotations %}
         {% if ann.kind.value == "point" and ann.points|length == 1 %}
           <div
             class="annotation-dot"
             data-annotation-id="{{ ann.id }}"
             data-x-norm="{{ ann.points[0].x_norm }}"
             data-y-norm="{{ ann.points[0].y_norm }}"
+          ></div>
+        {% elif ann.kind.value == "polyline" and ann.points|length >= 2 %}
+          <div
+            class="annotation-polyline-wrap"
+            data-annotation-id="{{ ann.id }}"
+            data-points-json='[{% for p in ann.points %}{"x_norm":{{ p.x_norm }},"y_norm":{{ p.y_norm }}}{% if not loop.last %},{% endif %}{% endfor %}]'
           ></div>
         {% endif %}
       {% endfor %}
@@ -26,14 +32,30 @@
   <p class="form-error media-seek-error" hidden></p>
   <div class="annotation-controls">
     <p class="muted small-print">
-      <strong>Annotations (Phase 3b):</strong> toggle <em>Add points</em>, then click on the picture area (letterboxing accounted for). Coordinates are normalized 0–1; each point stores the current playback time (and frame when fps is set).
+      <strong>Annotations (Phase 3b):</strong> choose <em>Point</em> or <em>Polyline</em>, toggle <em>Annotate</em>, then click on the picture area (letterboxing accounted for). Coordinates are normalized 0–1; each annotation stores the current playback time (and frame when fps is set). For polylines, use <strong>Finish polyline</strong> after two or more vertices.
       <a href="/media/export_annotations.csv">Download annotations backup (CSV)</a> (all media).
     </p>
-    <button type="button" class="btn annotation-toggle" data-annotation-toggle>
-      Add annotation points
-    </button>
+    <div class="annotation-mode-row" role="radiogroup" aria-label="Annotation tool">
+      <label class="annotation-mode-label">
+        <input type="radio" name="annotation-mode-vid-{{ media.id }}" value="point" checked data-annotation-mode-input />
+        Point
+      </label>
+      <label class="annotation-mode-label">
+        <input type="radio" name="annotation-mode-vid-{{ media.id }}" value="polyline" data-annotation-mode-input />
+        Polyline
+      </label>
+    </div>
+    <p class="annotation-mode-actions">
+      <button type="button" class="btn annotation-toggle" data-annotation-toggle>Annotate</button>
+      <button type="button" class="btn annotation-finish-polyline" data-annotation-finish-polyline hidden>
+        Finish polyline
+      </button>
+      <button type="button" class="btn btn-secondary annotation-cancel-polyline" data-annotation-cancel-polyline hidden>
+        Cancel
+      </button>
+    </p>
     <ul class="annotation-list">
-      {% for ann in video_annotations %}
+      {% for ann in annotations %}
         <li data-annotation-id="{{ ann.id }}">
           <code>{{ ann.kind.value }}</code>
           {% if ann.time_seconds is not none %}· t={{ "%.3f"|format(ann.time_seconds) }}s{% endif %}

@@ -1,0 +1,70 @@
+{# Expects ``media``, ``annotations`` (list of Annotation with points), ``file_on_disk`` (bool). #}
+<div
+  class="media-viewer media-viewer--image"
+  data-media-image-viewer="1"
+>
+  <div
+    class="annotation-image-wrap"
+    data-annotation-image-root
+    data-media-id="{{ media.id }}"
+  >
+    <img src="/media/{{ media.id }}/file" alt="" />
+    <div class="annotation-overlay" data-annotation-overlay aria-hidden="true">
+      {% for ann in annotations %}
+        {% if ann.kind.value == "point" and ann.points|length == 1 %}
+          <div
+            class="annotation-dot"
+            data-annotation-id="{{ ann.id }}"
+            data-x-norm="{{ ann.points[0].x_norm }}"
+            data-y-norm="{{ ann.points[0].y_norm }}"
+          ></div>
+        {% elif ann.kind.value == "polyline" and ann.points|length >= 2 %}
+          <div
+            class="annotation-polyline-wrap"
+            data-annotation-id="{{ ann.id }}"
+            data-points-json='[{% for p in ann.points %}{"x_norm":{{ p.x_norm }},"y_norm":{{ p.y_norm }}}{% if not loop.last %},{% endif %}{% endfor %}]'
+          ></div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <div class="annotation-controls">
+    <p class="muted small-print">
+      <strong>Annotations (Phase 3b):</strong> choose <em>Point</em> or <em>Polyline</em>, toggle <em>Annotate</em>, then click on the picture (letterboxing accounted for). For polylines, use <strong>Finish polyline</strong> after two or more vertices.
+      <a href="/media/export_annotations.csv">Download annotations backup (CSV)</a> (all media).
+    </p>
+    <div class="annotation-mode-row" role="radiogroup" aria-label="Annotation tool">
+      <label class="annotation-mode-label">
+        <input type="radio" name="annotation-mode-img-{{ media.id }}" value="point" checked data-annotation-mode-input />
+        Point
+      </label>
+      <label class="annotation-mode-label">
+        <input type="radio" name="annotation-mode-img-{{ media.id }}" value="polyline" data-annotation-mode-input />
+        Polyline
+      </label>
+    </div>
+    <p class="annotation-mode-actions">
+      <button type="button" class="btn annotation-toggle" data-annotation-toggle>Annotate</button>
+      <button type="button" class="btn annotation-finish-polyline" data-annotation-finish-polyline hidden>
+        Finish polyline
+      </button>
+      <button type="button" class="btn btn-secondary annotation-cancel-polyline" data-annotation-cancel-polyline hidden>
+        Cancel
+      </button>
+    </p>
+    <ul class="annotation-list">
+      {% for ann in annotations %}
+        <li data-annotation-id="{{ ann.id }}">
+          <code>{{ ann.kind.value }}</code>
+          {% if ann.label %}· {{ ann.label }}{% endif %}
+          {% if ann.kind.value == "point" and ann.points|length == 1 %}
+            · ({{ "%.4f"|format(ann.points[0].x_norm) }}, {{ "%.4f"|format(ann.points[0].y_norm) }})
+          {% elif ann.kind.value == "polyline" %}
+            · {{ ann.points|length }} vertices
+          {% endif %}
+          <button type="button" class="btn btn-danger annotation-delete">Delete</button>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

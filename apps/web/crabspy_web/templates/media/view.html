@@ -11,9 +11,7 @@
         File not found on disk for this storage path. Confirm the path and that the file exists (relative paths are under <code>CRABSPY_DATA_DIR</code>).
       </p>
     {% elif media.media_kind.value == "image" %}
-      <div class="media-viewer">
-        <img src="/media/{{ media.id }}/file" alt="" />
-      </div>
+      {% include "partials/media_image_viewer.html" %}
     {% elif media.media_kind.value == "video" %}
       {% include "partials/media_video_viewer.html" %}
     {% else %}

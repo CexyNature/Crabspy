@@ -143,9 +143,9 @@ def media_view_page(
     except (FileNotFoundError, ValueError):
         file_on_disk = False
     templates = request.app.state.templates
-    video_annotations: list[Annotation] = []
-    if file_on_disk and row.media_kind in (MediaKind.video, MediaKind.unknown):
-        video_annotations = list(
+    annotations: list[Annotation] = []
+    if file_on_disk:
+        annotations = list(
             db.scalars(
                 select(Annotation)
                 .where(Annotation.media_id == row.id)
@@ -160,7 +160,7 @@ def media_view_page(
             "title": "View media",
             "media": row,
             "file_on_disk": file_on_disk,
-            "video_annotations": video_annotations,
+            "annotations": annotations,
         },
     )
 

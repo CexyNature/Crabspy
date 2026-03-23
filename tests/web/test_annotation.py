@@ -102,6 +102,88 @@ def test_annotation_rejects_image_media_with_time(tmp_path: Path) -> None:
         assert r_post.status_code == 400
 
 
+def test_annotation_polyline_video(tmp_path: Path) -> None:
+    (tmp_path / "uploads").mkdir(parents=True)
+    (tmp_path / "uploads" / "clip.mp4").write_bytes(b"%fakevideo")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/clip.mp4", "media_kind": "video"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        assert m is not None
+        mid = m.group(1)
+        r_post = client.post(
+            f"/media/{mid}/annotations",
+            json={
+                "kind": "polyline",
+                "points": [
+                    {"x_norm": 0.1, "y_norm": 0.2},
+                    {"x_norm": 0.3, "y_norm": 0.4},
+                ],
+                "time_seconds": 2.0,
+                "frame_index": 50,
+            },
+        )
+        assert r_post.status_code == 201
+        data = r_post.json()
+        assert data["kind"] == "polyline"
+        assert len(data["points"]) == 2
+
+        r_view = client.get(f"/media/{mid}/view")
+        assert r_view.status_code == 200
+        assert "annotation-polyline-wrap" in r_view.text
+
+
+def test_annotation_polyline_image(tmp_path: Path) -> None:
+    (tmp_path / "uploads").mkdir(parents=True)
+    (tmp_path / "uploads" / "p.jpg").write_bytes(b"x")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/p.jpg", "media_kind": "image"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        assert m is not None
+        mid = m.group(1)
+        r_post = client.post(
+            f"/media/{mid}/annotations",
+            json={
+                "kind": "polyline",
+                "points": [
+                    {"x_norm": 0.05, "y_norm": 0.95},
+                    {"x_norm": 0.95, "y_norm": 0.05},
+                ],
+            },
+        )
+        assert r_post.status_code == 201
+        assert r_post.json()["kind"] == "polyline"
+
+
+def test_media_image_view_includes_annotation_shell(tmp_path: Path) -> None:
+    (tmp_path / "uploads").mkdir(parents=True)
+    (tmp_path / "uploads" / "photo.jpg").write_bytes(b"x")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/photo.jpg", "media_kind": "image"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        assert m is not None
+        mid = m.group(1)
+        r_view = client.get(f"/media/{mid}/view")
+        assert r_view.status_code == 200
+        assert 'data-media-image-viewer="1"' in r_view.text
+        assert "data-annotation-image-root" in r_view.text
+        assert "<img " in r_view.text
+
+
 def test_export_annotations_csv(tmp_path: Path) -> None:
     (tmp_path / "uploads").mkdir(parents=True)
     (tmp_path / "uploads" / "a.mp4").write_bytes(b"x")
