@@ -42,6 +42,9 @@
             <th>Storage path</th>
             <th>Sample code</th>
             <th>Site</th>
+            <th>Camera</th>
+            <th>Deploy</th>
+            <th>Lat/Lon</th>
             <th>Created</th>
           </tr>
         </thead>
@@ -53,6 +56,15 @@
               <td class="cell-path">{{ row.storage_path }}</td>
               <td>{{ row.sample_code or "—" }}</td>
               <td>{{ row.site_name or "—" }}</td>
+              <td>{{ row.camera_id or "—" }}</td>
+              <td>{{ row.deployment_type or "—" }}</td>
+              <td class="muted">
+                {% if row.latitude is not none and row.longitude is not none %}
+                  {{ row.latitude }}, {{ row.longitude }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
               <td class="muted">{{ row.created_at }}</td>
             </tr>
           {% endfor %}

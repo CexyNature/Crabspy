@@ -3,8 +3,10 @@
   <p class="muted">
     Upload a UTF-8 CSV. The first row must be headers. A <strong>path</strong> column is required
     (<code>storage_path</code>, <code>path</code>, or <code>video_path</code>). Optional columns map to
-    study metadata (see below). Rows with path, date, sample code, site, and location filled in are saved as
-    <code>ready_for_processing</code>; otherwise <code>draft</code>.
+    study metadata (see below). Optional: <code>camera_id</code>, <code>deployment_time</code>,
+    <code>deployment_type</code>, <code>latitude</code>/<code>longitude</code> (or <code>lat</code>/<code>lon</code>) —
+    leaving these empty does not block <code>ready_for_processing</code>. Rows with path, date, sample code, site, and
+    location name filled in are saved as <code>ready_for_processing</code>; otherwise <code>draft</code>.
   </p>
 
   {% if result %}
@@ -31,9 +33,9 @@
   {% endif %}
 
   <h2 class="h3">Example CSV</h2>
-  <pre class="code-block">storage_path,collected_at,sample_code,site_name,location_name,notes
-uploads/site_a/clip01.mp4,2025-06-01,S-001,Mudflat A,Quadrat 3,Low tide
-uploads/site_a/clip02.mp4,2025-06-02,S-002,Mudflat A,Quadrat 4,</pre>
+  <pre class="code-block">storage_path,collected_at,sample_code,site_name,location_name,notes,camera_id,deployment_time,deployment_type,latitude,longitude
+uploads/site_a/clip01.mp4,2025-06-01,S-001,Mudflat A,Quadrat 3,Low tide,CAM-01,2025-06-01T08:00:00,tripod,-19.25,146.82
+uploads/site_a/clip02.mp4,2025-06-02,S-002,Mudflat A,Quadrat 4,,,,,,</pre>
 
   <form
     class="stacked-form"

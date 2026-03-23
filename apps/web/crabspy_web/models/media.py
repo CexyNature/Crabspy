@@ -68,6 +68,13 @@ class Media(Base):
     location_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Optional capture / deployment metadata (nullable; empty values do not block ready_for_processing).
+    camera_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    deployment_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deployment_type: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+
     # Technical file information
     storage_path: Mapped[str] = mapped_column(Text, nullable=False)
     original_filename: Mapped[str | None] = mapped_column(String(512), nullable=True)

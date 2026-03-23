@@ -29,6 +29,17 @@ _HEADER_ALIASES: dict[str, str] = {
     "notes": "notes",
     "original_filename": "original_filename",
     "filename": "original_filename",
+    "camera_id": "camera_id",
+    "camera": "camera_id",
+    "deployment_time": "deployment_time",
+    "deployment_type": "deployment_type",
+    "deployment": "deployment_type",
+    "latitude": "latitude",
+    "lat": "latitude",
+    "longitude": "longitude",
+    "lon": "longitude",
+    "lng": "longitude",
+    "long": "longitude",
 }
 
 _CANONICAL = frozenset(
@@ -40,6 +51,11 @@ _CANONICAL = frozenset(
         "location_name",
         "notes",
         "original_filename",
+        "camera_id",
+        "deployment_time",
+        "deployment_type",
+        "latitude",
+        "longitude",
     }
 )
 
@@ -85,6 +101,13 @@ def parse_collected_at(raw: str | None) -> datetime | None:
     return None
 
 
+def _parse_optional_float(raw: str | None) -> float | None:
+    if raw is None or not str(raw).strip():
+        return None
+    s = str(raw).strip().replace(",", ".")
+    return float(s)
+
+
 def infer_media_kind(storage_path: str) -> MediaKind:
     suffix = PurePosixPath(storage_path).suffix
     if suffix in _VIDEO_SUFFIX:
@@ -100,6 +123,7 @@ def _row_ready_for_processing(
     site_name: str | None,
     location_name: str | None,
 ) -> bool:
+    """Ready when core study fields are set. Optional fields (camera, deployment, lat/lon) do not affect this."""
     return (
         collected_at is not None
         and bool(sample_code and sample_code.strip())
@@ -124,9 +148,10 @@ def parse_media_import_csv(text: str) -> tuple[list[MediaImportRow], list[tuple[
     - ``collected_at`` (or ``date_collected``, ``date``, …)
     - ``sample_code``, ``site_name``, ``location_name``, ``notes``
     - optional ``original_filename``
+    - optional ``camera_id``, ``deployment_time``, ``deployment_type``, ``latitude``, ``longitude``
 
     Rows with path + date + sample + site + location all set become ``ready_for_processing``;
-    otherwise ``draft``.
+    otherwise ``draft``. Empty optional fields (including camera/deployment/geo) never block readiness.
     """
     stream = io.StringIO(text)
     reader = csv.DictReader(stream)
@@ -174,6 +199,16 @@ def parse_media_import_csv(text: str) -> tuple[list[MediaImportRow], list[tuple[
         loc = cell(row, "location_name")
         notes = cell(row, "notes")
         orig = cell(row, "original_filename")
+        camera_id = cell(row, "camera_id")
+        deployment_type = cell(row, "deployment_type")
+        deployment_time = parse_collected_at(cell(row, "deployment_time"))
+
+        try:
+            latitude = _parse_optional_float(cell(row, "latitude"))
+            longitude = _parse_optional_float(cell(row, "longitude"))
+        except ValueError:
+            errors.append((line_no, "invalid latitude or longitude"))
+            continue
 
         status = (
             MediaProcessingStatus.ready_for_processing
@@ -189,6 +224,11 @@ def parse_media_import_csv(text: str) -> tuple[list[MediaImportRow], list[tuple[
             "location_name": loc,
             "notes": notes,
             "original_filename": orig,
+            "camera_id": camera_id,
+            "deployment_time": deployment_time,
+            "deployment_type": deployment_type,
+            "latitude": latitude,
+            "longitude": longitude,
             "media_kind": infer_media_kind(path),
             "processing_status": status,
         }

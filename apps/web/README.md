@@ -28,7 +28,7 @@ Environment variables (optional):
 
 **Web UI:** register draft media and export CSV from [`/media/`](http://127.0.0.1:8000/media/) (see nav). On startup the app applies Alembic migrations to the active database automatically.
 
-**Bulk import:** [`/media/import`](http://127.0.0.1:8000/media/import) accepts a UTF-8 CSV (headers in row 1). Required: a path column (`storage_path`, `path`, or `video_path`). Optional: `collected_at` / `date_collected` / `date`, `sample_code`, `site_name`, `location_name`, `notes`, `original_filename`. Dates accept ISO-8601 or `YYYY-MM-DD` (and a few common formats). Rows with path, date, sample, site, and location all set are stored as `ready_for_processing`; others as `draft`. Duplicate `storage_path` values already in the database are skipped.
+**Bulk import:** [`/media/import`](http://127.0.0.1:8000/media/import) accepts a UTF-8 CSV (headers in row 1). Required: a path column (`storage_path`, `path`, or `video_path`). Optional: `collected_at` / `date_collected` / `date`, `sample_code`, `site_name`, `location_name`, `notes`, `original_filename`, plus `camera_id`, `deployment_time`, `deployment_type`, `latitude`/`lat`, `longitude`/`lon`/`lng`. Dates accept ISO-8601 or `YYYY-MM-DD` (and a few common formats). Rows with path, date, sample, site, and location name set are stored as `ready_for_processing`; others as `draft`. Optional camera/deployment/geo fields can be empty without blocking readiness. Duplicate `storage_path` values already in the database are skipped.
 
 ## Docker
 
