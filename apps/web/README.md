@@ -34,6 +34,8 @@ Environment variables (optional):
 
 **Video seek:** On the view page, use **Time** (seconds or `MM:SS` / `HH:MM:SS`) or **Frame** (0-based index; requires **Frame rate** on the media row). Deep links: `?t=12.5` (seconds) or `?f=300` (frame index). If both are present, `f` wins when frame rate is set; otherwise `t` is used.
 
+**Video annotation spike (Phase 3b prep):** On the media **View** page for video-like rows, use **Add annotation points** to overlay clicks on the video (normalized 0–1 coordinates, letterbox-aware). Points are stored in the `video_spike_annotation` table via `POST /media/<uuid>/video-spike` (JSON body: `x_norm`, `y_norm`, `time_seconds`, optional `frame_index`) and `POST /media/<uuid>/video-spike/<point_id>/delete`. This is a thin vertical slice to validate overlay + persistence before the full annotation schema.
+
 **CI:** GitHub Actions runs `pytest tests/web` on push and pull requests (see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)).
 
 **Bulk import:** [`/media/import`](http://127.0.0.1:8000/media/import) accepts a UTF-8 CSV (headers in row 1). Required: a path column (`storage_path`, `path`, or `video_path`). Optional: `collected_at` / `date_collected` / `date`, `sample_code`, `site_name`, `location_name`, `notes`, `original_filename`, plus `camera_id`, `deployment_time`, `deployment_type`, `latitude`/`lat`, `longitude`/`lon`/`lng`. Dates accept ISO-8601 or `YYYY-MM-DD` (and a few common formats). Rows with path, date, sample, site, and location name set are stored as `ready_for_processing`; others as `draft`. Optional camera/deployment/geo fields can be empty without blocking readiness. Duplicate `storage_path` values already in the database are skipped.

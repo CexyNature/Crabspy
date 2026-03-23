@@ -14,14 +14,17 @@ crabspy_web/db/session.py
 crabspy_web/models/__init__.py
 crabspy_web/models/base.py
 crabspy_web/models/media.py
+crabspy_web/models/video_spike.py
 crabspy_web/routers/__init__.py
 crabspy_web/routers/health.py
 crabspy_web/routers/media.py
 crabspy_web/routers/pages.py
 crabspy_web/routers/settings.py
+crabspy_web/schemas/video_spike.py
 crabspy_web/services/__init__.py
 crabspy_web/services/csv_export.py
 crabspy_web/services/media_csv_import.py
 crabspy_web/services/media_files.py
 crabspy_web/services/media_form_utils.py
 crabspy_web/services/media_readiness.py
+crabspy_web/services/video_spike.py

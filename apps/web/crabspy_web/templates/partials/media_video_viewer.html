@@ -1,11 +1,54 @@
-{# Expects ``media`` (Media row). #}
+{# Expects ``media``, ``video_spike_points`` (list), ``file_on_disk`` (bool). #}
 <div
   class="media-viewer media-viewer--video"
   data-media-video-viewer="1"
   data-video-fps="{% if media.frame_rate is not none %}{{ media.frame_rate }}{% endif %}"
 >
-  <video controls preload="metadata" src="/media/{{ media.id }}/file"></video>
+  <div
+    class="video-spike-wrap"
+    data-video-spike-root
+    data-media-id="{{ media.id }}"
+  >
+    <video controls preload="metadata" src="/media/{{ media.id }}/file"></video>
+    <svg
+      class="video-spike-overlay"
+      data-video-spike-svg
+      viewBox="0 0 1 1"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      {% for p in video_spike_points %}
+        <circle
+          data-point-id="{{ p.id }}"
+          cx="{{ p.x_norm }}"
+          cy="{{ p.y_norm }}"
+          r="0.018"
+          fill="var(--accent)"
+          stroke="var(--bg)"
+          stroke-width="0.003"
+        />
+      {% endfor %}
+    </svg>
+  </div>
   <p class="form-error media-seek-error" hidden></p>
+  <div class="video-spike-controls">
+    <p class="muted small-print">
+      <strong>Spike (3b prep):</strong> toggle <em>Add points</em>, then click on the picture area (letterboxing ignored). Points store normalized coordinates and current playback time.
+    </p>
+    <button type="button" class="btn video-spike-toggle" data-video-spike-toggle>
+      Add annotation points
+    </button>
+    <ul class="video-spike-list">
+      {% for p in video_spike_points %}
+        <li data-point-id="{{ p.id }}">
+          t={{ "%.3f"|format(p.time_seconds) }}s
+          {% if p.frame_index is not none %}· f={{ p.frame_index }}{% endif %}
+          · ({{ "%.4f"|format(p.x_norm) }}, {{ "%.4f"|format(p.y_norm) }})
+          <button type="button" class="btn btn-danger video-spike-delete">Delete</button>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
   <div class="media-seek-bar">
     <div class="media-seek-row">
       <label class="media-seek-label">

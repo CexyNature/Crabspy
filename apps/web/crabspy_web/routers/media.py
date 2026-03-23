@@ -13,6 +13,9 @@ from sqlalchemy.orm import Session
 
 from crabspy_web.db.session import get_db
 from crabspy_web.models.media import Media, MediaKind, MediaProcessingStatus
+from crabspy_web.models.video_spike import VideoSpikeAnnotation
+from crabspy_web.schemas.video_spike import VideoSpikeCreate, VideoSpikeOut
+from crabspy_web.services.video_spike import media_allows_video_spike
 from crabspy_web.services.csv_export import media_rows_to_csv_bytes
 from crabspy_web.services.media_csv_import import decode_uploaded_csv, parse_collected_at, parse_media_import_csv
 from crabspy_web.services.media_files import resolve_storage_path_to_file
@@ -119,6 +122,15 @@ def media_view_page(
     except (FileNotFoundError, ValueError):
         file_on_disk = False
     templates = request.app.state.templates
+    video_spike_points: list[VideoSpikeAnnotation] = []
+    if file_on_disk and row.media_kind in (MediaKind.video, MediaKind.unknown):
+        video_spike_points = list(
+            db.scalars(
+                select(VideoSpikeAnnotation)
+                .where(VideoSpikeAnnotation.media_id == row.id)
+                .order_by(VideoSpikeAnnotation.created_at.asc())
+            ).all()
+        )
     return templates.TemplateResponse(
         request,
         "media/view.html",
@@ -126,8 +138,60 @@ def media_view_page(
             "title": "View media",
             "media": row,
             "file_on_disk": file_on_disk,
+            "video_spike_points": video_spike_points,
         },
     )
+
+
+@router.post(
+    "/{media_id:uuid}/video-spike",
+    status_code=201,
+    response_model=VideoSpikeOut,
+)
+def video_spike_create(
+    media_id: UUID,
+    body: VideoSpikeCreate,
+    db: Annotated[Session, Depends(get_db)],
+) -> VideoSpikeOut:
+    row = db.get(Media, media_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    if not media_allows_video_spike(row):
+        raise HTTPException(
+            status_code=400,
+            detail="Video spike annotations apply to video-like media only.",
+        )
+    ann = VideoSpikeAnnotation(
+        media_id=media_id,
+        x_norm=body.x_norm,
+        y_norm=body.y_norm,
+        time_seconds=body.time_seconds,
+        frame_index=body.frame_index,
+    )
+    db.add(ann)
+    db.commit()
+    db.refresh(ann)
+    return VideoSpikeOut(
+        id=str(ann.id),
+        x_norm=ann.x_norm,
+        y_norm=ann.y_norm,
+        time_seconds=ann.time_seconds,
+        frame_index=ann.frame_index,
+    )
+
+
+@router.post("/{media_id:uuid}/video-spike/{point_id:uuid}/delete")
+def video_spike_delete(
+    media_id: UUID,
+    point_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict[str, bool]:
+    ann = db.get(VideoSpikeAnnotation, point_id)
+    if ann is None or ann.media_id != media_id:
+        raise HTTPException(status_code=404, detail="Annotation not found.")
+    db.delete(ann)
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/{media_id:uuid}/file")
