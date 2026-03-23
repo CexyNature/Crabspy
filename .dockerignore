@@ -1,0 +1,15 @@
+.git
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.venv
+**/venv
+crabspy/.venv
+.idea
+*.mp4
+*.MP4
+*.avi
+data/db/*.sqlite
+data/db/*.sqlite3
+data/uploads/*
+!data/uploads/.gitkeep

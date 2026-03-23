@@ -1,0 +1,36 @@
+# Crabspy web stack — single service serves HTML (Jinja + HTMX) and JSON API.
+# See docs/crabspy-rebuild-plan.md. Volumes persist uploads, SQLite, exports, and cache.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      CRABSPY_DATA_DIR: /data
+      CRABSPY_DATABASE_URL: sqlite:////data/db/project.sqlite
+    volumes:
+      - crabspy_data_uploads:/data/uploads
+      - crabspy_data_db:/data/db
+      - crabspy_data_exports:/data/exports
+      - crabspy_data_cache:/data/cache
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  crabspy_data_uploads:
+  crabspy_data_db:
+  crabspy_data_exports:
+  crabspy_data_cache:
