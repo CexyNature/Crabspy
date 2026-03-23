@@ -1,0 +1,5 @@
+Alembic migrations for the Crabspy web app. Run from apps/web after install:
+
+  alembic upgrade head
+
+Override the DB URL with CRABSPY_DATABASE_URL.

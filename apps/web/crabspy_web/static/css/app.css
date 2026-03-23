@@ -1,0 +1,99 @@
+/* Base styles for Crabspy web scaffold — extend as the UI grows */
+
+:root {
+  color-scheme: light dark;
+  --fg: #1a1a1a;
+  --bg: #fafafa;
+  --muted: #5c5c5c;
+  --border: #d0d0d0;
+  --accent: #0b5fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #f2f2f2;
+    --bg: #121212;
+    --muted: #a3a3a3;
+    --border: #333;
+    --accent: #6aa8ff;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: inherit;
+}
+
+.site-nav a {
+  margin-left: 1rem;
+  color: var(--accent);
+}
+
+.site-main {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+.site-footer {
+  padding: 1rem 1.25rem 2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.panel {
+  padding: 1rem 0;
+}
+
+.lead {
+  font-size: 1.05rem;
+}
+
+.btn {
+  cursor: pointer;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.status-panel {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+}
+
+.fragment-status p {
+  margin: 0;
+}

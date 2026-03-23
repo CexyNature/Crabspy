@@ -1,0 +1,25 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ title }} — Crabspy{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>Crabspy web</h1>
+    <p class="lead">
+      Server-rendered UI scaffold. Media metadata, annotations, and database features will plug in per the rebuild plan.
+    </p>
+    <p>
+      <strong>HTMX example:</strong>
+      <button
+        type="button"
+        class="btn"
+        hx-get="/fragments/status"
+        hx-target="#status-panel"
+        hx-swap="innerHTML"
+      >
+        Load status fragment
+      </button>
+    </p>
+    <div id="status-panel" class="status-panel muted" aria-live="polite">
+      (status will appear here)
+    </div>
+  </section>
+{% endblock %}
