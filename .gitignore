@@ -121,3 +121,7 @@ __pycache__/
 crabspy/results/Log/
 results/snapshots/
 video/
+
+# Crabspy web — local SQLite DB files (schema lives in apps/web/alembic/versions/)
+data/db/*.sqlite
+data/db/*.sqlite3
