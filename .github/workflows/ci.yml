@@ -13,8 +13,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install crabspy-web (dev)
-        run: pip install -e "apps/web[dev]"
+      - name: Install crabspy + crabspy-web (dev)
+        run: |
+          pip install -e ".[dev]"
+          pip install -e "apps/web[dev]"
 
       - name: Run tests
-        run: pytest tests/web -q
+        run: pytest tests/crabspy tests/web -q
