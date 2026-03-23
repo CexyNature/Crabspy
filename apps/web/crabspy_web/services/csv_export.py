@@ -8,6 +8,7 @@ from collections.abc import Iterable
 
 from crabspy_web.models.annotation import Annotation, AnnotationPoint
 from crabspy_web.models.media import Media
+from crabspy_web.services.annotation_geometry import annotation_path_lengths, edge_norm_and_px
 
 
 def media_rows_to_csv_bytes(rows: Iterable[Media]) -> bytes:
@@ -86,16 +87,34 @@ def annotation_rows_to_csv_bytes(annotations: Iterable[Annotation]) -> bytes:
             "frame_index",
             "ref_width_px",
             "ref_height_px",
+            "path_length_norm",
+            "path_length_px",
             "point_order",
             "x_norm",
             "y_norm",
+            "edge_length_norm",
+            "edge_length_px",
             "annotation_created_at",
             "annotation_updated_at",
         ]
     )
     for ann in annotations:
         points: list[AnnotationPoint] = sorted(ann.points, key=lambda p: p.order_index)
-        for p in points:
+        coords = [(p.x_norm, p.y_norm) for p in points]
+        path_n, path_px = annotation_path_lengths(ann, coords)
+        rw = ann.ref_width_px
+        rh = ann.ref_height_px
+        for i, p in enumerate(points):
+            edge_n: float | str = ""
+            edge_px_out: float | str = ""
+            if i > 0:
+                prev = points[i - 1]
+                en, epx = edge_norm_and_px(
+                    prev.x_norm, prev.y_norm, p.x_norm, p.y_norm, rw, rh
+                )
+                edge_n = en
+                if epx is not None:
+                    edge_px_out = epx
             writer.writerow(
                 [
                     str(ann.id),
@@ -104,11 +123,15 @@ def annotation_rows_to_csv_bytes(annotations: Iterable[Annotation]) -> bytes:
                     ann.label or "",
                     ann.time_seconds if ann.time_seconds is not None else "",
                     ann.frame_index if ann.frame_index is not None else "",
-                    ann.ref_width_px if ann.ref_width_px is not None else "",
-                    ann.ref_height_px if ann.ref_height_px is not None else "",
+                    rw if rw is not None else "",
+                    rh if rh is not None else "",
+                    path_n,
+                    "" if path_px is None else path_px,
                     p.order_index,
                     p.x_norm,
                     p.y_norm,
+                    edge_n,
+                    edge_px_out,
                     ann.created_at.isoformat() if ann.created_at else "",
                     ann.updated_at.isoformat() if ann.updated_at else "",
                 ]

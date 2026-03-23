@@ -196,7 +196,7 @@ GPL affects **distribution** of the combined work. Server-rendered Jinja templat
 1. **Phase 1**: Stabilize core algorithms behind functions; add **pytest** coverage with small fixtures and wire **CI** to run the default suite.
 2. **Phase 2**: **Data layer vertical slice**: schema and migrations; **register media** with **required metadata**; **switch active database**; **CSV export** of media rows; tests for these paths.
 3. **Phase 3**: **Annotation** capture (lines, reference points) on image and video frames, persisted to the DB, with export included or linked in CSV workflows.
-   - **Phase 3b (in progress)**: relational `annotation` / `annotation_point`, video point UI, `POST /media/{id}/annotations`, CSV backup via `GET /media/export_annotations.csv`, and optional **full backup** by copying the SQLite file when the app is stopped. Next: polyline drawing (multi-click + finish) and image viewer using the same API.
+   - **Phase 3b (complete for core scope)**: relational `annotation` / `annotation_point`; web UI for **points and polylines** on **video and image**; optional **labels**; **`ref_width_px` / `ref_height_px`** from client intrinsic dimensions for reproducible pixel lengths; CSV export with **path and edge lengths** (normalized and pixel); `GET /media/export_annotations.csv` and optional **SQLite file copy** when the app is stopped for full backup. **Deferred**: optional **annotation import** from CSV (round-trip).
 4. **Phase 4**: One **processing** vertical slice (e.g. upload video → one OpenCV pipeline step) only after metadata is recorded; HTMX for job status.
 5. **Phase 5**: Generalize jobs, storage, and UI patterns before porting every legacy script.
 

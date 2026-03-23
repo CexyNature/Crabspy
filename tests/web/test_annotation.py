@@ -184,6 +184,60 @@ def test_media_image_view_includes_annotation_shell(tmp_path: Path) -> None:
         assert "<img " in r_view.text
 
 
+def test_annotation_label_and_ref_in_response(tmp_path: Path) -> None:
+    (tmp_path / "uploads").mkdir(parents=True)
+    (tmp_path / "uploads" / "clip.mp4").write_bytes(b"%fakevideo")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/clip.mp4", "media_kind": "video"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        mid = m.group(1)
+        r_post = client.post(
+            f"/media/{mid}/annotations",
+            json={
+                "kind": "point",
+                "points": [{"x_norm": 0.1, "y_norm": 0.2}],
+                "time_seconds": 0.5,
+                "label": "snout",
+                "ref_width_px": 1920,
+                "ref_height_px": 1080,
+            },
+        )
+        assert r_post.status_code == 201
+        data = r_post.json()
+        assert data["label"] == "snout"
+        assert data["ref_width_px"] == 1920
+        assert data["ref_height_px"] == 1080
+
+
+def test_annotation_rejects_partial_ref_dimensions(tmp_path: Path) -> None:
+    (tmp_path / "uploads").mkdir(parents=True)
+    (tmp_path / "uploads" / "clip.mp4").write_bytes(b"%fakevideo")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/clip.mp4", "media_kind": "video"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        mid = m.group(1)
+        r_post = client.post(
+            f"/media/{mid}/annotations",
+            json={
+                "kind": "point",
+                "points": [{"x_norm": 0.1, "y_norm": 0.2}],
+                "time_seconds": 0.5,
+                "ref_width_px": 100,
+            },
+        )
+        assert r_post.status_code == 422
+
+
 def test_export_annotations_csv(tmp_path: Path) -> None:
     (tmp_path / "uploads").mkdir(parents=True)
     (tmp_path / "uploads" / "a.mp4").write_bytes(b"x")
@@ -204,9 +258,27 @@ def test_export_annotations_csv(tmp_path: Path) -> None:
                 "time_seconds": 0.5,
             },
         )
+        client.post(
+            f"/media/{mid}/annotations",
+            json={
+                "kind": "polyline",
+                "points": [
+                    {"x_norm": 0.0, "y_norm": 0.0},
+                    {"x_norm": 1.0, "y_norm": 0.0},
+                ],
+                "time_seconds": 0.0,
+                "ref_width_px": 100,
+                "ref_height_px": 100,
+            },
+        )
         r_csv = client.get("/media/export_annotations.csv")
         assert r_csv.status_code == 200
         body = r_csv.text
         assert "annotation_id" in body
         assert "x_norm" in body
+        assert "path_length_norm" in body
+        assert "path_length_px" in body
+        assert "edge_length_norm" in body
+        assert "edge_length_px" in body
         assert mid in body
+        assert "1.0" in body

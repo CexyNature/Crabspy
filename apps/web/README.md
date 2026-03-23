@@ -26,7 +26,11 @@ Environment variables (optional):
 
 ## Phase 3b — annotations and backup
 
-Annotations are stored relationally (`annotation`, `annotation_point`) with normalized coordinates. The web UI supports video point placement; polylines and image viewers can use the same JSON API.
+Annotations are stored relationally (`annotation`, `annotation_point`) with normalized coordinates. The web UI supports **points and polylines** on **video** and **image** viewers; `POST /media/{id}/annotations` accepts the same JSON schema.
+
+- **Optional label** — Text field on the view page; stored on the annotation row.
+- **Reference dimensions** — When the browser knows intrinsic size (`videoWidth` / `videoHeight` or image `naturalWidth` / `naturalHeight`), the client sends `ref_width_px` and `ref_height_px` together so exports can compute pixel-space lengths. Omit if metadata is not ready yet.
+- **CSV export** — `GET /media/export_annotations.csv` includes per-vertex rows plus `path_length_norm`, `path_length_px` (when refs are set), and `edge_length_norm` / `edge_length_px` for each segment.
 
 **Backup (recommended before migrations or risky edits):**
 

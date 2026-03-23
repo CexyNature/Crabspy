@@ -289,6 +289,25 @@ body {
   font-size: 0.9375rem;
 }
 
+.annotation-label-row {
+  margin: 0.5rem 0 0;
+}
+
+.annotation-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9375rem;
+  max-width: min(100%, 28rem);
+}
+
+.annotation-label input[type="text"] {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 .annotation-mode-actions {
   display: flex;
   flex-wrap: wrap;

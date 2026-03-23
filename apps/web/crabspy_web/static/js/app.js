@@ -428,8 +428,53 @@
     }
   }
 
+  /**
+   * @param {HTMLVideoElement | HTMLImageElement} media
+   * @returns {{ ref_width_px?: number, ref_height_px?: number }}
+   */
+  function getRefDimensions(media) {
+    if (media.tagName === "VIDEO") {
+      var vw = media.videoWidth;
+      var vh = media.videoHeight;
+      if (vw > 0 && vh > 0) {
+        return { ref_width_px: vw, ref_height_px: vh };
+      }
+    } else if (media.tagName === "IMG") {
+      var nw = media.naturalWidth;
+      var nh = media.naturalHeight;
+      if (nw > 0 && nh > 0) {
+        return { ref_width_px: nw, ref_height_px: nh };
+      }
+    }
+    return {};
+  }
+
+  /**
+   * Optional label + intrinsic picture dimensions (video frame / image pixel size).
+   * @param {HTMLElement} host
+   * @param {HTMLVideoElement | HTMLImageElement} media
+   * @param {Record<string, unknown>} payload
+   */
+  function applyAnnotationPayloadExtras(host, media, payload) {
+    var r = getRefDimensions(media);
+    if (r.ref_width_px) {
+      payload.ref_width_px = r.ref_width_px;
+      payload.ref_height_px = r.ref_height_px;
+    }
+    var lab = host.querySelector("[data-annotation-label]");
+    if (lab && lab.value) {
+      var t = String(lab.value).trim();
+      if (t) {
+        payload.label = t;
+      }
+    }
+  }
+
   function annotationFormatRow(data) {
     var parts = [data.kind || "point"];
+    if (data.label) {
+      parts.push(String(data.label));
+    }
     if (data.time_seconds !== null && data.time_seconds !== undefined) {
       var t =
         typeof data.time_seconds === "number"
@@ -578,6 +623,7 @@
             payload.frame_index = Math.floor(time * fps);
           }
         }
+        applyAnnotationPayloadExtras(host, media, payload);
         fetch("/media/" + mediaId + "/annotations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -668,6 +714,7 @@
             payload.frame_index = Math.floor(t * fps);
           }
         }
+        applyAnnotationPayloadExtras(host, media, payload);
         fetch("/media/" + mediaId + "/annotations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -57,4 +57,6 @@ def annotation_to_out(ann: Annotation) -> AnnotationOut:
         label=ann.label,
         time_seconds=ann.time_seconds,
         frame_index=ann.frame_index,
+        ref_width_px=ann.ref_width_px,
+        ref_height_px=ann.ref_height_px,
     )
