@@ -203,3 +203,5 @@ GPL affects **distribution** of the combined work. Server-rendered Jinja templat
 ## Summary
 
 The stack is **fixed**: **FastAPI + Jinja2 + HTMX** for a **local** tool, with **Python/OpenCV** on the server, **pytest** for quality, and **Docker Compose** for a consistent run path. Domain priorities include **media (images/videos)** with **mandatory metadata** before processing, **annotations** (line measurements, reference points) stored in a **relational database**, **CSV export**, and **runtime switching** between project databases. Next work spans **library API clarity**, **schema and migrations**, **metadata and annotation UX**, **job + file layout**, **tests + CI**, and **container definitions**.
+
+**Crab biology / CV domain (calibration, carapace measures, background model, tracking, color profiles, individuals/species):** see [`crabspy-library-and-domain-plan.md`](crabspy-library-and-domain-plan.md) for a **library-first rebuild of `crabspy/`** and phased integration with the web app.
