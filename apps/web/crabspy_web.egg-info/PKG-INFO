@@ -13,6 +13,8 @@ Requires-Dist: alembic>=1.13
 Provides-Extra: dev
 Requires-Dist: httpx>=0.27; extra == "dev"
 Requires-Dist: pytest>=8.0; extra == "dev"
+Provides-Extra: postgres
+Requires-Dist: psycopg[binary]>=3.1; extra == "postgres"
 
 # Crabspy web (`crabspy_web`)
 

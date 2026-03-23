@@ -1,5 +1,6 @@
 """FastAPI application factory."""
 
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -7,9 +8,21 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from crabspy_web.config import get_settings
+from crabspy_web.db.session import init_engine
 from crabspy_web.routers import health, pages
 
 PACKAGE_DIR = Path(__file__).resolve().parent
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    settings = app.state.settings
+    settings.db_dir.mkdir(parents=True, exist_ok=True)
+    settings.uploads_dir.mkdir(parents=True, exist_ok=True)
+    settings.exports_dir.mkdir(parents=True, exist_ok=True)
+    settings.cache_dir.mkdir(parents=True, exist_ok=True)
+    init_engine(settings.database_url)
+    yield
 
 
 def create_app() -> FastAPI:
@@ -18,6 +31,7 @@ def create_app() -> FastAPI:
         title="Crabspy Web",
         version="0.1.0",
         description="Local web UI for Crabspy (see docs/crabspy-rebuild-plan.md).",
+        lifespan=lifespan,
     )
     app.state.settings = settings
 

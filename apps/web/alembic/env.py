@@ -13,13 +13,9 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Target metadata for autogenerate — replace with Base.metadata when models exist.
-try:
-    from crabspy_web.models import Base  # type: ignore[attr-defined]
+from crabspy_web.models import Base
 
-    target_metadata = Base.metadata
-except (ImportError, AttributeError):
-    target_metadata = None
+target_metadata = Base.metadata
 
 
 def get_url() -> str:
