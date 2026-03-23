@@ -26,7 +26,11 @@ Environment variables (optional):
 
 **Project databases (Postgres-ready):** use one SQLite file per study or campaign, e.g. `data/db/coastal_site_2025.sqlite`, with URL `sqlite:////absolute/path/to/data/db/coastal_site_2025.sqlite` (four slashes after `sqlite:` for absolute paths on Unix). Switch in the UI under **Database** (`/settings/database`) or by editing `data/config/database_url`. For PostgreSQL: `postgresql+psycopg://user:pass@host:5432/dbname` after `pip install -e ".[postgres]"`.
 
-**Web UI:** register draft media and export CSV from [`/media/`](http://127.0.0.1:8000/media/) (see nav). On startup the app applies Alembic migrations to the active database automatically.
+**Web UI:** register draft media and export CSV from [`/media/`](http://127.0.0.1:8000/media/) (see nav). Edit or delete a row via **Edit** on the list. On startup the app applies Alembic migrations to the active database automatically.
+
+**Storage paths:** `storage_path` is a string pointing at your files (e.g. on an external SSD or NAS). The app does not copy or move originals; it only records the path. Optional future feature: copy uploads into `data/uploads/` for self-contained projects.
+
+**CI:** GitHub Actions runs `pytest tests/web` on push and pull requests (see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)).
 
 **Bulk import:** [`/media/import`](http://127.0.0.1:8000/media/import) accepts a UTF-8 CSV (headers in row 1). Required: a path column (`storage_path`, `path`, or `video_path`). Optional: `collected_at` / `date_collected` / `date`, `sample_code`, `site_name`, `location_name`, `notes`, `original_filename`, plus `camera_id`, `deployment_time`, `deployment_type`, `latitude`/`lat`, `longitude`/`lon`/`lng`. Dates accept ISO-8601 or `YYYY-MM-DD` (and a few common formats). Rows with path, date, sample, site, and location name set are stored as `ready_for_processing`; others as `draft`. Optional camera/deployment/geo fields can be empty without blocking readiness. Duplicate `storage_path` values already in the database are skipped.
 

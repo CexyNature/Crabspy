@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from pathlib import PurePosixPath
 
 from crabspy_web.models.media import MediaKind, MediaProcessingStatus
+from crabspy_web.services.media_readiness import core_metadata_ready_for_processing
 
 # First row = headers. Aliases normalize to canonical names (lower, spaces → underscores).
 _HEADER_ALIASES: dict[str, str] = {
@@ -117,21 +118,6 @@ def infer_media_kind(storage_path: str) -> MediaKind:
     return MediaKind.unknown
 
 
-def _row_ready_for_processing(
-    collected_at: datetime | None,
-    sample_code: str | None,
-    site_name: str | None,
-    location_name: str | None,
-) -> bool:
-    """Ready when core study fields are set. Optional fields (camera, deployment, lat/lon) do not affect this."""
-    return (
-        collected_at is not None
-        and bool(sample_code and sample_code.strip())
-        and bool(site_name and site_name.strip())
-        and bool(location_name and location_name.strip())
-    )
-
-
 @dataclass(frozen=True)
 class MediaImportRow:
     """Line number (1-based, file lines; data row) and kwargs for ``Media``."""
@@ -212,7 +198,7 @@ def parse_media_import_csv(text: str) -> tuple[list[MediaImportRow], list[tuple[
 
         status = (
             MediaProcessingStatus.ready_for_processing
-            if _row_ready_for_processing(collected, sample, site, loc)
+            if core_metadata_ready_for_processing(collected, sample, site, loc)
             else MediaProcessingStatus.draft
         )
 

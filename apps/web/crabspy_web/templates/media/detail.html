@@ -1,0 +1,131 @@
+{% extends "layouts/base.html" %}
+{% block title %}Edit media — Crabspy{% endblock %}
+{% block content %}
+  {% set f = form %}
+  <section class="panel">
+    <h1>Edit media</h1>
+    <p class="muted">ID: <code>{{ media.id }}</code></p>
+
+    {% if form_error %}
+      <p class="form-error" role="alert">{{ form_error }}</p>
+    {% endif %}
+
+    <form class="stacked-form media-edit-form" method="post" action="/media/{{ media.id }}">
+      <h2 class="h3">File</h2>
+      <label>
+        Storage path <span class="muted">(required)</span>
+        <input type="text" name="storage_path" required value="{{ f.storage_path if f else media.storage_path }}" autocomplete="off" />
+      </label>
+      <p class="muted small-print">
+        Path to the file on disk (e.g. external SSD). Crabspy stores the path only; it does not move or copy your originals.
+      </p>
+      <label>
+        Original filename
+        <input type="text" name="original_filename" value="{{ f.original_filename if f else (media.original_filename or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Media kind
+        <select name="media_kind">
+          {% for v in ["unknown", "image", "video"] %}
+            <option value="{{ v }}" {% if (f.media_kind if f else media.media_kind.value) == v %}selected{% endif %}>{{ v }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Processing status
+        <select name="processing_status">
+          {% for v in ["draft", "ready_for_processing"] %}
+            <option value="{{ v }}" {% if (f.processing_status if f else media.processing_status.value) == v %}selected{% endif %}>{{ v }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <h2 class="h3">Study metadata</h2>
+      <label>
+        Date / time collected (ISO or YYYY-MM-DD)
+        <input type="text" name="collected_at" value="{{ f.collected_at if f else (media.collected_at.isoformat() if media.collected_at else '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Sample code
+        <input type="text" name="sample_code" value="{{ f.sample_code if f else (media.sample_code or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Site name
+        <input type="text" name="site_name" value="{{ f.site_name if f else (media.site_name or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Location name
+        <input type="text" name="location_name" value="{{ f.location_name if f else (media.location_name or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Notes
+        <textarea name="notes" rows="3">{{ f.notes if f else (media.notes or '') }}</textarea>
+      </label>
+
+      <h2 class="h3">Camera & deployment (optional)</h2>
+      <label>
+        Camera ID
+        <input type="text" name="camera_id" value="{{ f.camera_id if f else (media.camera_id or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Deployment time (ISO or YYYY-MM-DD)
+        <input type="text" name="deployment_time" value="{{ f.deployment_time if f else (media.deployment_time.isoformat() if media.deployment_time else '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Deployment type
+        <input type="text" name="deployment_type" value="{{ f.deployment_type if f else (media.deployment_type or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Latitude
+        <input type="text" name="latitude" value="{{ f.latitude if f else (media.latitude if media.latitude is not none else '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Longitude
+        <input type="text" name="longitude" value="{{ f.longitude if f else (media.longitude if media.longitude is not none else '') }}" autocomplete="off" />
+      </label>
+
+      <h2 class="h3">Technical (optional)</h2>
+      <label>
+        MIME type
+        <input type="text" name="mime_type" value="{{ f.mime_type if f else (media.mime_type or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        SHA256 checksum
+        <input type="text" name="checksum_sha256" value="{{ f.checksum_sha256 if f else (media.checksum_sha256 or '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Width (px)
+        <input type="text" name="width_px" value="{{ f.width_px if f else (media.width_px if media.width_px is not none else '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Height (px)
+        <input type="text" name="height_px" value="{{ f.height_px if f else (media.height_px if media.height_px is not none else '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Duration (seconds)
+        <input type="text" name="duration_seconds" value="{{ f.duration_seconds if f else (media.duration_seconds if media.duration_seconds is not none else '') }}" autocomplete="off" />
+      </label>
+      <label>
+        Frame rate
+        <input type="text" name="frame_rate" value="{{ f.frame_rate if f else (media.frame_rate if media.frame_rate is not none else '') }}" autocomplete="off" />
+      </label>
+
+      <p class="muted small-print">
+        Created: {{ media.created_at }} · Updated: {{ media.updated_at }}
+      </p>
+
+      <button type="submit" class="btn">Save changes</button>
+    </form>
+
+    <form
+      class="delete-form"
+      method="post"
+      action="/media/{{ media.id }}/delete"
+      onsubmit="return confirm('Delete this media row permanently? This cannot be undone.');"
+    >
+      <button type="submit" class="btn btn-danger">Delete media row</button>
+    </form>
+
+    <p class="muted"><a href="/media/">← Back to media list</a></p>
+  </section>
+{% endblock %}

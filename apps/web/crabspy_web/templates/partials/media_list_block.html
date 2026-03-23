@@ -46,6 +46,7 @@
             <th>Deploy</th>
             <th>Lat/Lon</th>
             <th>Created</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -66,6 +67,7 @@
                 {% endif %}
               </td>
               <td class="muted">{{ row.created_at }}</td>
+              <td><a href="/media/{{ row.id }}">Edit</a></td>
             </tr>
           {% endfor %}
         </tbody>

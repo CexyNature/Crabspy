@@ -87,6 +87,26 @@ body {
   border-color: var(--accent);
 }
 
+.btn-danger {
+  border-color: #b00020;
+  color: #b00020;
+}
+
+.btn-danger:hover {
+  background: color-mix(in srgb, #b00020 12%, transparent);
+}
+
+.delete-form {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+
+.small-print {
+  font-size: 0.82rem;
+  margin: -0.25rem 0 0.5rem;
+}
+
 .status-panel {
   margin-top: 1rem;
   padding: 0.75rem 1rem;

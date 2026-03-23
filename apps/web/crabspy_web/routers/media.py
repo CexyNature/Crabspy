@@ -1,8 +1,9 @@
-"""Media list, create draft, CSV import/export."""
+"""Media list, create draft, CSV import/export, detail/edit, delete."""
 
 from __future__ import annotations
 
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -12,7 +13,9 @@ from sqlalchemy.orm import Session
 from crabspy_web.db.session import get_db
 from crabspy_web.models.media import Media, MediaKind, MediaProcessingStatus
 from crabspy_web.services.csv_export import media_rows_to_csv_bytes
-from crabspy_web.services.media_csv_import import decode_uploaded_csv, parse_media_import_csv
+from crabspy_web.services.media_csv_import import decode_uploaded_csv, parse_collected_at, parse_media_import_csv
+from crabspy_web.services.media_form_utils import empty_to_none, parse_optional_float, parse_optional_int
+from crabspy_web.services.media_readiness import core_metadata_ready_for_processing
 
 router = APIRouter(prefix="/media", tags=["media"])
 
@@ -165,3 +168,172 @@ async def media_import_upload(
             "parse_errors": row_errors,
         },
     )
+
+
+def _media_detail_context(
+    *,
+    media: Media,
+    form: dict[str, str | None] | None = None,
+    form_error: str | None = None,
+) -> dict:
+    """Template context: ``form`` overrides display when re-rendering after validation error."""
+    return {
+        "title": "Edit media",
+        "media": media,
+        "form": form,
+        "form_error": form_error,
+    }
+
+
+@router.get("/{media_id:uuid}", response_class=HTMLResponse)
+def media_detail(
+    request: Request,
+    media_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+) -> HTMLResponse:
+    row = db.get(Media, media_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    templates = request.app.state.templates
+    return templates.TemplateResponse(
+        request,
+        "media/detail.html",
+        _media_detail_context(media=row),
+    )
+
+
+@router.post("/{media_id:uuid}", response_class=HTMLResponse)
+def media_update(
+    request: Request,
+    media_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+    storage_path: Annotated[str, Form()],
+    processing_status: Annotated[str, Form()],
+    media_kind: Annotated[str, Form()],
+    collected_at: Annotated[str, Form()] = "",
+    sample_code: Annotated[str, Form()] = "",
+    site_name: Annotated[str, Form()] = "",
+    location_name: Annotated[str, Form()] = "",
+    notes: Annotated[str, Form()] = "",
+    camera_id: Annotated[str, Form()] = "",
+    deployment_time: Annotated[str, Form()] = "",
+    deployment_type: Annotated[str, Form()] = "",
+    latitude: Annotated[str, Form()] = "",
+    longitude: Annotated[str, Form()] = "",
+    original_filename: Annotated[str, Form()] = "",
+    mime_type: Annotated[str, Form()] = "",
+    checksum_sha256: Annotated[str, Form()] = "",
+    width_px: Annotated[str, Form()] = "",
+    height_px: Annotated[str, Form()] = "",
+    duration_seconds: Annotated[str, Form()] = "",
+    frame_rate: Annotated[str, Form()] = "",
+) -> Response:
+    row = db.get(Media, media_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+
+    templates = request.app.state.templates
+
+    form_snapshot = {
+        "storage_path": storage_path,
+        "processing_status": processing_status,
+        "media_kind": media_kind,
+        "collected_at": collected_at,
+        "sample_code": sample_code,
+        "site_name": site_name,
+        "location_name": location_name,
+        "notes": notes,
+        "camera_id": camera_id,
+        "deployment_time": deployment_time,
+        "deployment_type": deployment_type,
+        "latitude": latitude,
+        "longitude": longitude,
+        "original_filename": original_filename,
+        "mime_type": mime_type,
+        "checksum_sha256": checksum_sha256,
+        "width_px": width_px,
+        "height_px": height_px,
+        "duration_seconds": duration_seconds,
+        "frame_rate": frame_rate,
+    }
+
+    try:
+        path = _validate_storage_path(storage_path)
+        status = MediaProcessingStatus(processing_status)
+        kind = _parse_media_kind(media_kind)
+        collected = parse_collected_at(empty_to_none(collected_at))
+        dep_time = parse_collected_at(empty_to_none(deployment_time))
+        lat = parse_optional_float(empty_to_none(latitude))
+        lon = parse_optional_float(empty_to_none(longitude))
+        w = parse_optional_int(empty_to_none(width_px))
+        h = parse_optional_int(empty_to_none(height_px))
+        dur = parse_optional_float(empty_to_none(duration_seconds))
+        fps = parse_optional_float(empty_to_none(frame_rate))
+    except HTTPException as exc:
+        msg = exc.detail
+        if isinstance(msg, list):
+            msg = "; ".join(str(x) for x in msg)
+        else:
+            msg = str(msg)
+        return templates.TemplateResponse(
+            request,
+            "media/detail.html",
+            _media_detail_context(media=row, form=form_snapshot, form_error=msg),
+        )
+    except ValueError as exc:
+        return templates.TemplateResponse(
+            request,
+            "media/detail.html",
+            _media_detail_context(media=row, form=form_snapshot, form_error=str(exc)),
+        )
+
+    if status == MediaProcessingStatus.ready_for_processing and not core_metadata_ready_for_processing(
+        collected,
+        empty_to_none(sample_code),
+        empty_to_none(site_name),
+        empty_to_none(location_name),
+    ):
+        return templates.TemplateResponse(
+            request,
+            "media/detail.html",
+            _media_detail_context(
+                media=row,
+                form=form_snapshot,
+                form_error="Cannot set status to “ready for processing” until date collected, sample code, site name, and location name are all filled in.",
+            ),
+        )
+
+    row.storage_path = path
+    row.processing_status = status
+    row.media_kind = kind
+    row.collected_at = collected
+    row.sample_code = empty_to_none(sample_code)
+    row.site_name = empty_to_none(site_name)
+    row.location_name = empty_to_none(location_name)
+    row.notes = empty_to_none(notes)
+    row.camera_id = empty_to_none(camera_id)
+    row.deployment_time = dep_time
+    row.deployment_type = empty_to_none(deployment_type)
+    row.latitude = lat
+    row.longitude = lon
+    row.original_filename = empty_to_none(original_filename)
+    row.mime_type = empty_to_none(mime_type)
+    row.checksum_sha256 = empty_to_none(checksum_sha256)
+    row.width_px = w
+    row.height_px = h
+    row.duration_seconds = dur
+    row.frame_rate = fps
+
+    return RedirectResponse(url=f"/media/{media_id}", status_code=303)
+
+
+@router.post("/{media_id:uuid}/delete")
+def media_delete(
+    media_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+) -> RedirectResponse:
+    row = db.get(Media, media_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    db.delete(row)
+    return RedirectResponse(url="/media/", status_code=303)
