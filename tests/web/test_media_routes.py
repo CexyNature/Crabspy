@@ -191,6 +191,10 @@ def test_media_view_and_file_serve(tmp_path: Path) -> None:
         assert r_view.status_code == 200
         assert "<video" in r_view.text
         assert f"/media/{mid}/file" in r_view.text
+        assert 'data-media-video-viewer="1"' in r_view.text
+        assert "media-seek-time" in r_view.text
+        assert "media-seek-frame" in r_view.text
+        assert "Frame rate" in r_view.text
 
 
 def test_media_file_missing_returns_404(tmp_path: Path) -> None:

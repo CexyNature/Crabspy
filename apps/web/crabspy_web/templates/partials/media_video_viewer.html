@@ -1,0 +1,52 @@
+{# Expects ``media`` (Media row). #}
+<div
+  class="media-viewer media-viewer--video"
+  data-media-video-viewer="1"
+  data-video-fps="{% if media.frame_rate is not none %}{{ media.frame_rate }}{% endif %}"
+>
+  <video controls preload="metadata" src="/media/{{ media.id }}/file"></video>
+  <p class="form-error media-seek-error" hidden></p>
+  <div class="media-seek-bar">
+    <div class="media-seek-row">
+      <label class="media-seek-label">
+        <span class="media-seek-title">Time</span>
+        <input
+          type="text"
+          class="media-seek-time"
+          inputmode="decimal"
+          autocomplete="off"
+          placeholder="e.g. 12.5 or 1:02"
+          aria-describedby="media-seek-time-hint"
+        />
+      </label>
+      <button type="button" class="btn media-seek-time-btn">Go</button>
+    </div>
+    <p id="media-seek-time-hint" class="muted small-print">
+      Seconds, or <code>MM:SS</code> / <code>HH:MM:SS</code>. Add <code>?t=…</code> to the URL to open at a time.
+    </p>
+    <div class="media-seek-row">
+      <label class="media-seek-label">
+        <span class="media-seek-title">Frame</span>
+        <input
+          type="number"
+          class="media-seek-frame"
+          min="0"
+          step="1"
+          inputmode="numeric"
+          placeholder="0"
+          aria-describedby="media-seek-frame-hint"
+        />
+      </label>
+      <button type="button" class="btn media-seek-frame-btn">Go</button>
+    </div>
+    {% if media.frame_rate is not none %}
+      <p id="media-seek-frame-hint" class="muted small-print">
+        0-based frame index at <strong>{{ media.frame_rate }}</strong> fps (<code>?f=…</code> in the URL).
+      </p>
+    {% else %}
+      <p id="media-seek-frame-hint" class="muted small-print">
+        0-based frame index. Set <strong>Frame rate</strong> on the edit page to enable frame seek, or use time only.
+      </p>
+    {% endif %}
+  </div>
+</div>

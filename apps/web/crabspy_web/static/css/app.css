@@ -222,3 +222,45 @@ body {
   border-radius: 6px;
   border: 1px solid var(--border);
 }
+
+.media-seek-bar {
+  margin-top: 1rem;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--border);
+}
+
+.media-seek-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.media-seek-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: min(100%, 18rem);
+}
+
+.media-seek-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.media-seek-time,
+.media-seek-frame {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  max-width: 100%;
+}
+
+.media-seek-frame:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

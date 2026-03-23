@@ -15,14 +15,10 @@
         <img src="/media/{{ media.id }}/file" alt="" />
       </div>
     {% elif media.media_kind.value == "video" %}
-      <div class="media-viewer">
-        <video controls src="/media/{{ media.id }}/file"></video>
-      </div>
+      {% include "partials/media_video_viewer.html" %}
     {% else %}
       <p class="muted">Kind is <strong>unknown</strong> — showing as video; set kind to <strong>image</strong> or <strong>video</strong> on the edit page for the correct viewer.</p>
-      <div class="media-viewer">
-        <video controls src="/media/{{ media.id }}/file"></video>
-      </div>
+      {% include "partials/media_video_viewer.html" %}
     {% endif %}
 
     <p class="muted"><a href="/media/{{ media.id }}">Edit media</a> · <a href="/media/">← Back to media list</a></p>
