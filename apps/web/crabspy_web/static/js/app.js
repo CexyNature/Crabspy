@@ -257,44 +257,54 @@
   }
 
   function renderDots(overlay, video) {
-    var dots = overlay.querySelectorAll(".video-spike-dot");
+    var dots = overlay.querySelectorAll(".annotation-dot");
     for (var i = 0; i < dots.length; i++) {
       placeDot(dots[i], video);
     }
   }
 
-  function videoSpikeAddDot(overlay, video, data) {
+  function annotationAddDot(overlay, video, data) {
+    var p0 = data.points && data.points[0];
+    if (!p0) {
+      return;
+    }
     var dot = document.createElement("div");
-    dot.className = "video-spike-dot";
-    dot.setAttribute("data-point-id", data.id);
-    dot.setAttribute("data-x-norm", String(data.x_norm));
-    dot.setAttribute("data-y-norm", String(data.y_norm));
+    dot.className = "annotation-dot";
+    dot.setAttribute("data-annotation-id", data.id);
+    dot.setAttribute("data-x-norm", String(p0.x_norm));
+    dot.setAttribute("data-y-norm", String(p0.y_norm));
     overlay.appendChild(dot);
     placeDot(dot, video);
   }
 
-  function videoSpikeFormatRow(data) {
-    var t = typeof data.time_seconds === "number" ? data.time_seconds.toFixed(3) : String(data.time_seconds);
-    var parts = ["t=" + t + "s"];
+  function annotationFormatRow(data) {
+    var t =
+      typeof data.time_seconds === "number"
+        ? data.time_seconds.toFixed(3)
+        : String(data.time_seconds);
+    var parts = [data.kind || "point", "t=" + t + "s"];
     if (data.frame_index !== null && data.frame_index !== undefined) {
       parts.push("f=" + String(data.frame_index));
     }
-    parts.push(
-      "(" +
-        Number(data.x_norm).toFixed(4) +
-        ", " +
-        Number(data.y_norm).toFixed(4) +
-        ")"
-    );
+    var p0 = data.points && data.points[0];
+    if (p0) {
+      parts.push(
+        "(" +
+          Number(p0.x_norm).toFixed(4) +
+          ", " +
+          Number(p0.y_norm).toFixed(4) +
+          ")"
+      );
+    }
     return parts.join(" · ");
   }
 
   /**
-   * @param {HTMLElement} wrap — [data-video-spike-root]
+   * @param {HTMLElement} wrap — [data-annotation-video-root]
    */
-  function initVideoSpike(wrap) {
+  function initAnnotationVideo(wrap) {
     var video = wrap.querySelector("video");
-    var overlay = wrap.querySelector("[data-video-spike-overlay]");
+    var overlay = wrap.querySelector("[data-annotation-overlay]");
     if (!video || !overlay) {
       return;
     }
@@ -302,8 +312,8 @@
     if (!host) {
       return;
     }
-    var toggle = host.querySelector("[data-video-spike-toggle]");
-    var list = host.querySelector(".video-spike-list");
+    var toggle = host.querySelector("[data-annotation-toggle]");
+    var list = host.querySelector(".annotation-list");
     var mediaId = wrap.getAttribute("data-media-id");
     if (!mediaId) {
       return;
@@ -347,14 +357,14 @@
       }
       var time = video.currentTime;
       var payload = {
-        x_norm: pt.x,
-        y_norm: pt.y,
+        kind: "point",
+        points: [{ x_norm: pt.x, y_norm: pt.y }],
         time_seconds: time,
       };
       if (hasFps) {
         payload.frame_index = Math.floor(time * fps);
       }
-      fetch("/media/" + mediaId + "/video-spike", {
+      fetch("/media/" + mediaId + "/annotations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -366,16 +376,16 @@
           return r.json();
         })
         .then(function (data) {
-          videoSpikeAddDot(overlay, video, data);
+          annotationAddDot(overlay, video, data);
           if (!list) {
             return;
           }
           var li = document.createElement("li");
-          li.setAttribute("data-point-id", data.id);
-          li.appendChild(document.createTextNode(videoSpikeFormatRow(data) + " "));
+          li.setAttribute("data-annotation-id", data.id);
+          li.appendChild(document.createTextNode(annotationFormatRow(data) + " "));
           var del = document.createElement("button");
           del.type = "button";
-          del.className = "btn btn-danger video-spike-delete";
+          del.className = "btn btn-danger annotation-delete";
           del.textContent = "Delete";
           li.appendChild(del);
           list.appendChild(li);
@@ -386,22 +396,22 @@
     if (list) {
       list.addEventListener("click", function (e) {
         var t = e.target;
-        if (!t || !t.classList || !t.classList.contains("video-spike-delete")) {
+        if (!t || !t.classList || !t.classList.contains("annotation-delete")) {
           return;
         }
         var li = t.closest("li");
-        var pid = li && li.getAttribute("data-point-id");
-        if (!pid) {
+        var aid = li && li.getAttribute("data-annotation-id");
+        if (!aid) {
           return;
         }
-        fetch("/media/" + mediaId + "/video-spike/" + pid + "/delete", {
+        fetch("/media/" + mediaId + "/annotations/" + aid + "/delete", {
           method: "POST",
         })
           .then(function (r) {
             if (!r.ok) {
               throw new Error("del");
             }
-            var c = overlay.querySelector('[data-point-id="' + pid + '"]');
+            var c = overlay.querySelector('[data-annotation-id="' + aid + '"]');
             if (c && c.parentNode) {
               c.parentNode.removeChild(c);
             }
@@ -419,9 +429,9 @@
     for (var i = 0; i < nodes.length; i++) {
       initMediaVideoViewer(nodes[i]);
     }
-    var spikes = document.querySelectorAll("[data-video-spike-root]");
-    for (var j = 0; j < spikes.length; j++) {
-      initVideoSpike(spikes[j]);
+    var annRoots = document.querySelectorAll("[data-annotation-video-root]");
+    for (var j = 0; j < annRoots.length; j++) {
+      initAnnotationVideo(annRoots[j]);
     }
   }
 

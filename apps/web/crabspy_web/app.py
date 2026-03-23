@@ -25,8 +25,10 @@ async def lifespan(app: FastAPI):
     settings.config_dir.mkdir(parents=True, exist_ok=True)
 
     url = settings.resolve_database_url()
-    init_engine(url)
+    # Run Alembic before creating the SQLAlchemy engine so SQLite is not contending
+    # with an open pool (and so schema exists before ORM connects).
     run_alembic_upgrade_head(url)
+    init_engine(url)
 
     yield
 

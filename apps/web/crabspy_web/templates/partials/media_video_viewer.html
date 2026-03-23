@@ -1,41 +1,49 @@
-{# Expects ``media``, ``video_spike_points`` (list), ``file_on_disk`` (bool). #}
+{# Expects ``media``, ``video_annotations`` (list of Annotation with points), ``file_on_disk`` (bool). #}
 <div
   class="media-viewer media-viewer--video"
   data-media-video-viewer="1"
   data-video-fps="{% if media.frame_rate is not none %}{{ media.frame_rate }}{% endif %}"
 >
   <div
-    class="video-spike-wrap"
-    data-video-spike-root
+    class="annotation-video-wrap"
+    data-annotation-video-root
     data-media-id="{{ media.id }}"
   >
     <video controls preload="metadata" src="/media/{{ media.id }}/file"></video>
-    <div class="video-spike-overlay" data-video-spike-overlay aria-hidden="true">
-      {% for p in video_spike_points %}
-        <div
-          class="video-spike-dot"
-          data-point-id="{{ p.id }}"
-          data-x-norm="{{ p.x_norm }}"
-          data-y-norm="{{ p.y_norm }}"
-        ></div>
+    <div class="annotation-overlay" data-annotation-overlay aria-hidden="true">
+      {% for ann in video_annotations %}
+        {% if ann.kind.value == "point" and ann.points|length == 1 %}
+          <div
+            class="annotation-dot"
+            data-annotation-id="{{ ann.id }}"
+            data-x-norm="{{ ann.points[0].x_norm }}"
+            data-y-norm="{{ ann.points[0].y_norm }}"
+          ></div>
+        {% endif %}
       {% endfor %}
     </div>
   </div>
   <p class="form-error media-seek-error" hidden></p>
-  <div class="video-spike-controls">
+  <div class="annotation-controls">
     <p class="muted small-print">
-      <strong>Spike (3b prep):</strong> toggle <em>Add points</em>, then click on the picture area (letterboxing ignored). Points store normalized coordinates and current playback time.
+      <strong>Annotations (Phase 3b):</strong> toggle <em>Add points</em>, then click on the picture area (letterboxing accounted for). Coordinates are normalized 0–1; each point stores the current playback time (and frame when fps is set).
     </p>
-    <button type="button" class="btn video-spike-toggle" data-video-spike-toggle>
+    <button type="button" class="btn annotation-toggle" data-annotation-toggle>
       Add annotation points
     </button>
-    <ul class="video-spike-list">
-      {% for p in video_spike_points %}
-        <li data-point-id="{{ p.id }}">
-          t={{ "%.3f"|format(p.time_seconds) }}s
-          {% if p.frame_index is not none %}· f={{ p.frame_index }}{% endif %}
-          · ({{ "%.4f"|format(p.x_norm) }}, {{ "%.4f"|format(p.y_norm) }})
-          <button type="button" class="btn btn-danger video-spike-delete">Delete</button>
+    <ul class="annotation-list">
+      {% for ann in video_annotations %}
+        <li data-annotation-id="{{ ann.id }}">
+          <code>{{ ann.kind.value }}</code>
+          {% if ann.time_seconds is not none %}· t={{ "%.3f"|format(ann.time_seconds) }}s{% endif %}
+          {% if ann.frame_index is not none %}· f={{ ann.frame_index }}{% endif %}
+          {% if ann.label %}· {{ ann.label }}{% endif %}
+          {% if ann.kind.value == "point" and ann.points|length == 1 %}
+            · ({{ "%.4f"|format(ann.points[0].x_norm) }}, {{ "%.4f"|format(ann.points[0].y_norm) }})
+          {% elif ann.kind.value == "polyline" %}
+            · {{ ann.points|length }} vertices
+          {% endif %}
+          <button type="button" class="btn btn-danger annotation-delete">Delete</button>
         </li>
       {% endfor %}
     </ul>

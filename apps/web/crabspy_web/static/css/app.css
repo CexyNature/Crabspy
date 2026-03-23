@@ -229,13 +229,13 @@ body {
   border: 1px solid var(--border);
 }
 
-.video-spike-wrap {
+.annotation-video-wrap {
   position: relative;
   display: block;
   width: 100%;
 }
 
-.video-spike-overlay {
+.annotation-overlay {
   position: absolute;
   left: 0;
   top: 0;
@@ -245,12 +245,12 @@ body {
   border-radius: 6px;
 }
 
-.video-spike-wrap.is-annotating .video-spike-overlay {
+.annotation-video-wrap.is-annotating .annotation-overlay {
   pointer-events: auto;
   cursor: crosshair;
 }
 
-.video-spike-dot {
+.annotation-dot {
   position: absolute;
   left: 0;
   top: 0;
@@ -262,16 +262,16 @@ body {
   border: 1px solid var(--bg);
 }
 
-.video-spike-controls {
+.annotation-controls {
   margin: 0.75rem 0 0;
 }
 
-.video-spike-list {
+.annotation-list {
   margin: 0.5rem 0 0;
   padding-left: 1.25rem;
 }
 
-.video-spike-list li {
+.annotation-list li {
   margin: 0.25rem 0;
 }
 

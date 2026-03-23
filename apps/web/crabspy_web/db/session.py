@@ -15,7 +15,8 @@ _session_factory: sessionmaker[Session] | None = None
 def create_engine_from_url(database_url: str) -> Engine:
     kwargs: dict = {"future": True}
     if database_url.startswith("sqlite"):
-        kwargs["connect_args"] = {"check_same_thread": False}
+        # timeout seconds: wait on SQLITE_BUSY instead of failing immediately (e.g. reload + migration).
+        kwargs["connect_args"] = {"check_same_thread": False, "timeout": 30.0}
     return create_engine(database_url, **kwargs)
 
 

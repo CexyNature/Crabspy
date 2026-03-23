@@ -6,6 +6,7 @@ import csv
 import io
 from collections.abc import Iterable
 
+from crabspy_web.models.annotation import Annotation, AnnotationPoint
 from crabspy_web.models.media import Media
 
 
@@ -68,4 +69,48 @@ def media_rows_to_csv_bytes(rows: Iterable[Media]) -> bytes:
                 m.updated_at.isoformat() if m.updated_at else "",
             ]
         )
+    return buffer.getvalue().encode("utf-8")
+
+
+def annotation_rows_to_csv_bytes(annotations: Iterable[Annotation]) -> bytes:
+    """One row per vertex; suitable for spreadsheets and GIS joins."""
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(
+        [
+            "annotation_id",
+            "media_id",
+            "kind",
+            "label",
+            "time_seconds",
+            "frame_index",
+            "ref_width_px",
+            "ref_height_px",
+            "point_order",
+            "x_norm",
+            "y_norm",
+            "annotation_created_at",
+            "annotation_updated_at",
+        ]
+    )
+    for ann in annotations:
+        points: list[AnnotationPoint] = sorted(ann.points, key=lambda p: p.order_index)
+        for p in points:
+            writer.writerow(
+                [
+                    str(ann.id),
+                    str(ann.media_id),
+                    ann.kind.value,
+                    ann.label or "",
+                    ann.time_seconds if ann.time_seconds is not None else "",
+                    ann.frame_index if ann.frame_index is not None else "",
+                    ann.ref_width_px if ann.ref_width_px is not None else "",
+                    ann.ref_height_px if ann.ref_height_px is not None else "",
+                    p.order_index,
+                    p.x_norm,
+                    p.y_norm,
+                    ann.created_at.isoformat() if ann.created_at else "",
+                    ann.updated_at.isoformat() if ann.updated_at else "",
+                ]
+            )
     return buffer.getvalue().encode("utf-8")
