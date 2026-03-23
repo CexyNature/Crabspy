@@ -1,10 +1,10 @@
-"""Media list, create draft, and CSV export."""
+"""Media list, create draft, CSV import/export."""
 
 from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from crabspy_web.db.session import get_db
 from crabspy_web.models.media import Media, MediaKind, MediaProcessingStatus
 from crabspy_web.services.csv_export import media_rows_to_csv_bytes
+from crabspy_web.services.media_csv_import import decode_uploaded_csv, parse_media_import_csv
 
 router = APIRouter(prefix="/media", tags=["media"])
 
@@ -94,4 +95,73 @@ def media_export_csv(db: Annotated[Session, Depends(get_db)]) -> Response:
         content=body,
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": 'attachment; filename="media_export.csv"'},
+    )
+
+
+def _import_page_response(request: Request, templates, *, result: dict | None) -> HTMLResponse:
+    """Full page for normal requests; fragment for HTMX (same content as inside ``<main>``)."""
+    ctx = {"title": "Import media from CSV", "result": result}
+    name = "partials/media_import_body.html" if _htmx(request) else "media/import.html"
+    return templates.TemplateResponse(request, name, ctx)
+
+
+@router.get("/import", response_class=HTMLResponse)
+def media_import_form(request: Request) -> HTMLResponse:
+    templates = request.app.state.templates
+    return _import_page_response(request, templates, result=None)
+
+
+@router.post("/import", response_class=HTMLResponse)
+async def media_import_upload(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    file: Annotated[UploadFile, File(..., description="UTF-8 CSV with media columns")],
+) -> HTMLResponse:
+    templates = request.app.state.templates
+    raw = await file.read()
+    if not raw:
+        return _import_page_response(
+            request,
+            templates,
+            result={
+                "created": 0,
+                "skipped_duplicate": [],
+                "parse_errors": [(0, "Empty file.")],
+            },
+        )
+
+    try:
+        text = decode_uploaded_csv(raw)
+    except UnicodeDecodeError:
+        return _import_page_response(
+            request,
+            templates,
+            result={
+                "created": 0,
+                "skipped_duplicate": [],
+                "parse_errors": [(0, "File is not valid UTF-8.")],
+            },
+        )
+
+    parsed, row_errors = parse_media_import_csv(text)
+    existing = set(db.scalars(select(Media.storage_path)).all())
+    created = 0
+    skipped_duplicate: list[tuple[int, str]] = []
+    for item in parsed:
+        path = item.kwargs["storage_path"]
+        if path in existing:
+            skipped_duplicate.append((item.line_no, path))
+            continue
+        db.add(Media(**item.kwargs))
+        existing.add(path)
+        created += 1
+
+    return _import_page_response(
+        request,
+        templates,
+        result={
+            "created": created,
+            "skipped_duplicate": skipped_duplicate,
+            "parse_errors": row_errors,
+        },
     )

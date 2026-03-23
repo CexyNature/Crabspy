@@ -54,3 +54,33 @@ def test_settings_database_page() -> None:
         assert r.status_code == 200
         assert "Project database" in r.text
         assert "sqlite" in r.text.lower()
+
+
+def test_media_csv_import_endpoint() -> None:
+    csv_body = (
+        "storage_path,collected_at,sample_code,site_name,location_name,notes\n"
+        "uploads/t/one.mp4,2025-03-01,SC,S,L,N\n"
+    ).encode("utf-8")
+    with TestClient(create_app()) as client:
+        r = client.post(
+            "/media/import",
+            files={"file": ("batch.csv", csv_body, "text/csv")},
+        )
+        assert r.status_code == 200
+        assert "Imported:" in r.text
+        r2 = client.get("/media/")
+        assert r2.status_code == 200
+        assert "uploads/t/one.mp4" in r2.text
+        assert "ready_for_processing" in r2.text
+
+
+def test_media_import_duplicate_skipped() -> None:
+    csv_body = (
+        "path,collected_at,sample_code,site_name,location_name\n"
+        "uploads/dup/x.mp4,2025-01-01,A,B,C\n"
+    ).encode("utf-8")
+    with TestClient(create_app()) as client:
+        client.post("/media/import", files={"file": ("a.csv", csv_body, "text/csv")})
+        r2 = client.post("/media/import", files={"file": ("b.csv", csv_body, "text/csv")})
+        assert r2.status_code == 200
+        assert "Skipped" in r2.text or "duplicate" in r2.text.lower()

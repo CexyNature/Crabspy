@@ -1,0 +1,56 @@
+<section class="panel">
+  <h1>Import media from CSV</h1>
+  <p class="muted">
+    Upload a UTF-8 CSV. The first row must be headers. A <strong>path</strong> column is required
+    (<code>storage_path</code>, <code>path</code>, or <code>video_path</code>). Optional columns map to
+    study metadata (see below). Rows with path, date, sample code, site, and location filled in are saved as
+    <code>ready_for_processing</code>; otherwise <code>draft</code>.
+  </p>
+
+  {% if result %}
+    <div class="notice {% if result.created %}success{% endif %}" role="status">
+      <p><strong>Imported:</strong> {{ result.created }} new media row(s).</p>
+      {% if result.parse_errors %}
+        <p><strong>Row issues while parsing:</strong></p>
+        <ul>
+          {% for line_no, msg in result.parse_errors %}
+            <li>Line {{ line_no }}: {{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if result.skipped_duplicate %}
+        <p><strong>Skipped (already in database):</strong></p>
+        <ul>
+          {% for line_no, path in result.skipped_duplicate %}
+            <li>Line {{ line_no }}: <code>{{ path }}</code></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+    <p><a class="btn btn-secondary" href="/media/">View media list</a></p>
+  {% endif %}
+
+  <h2 class="h3">Example CSV</h2>
+  <pre class="code-block">storage_path,collected_at,sample_code,site_name,location_name,notes
+uploads/site_a/clip01.mp4,2025-06-01,S-001,Mudflat A,Quadrat 3,Low tide
+uploads/site_a/clip02.mp4,2025-06-02,S-002,Mudflat A,Quadrat 4,</pre>
+
+  <form
+    class="stacked-form"
+    method="post"
+    action="/media/import"
+    enctype="multipart/form-data"
+    hx-post="/media/import"
+    hx-encoding="multipart/form-data"
+    hx-target="main"
+    hx-swap="innerHTML"
+  >
+    <label>
+      CSV file
+      <input type="file" name="file" accept=".csv,text/csv" required />
+    </label>
+    <button type="submit" class="btn">Import</button>
+  </form>
+
+  <p class="muted"><a href="/media/">← Back to media list</a></p>
+</section>
