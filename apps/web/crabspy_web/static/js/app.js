@@ -210,44 +210,67 @@
   }
 
   /**
-   * Map viewport click to normalized coords (0–1) within the visible video picture (letterbox excluded).
-   * @returns {{ x: number, y: number } | null}
+   * Returns picture rectangle inside the rendered video element (letterbox excluded).
+   * @returns {{ x0: number, y0: number, width: number, height: number }}
    */
-  function normalizedVideoClick(video, clientX, clientY) {
+  function getVideoPictureRect(video) {
     var rect = video.getBoundingClientRect();
     var vw = video.videoWidth;
     var vh = video.videoHeight;
     var elW = rect.width;
     var elH = rect.height;
-    var relX = clientX - rect.left;
-    var relY = clientY - rect.top;
     if (!vw || !vh) {
-      if (relX < 0 || relY < 0 || relX > elW || relY > elH) {
-        return null;
-      }
-      return { x: relX / elW, y: relY / elH };
+      return { x0: 0, y0: 0, width: elW, height: elH };
     }
     var scale = Math.min(elW / vw, elH / vh);
     var dispW = vw * scale;
     var dispH = vh * scale;
     var x0 = (elW - dispW) / 2;
     var y0 = (elH - dispH) / 2;
-    if (relX < x0 || relX > x0 + dispW || relY < y0 || relY > y0 + dispH) {
-      return null;
-    }
-    return { x: (relX - x0) / dispW, y: (relY - y0) / dispH };
+    return { x0: x0, y0: y0, width: dispW, height: dispH };
   }
 
-  function videoSpikeAddCircle(svg, data) {
-    var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    c.setAttribute("data-point-id", data.id);
-    c.setAttribute("cx", String(data.x_norm));
-    c.setAttribute("cy", String(data.y_norm));
-    c.setAttribute("r", "0.018");
-    c.setAttribute("fill", "var(--accent)");
-    c.setAttribute("stroke", "var(--bg)");
-    c.setAttribute("stroke-width", "0.003");
-    svg.appendChild(c);
+  /**
+   * Map viewport click to normalized coords (0–1) within the visible video picture (letterbox excluded).
+   * @returns {{ x: number, y: number } | null}
+   */
+  function normalizedVideoClick(video, clientX, clientY) {
+    var rect = video.getBoundingClientRect();
+    var relX = clientX - rect.left;
+    var relY = clientY - rect.top;
+    var pic = getVideoPictureRect(video);
+    if (relX < pic.x0 || relX > pic.x0 + pic.width || relY < pic.y0 || relY > pic.y0 + pic.height) {
+      return null;
+    }
+    return { x: (relX - pic.x0) / pic.width, y: (relY - pic.y0) / pic.height };
+  }
+
+  function placeDot(dot, video) {
+    var xNorm = parseFloat(dot.getAttribute("data-x-norm") || "");
+    var yNorm = parseFloat(dot.getAttribute("data-y-norm") || "");
+    if (!Number.isFinite(xNorm) || !Number.isFinite(yNorm)) {
+      return;
+    }
+    var pic = getVideoPictureRect(video);
+    dot.style.left = pic.x0 + xNorm * pic.width + "px";
+    dot.style.top = pic.y0 + yNorm * pic.height + "px";
+  }
+
+  function renderDots(overlay, video) {
+    var dots = overlay.querySelectorAll(".video-spike-dot");
+    for (var i = 0; i < dots.length; i++) {
+      placeDot(dots[i], video);
+    }
+  }
+
+  function videoSpikeAddDot(overlay, video, data) {
+    var dot = document.createElement("div");
+    dot.className = "video-spike-dot";
+    dot.setAttribute("data-point-id", data.id);
+    dot.setAttribute("data-x-norm", String(data.x_norm));
+    dot.setAttribute("data-y-norm", String(data.y_norm));
+    overlay.appendChild(dot);
+    placeDot(dot, video);
   }
 
   function videoSpikeFormatRow(data) {
@@ -271,8 +294,8 @@
    */
   function initVideoSpike(wrap) {
     var video = wrap.querySelector("video");
-    var svg = wrap.querySelector("[data-video-spike-svg]");
-    if (!video || !svg) {
+    var overlay = wrap.querySelector("[data-video-spike-overlay]");
+    if (!video || !overlay) {
       return;
     }
     var host = wrap.closest("[data-media-video-viewer]");
@@ -300,7 +323,19 @@
       });
     }
 
-    svg.addEventListener("click", function (e) {
+    function syncDots() {
+      renderDots(overlay, video);
+    }
+
+    if (video.readyState >= HAVE_METADATA) {
+      syncDots();
+    } else {
+      video.addEventListener("loadedmetadata", syncDots, { once: true });
+    }
+    video.addEventListener("loadeddata", syncDots);
+    window.addEventListener("resize", syncDots);
+
+    overlay.addEventListener("click", function (e) {
       if (!wrap.classList.contains("is-annotating")) {
         return;
       }
@@ -331,7 +366,7 @@
           return r.json();
         })
         .then(function (data) {
-          videoSpikeAddCircle(svg, data);
+          videoSpikeAddDot(overlay, video, data);
           if (!list) {
             return;
           }
@@ -366,7 +401,7 @@
             if (!r.ok) {
               throw new Error("del");
             }
-            var c = svg.querySelector('circle[data-point-id="' + pid + '"]');
+            var c = overlay.querySelector('[data-point-id="' + pid + '"]');
             if (c && c.parentNode) {
               c.parentNode.removeChild(c);
             }

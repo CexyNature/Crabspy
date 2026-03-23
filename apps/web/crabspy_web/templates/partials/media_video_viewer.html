@@ -10,25 +10,16 @@
     data-media-id="{{ media.id }}"
   >
     <video controls preload="metadata" src="/media/{{ media.id }}/file"></video>
-    <svg
-      class="video-spike-overlay"
-      data-video-spike-svg
-      viewBox="0 0 1 1"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
+    <div class="video-spike-overlay" data-video-spike-overlay aria-hidden="true">
       {% for p in video_spike_points %}
-        <circle
+        <div
+          class="video-spike-dot"
           data-point-id="{{ p.id }}"
-          cx="{{ p.x_norm }}"
-          cy="{{ p.y_norm }}"
-          r="0.018"
-          fill="var(--accent)"
-          stroke="var(--bg)"
-          stroke-width="0.003"
-        />
+          data-x-norm="{{ p.x_norm }}"
+          data-y-norm="{{ p.y_norm }}"
+        ></div>
       {% endfor %}
-    </svg>
+    </div>
   </div>
   <p class="form-error media-seek-error" hidden></p>
   <div class="video-spike-controls">
