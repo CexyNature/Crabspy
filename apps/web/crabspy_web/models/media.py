@@ -10,13 +10,14 @@ from sqlalchemy import (
     DateTime,
     Enum,
     Float,
+    ForeignKey,
     Integer,
     String,
     Text,
     Uuid,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from crabspy_web.models.base import Base
 
@@ -32,6 +33,11 @@ class MediaKind(str, enum.Enum):
     image = "image"
     video = "video"
     unknown = "unknown"
+
+
+class MediaMeasurementMode(str, enum.Enum):
+    isotropic = "isotropic"
+    homography = "homography"
 
 
 def _enum_values(enum_cls: type[enum.Enum]) -> list[str]:
@@ -59,6 +65,12 @@ class Media(Base):
         Enum(MediaKind, values_callable=_enum_values, native_enum=False),
         nullable=False,
         default=MediaKind.unknown,
+    )
+    measurement_mode: Mapped[MediaMeasurementMode] = mapped_column(
+        Enum(MediaMeasurementMode, values_callable=_enum_values, native_enum=False),
+        nullable=False,
+        default=MediaMeasurementMode.homography,
+        server_default=MediaMeasurementMode.homography.value,
     )
 
     # Study metadata (required before processing when status is ready_for_processing — enforced in services).
@@ -95,4 +107,22 @@ class Media(Base):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+    # Use this calibration's mm/px when interpreting carapace polylines on this media (may point to any calibration row).
+    active_calibration_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("calibration.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
+    active_calibration: Mapped["Calibration | None"] = relationship(
+        "Calibration",
+        foreign_keys=[active_calibration_id],
+    )
+    calibrations_defined: Mapped[list["Calibration"]] = relationship(
+        "Calibration",
+        foreign_keys="Calibration.source_media_id",
+        back_populates="source_media",
     )

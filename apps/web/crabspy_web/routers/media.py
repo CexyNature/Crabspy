@@ -13,13 +13,17 @@ from sqlalchemy.orm import Session, selectinload
 
 from crabspy_web.db.session import get_db
 from crabspy_web.models.annotation import Annotation
-from crabspy_web.models.media import Media, MediaKind, MediaProcessingStatus
+from crabspy_web.models.calibration import Calibration
+from crabspy_web.models.media import Media, MediaKind, MediaMeasurementMode, MediaProcessingStatus
 from crabspy_web.schemas.annotation import AnnotationCreate, AnnotationOut
+from crabspy_web.schemas.calibration import CalibrationCreate, CalibrationOut
 from crabspy_web.services.annotation import (
     annotation_to_out,
     build_annotation_row,
     validate_annotation_for_media,
 )
+from crabspy_web.services.calibration_measure import path_length_mm_for_polyline
+from crabspy_web.services.calibration_service import calibration_to_out, create_calibration
 from crabspy_web.services.csv_export import annotation_rows_to_csv_bytes, media_rows_to_csv_bytes
 from crabspy_web.services.media_csv_import import decode_uploaded_csv, parse_collected_at, parse_media_import_csv
 from crabspy_web.services.media_files import resolve_storage_path_to_file
@@ -133,7 +137,9 @@ def media_view_page(
     media_id: UUID,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse:
-    row = db.get(Media, media_id)
+    row = db.scalars(
+        select(Media).where(Media.id == media_id).options(selectinload(Media.active_calibration))
+    ).one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="Media not found")
     settings = request.app.state.settings
@@ -153,6 +159,12 @@ def media_view_page(
                 .order_by(Annotation.created_at.asc())
             ).all()
         )
+    all_calibrations = list(db.scalars(select(Calibration).order_by(Calibration.created_at.desc())).all())
+    annotation_path_mm: dict[str, float | None] = {}
+    if file_on_disk and annotations:
+        cal = row.active_calibration
+        for a in annotations:
+            annotation_path_mm[str(a.id)] = path_length_mm_for_polyline(a, row, cal)
     return templates.TemplateResponse(
         request,
         "media/view.html",
@@ -161,6 +173,8 @@ def media_view_page(
             "media": row,
             "file_on_disk": file_on_disk,
             "annotations": annotations,
+            "all_calibrations": all_calibrations,
+            "annotation_path_mm": annotation_path_mm,
         },
     )
 
@@ -184,12 +198,32 @@ def annotation_create(
     db.flush()
     aid = ann.id
     db.commit()
+    media_row = db.scalars(
+        select(Media).where(Media.id == media_id).options(selectinload(Media.active_calibration))
+    ).one()
     ann = db.scalars(
         select(Annotation)
         .where(Annotation.id == aid)
         .options(selectinload(Annotation.points))
     ).one()
-    return annotation_to_out(ann)
+    return annotation_to_out(ann, media=media_row)
+
+
+@router.post(
+    "/{media_id:uuid}/calibration",
+    status_code=201,
+    response_model=CalibrationOut,
+)
+def calibration_create_endpoint(
+    media_id: UUID,
+    body: CalibrationCreate,
+    db: Annotated[Session, Depends(get_db)],
+) -> CalibrationOut:
+    row = db.scalars(select(Media).where(Media.id == media_id)).one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    cal = create_calibration(db, row, body, set_active_on_this_media=True)
+    return calibration_to_out(cal)
 
 
 @router.post("/{media_id:uuid}/annotations/{annotation_id:uuid}/delete")
@@ -301,6 +335,7 @@ async def media_import_upload(
 def _media_detail_context(
     *,
     media: Media,
+    all_calibrations: list[Calibration],
     form: dict[str, str | None] | None = None,
     form_error: str | None = None,
 ) -> dict:
@@ -308,6 +343,7 @@ def _media_detail_context(
     return {
         "title": "Edit media",
         "media": media,
+        "all_calibrations": all_calibrations,
         "form": form,
         "form_error": form_error,
     }
@@ -319,14 +355,17 @@ def media_detail(
     media_id: UUID,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse:
-    row = db.get(Media, media_id)
+    row = db.scalars(
+        select(Media).where(Media.id == media_id).options(selectinload(Media.active_calibration))
+    ).one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="Media not found")
+    all_calibrations = list(db.scalars(select(Calibration).order_by(Calibration.created_at.desc())).all())
     templates = request.app.state.templates
     return templates.TemplateResponse(
         request,
         "media/detail.html",
-        _media_detail_context(media=row),
+        _media_detail_context(media=row, all_calibrations=all_calibrations),
     )
 
 
@@ -355,8 +394,12 @@ def media_update(
     height_px: Annotated[str, Form()] = "",
     duration_seconds: Annotated[str, Form()] = "",
     frame_rate: Annotated[str, Form()] = "",
+    active_calibration_id: Annotated[str, Form()] = "",
+    measurement_mode: Annotated[str, Form()] = "homography",
 ) -> Response:
-    row = db.get(Media, media_id)
+    row = db.scalars(
+        select(Media).where(Media.id == media_id).options(selectinload(Media.active_calibration))
+    ).one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="Media not found")
 
@@ -383,6 +426,8 @@ def media_update(
         "height_px": height_px,
         "duration_seconds": duration_seconds,
         "frame_rate": frame_rate,
+        "active_calibration_id": active_calibration_id,
+        "measurement_mode": measurement_mode,
     }
 
     try:
@@ -397,22 +442,42 @@ def media_update(
         h = parse_optional_int(empty_to_none(height_px))
         dur = parse_optional_float(empty_to_none(duration_seconds))
         fps = parse_optional_float(empty_to_none(frame_rate))
+        mode = MediaMeasurementMode(measurement_mode)
+        acid_raw = empty_to_none(active_calibration_id.strip())
+        active_cal: UUID | None = None
+        if acid_raw:
+            try:
+                active_cal = UUID(acid_raw)
+            except ValueError as exc:
+                raise ValueError("Active calibration must be a valid UUID or empty.") from exc
     except HTTPException as exc:
         msg = exc.detail
         if isinstance(msg, list):
             msg = "; ".join(str(x) for x in msg)
         else:
             msg = str(msg)
+        all_calibrations_err = list(db.scalars(select(Calibration).order_by(Calibration.created_at.desc())).all())
         return templates.TemplateResponse(
             request,
             "media/detail.html",
-            _media_detail_context(media=row, form=form_snapshot, form_error=msg),
+            _media_detail_context(
+                media=row,
+                all_calibrations=all_calibrations_err,
+                form=form_snapshot,
+                form_error=msg,
+            ),
         )
     except ValueError as exc:
+        all_calibrations_err = list(db.scalars(select(Calibration).order_by(Calibration.created_at.desc())).all())
         return templates.TemplateResponse(
             request,
             "media/detail.html",
-            _media_detail_context(media=row, form=form_snapshot, form_error=str(exc)),
+            _media_detail_context(
+                media=row,
+                all_calibrations=all_calibrations_err,
+                form=form_snapshot,
+                form_error=str(exc),
+            ),
         )
 
     if status == MediaProcessingStatus.ready_for_processing and not core_metadata_ready_for_processing(
@@ -421,11 +486,13 @@ def media_update(
         empty_to_none(site_name),
         empty_to_none(location_name),
     ):
+        all_calibrations_rf = list(db.scalars(select(Calibration).order_by(Calibration.created_at.desc())).all())
         return templates.TemplateResponse(
             request,
             "media/detail.html",
             _media_detail_context(
                 media=row,
+                all_calibrations=all_calibrations_rf,
                 form=form_snapshot,
                 form_error="Cannot set status to “ready for processing” until date collected, sample code, site name, and location name are all filled in.",
             ),
@@ -451,6 +518,25 @@ def media_update(
     row.height_px = h
     row.duration_seconds = dur
     row.frame_rate = fps
+    row.measurement_mode = mode
+
+    if active_cal is None:
+        row.active_calibration_id = None
+    else:
+        cal_row = db.get(Calibration, active_cal)
+        if cal_row is None:
+            all_calibrations_nf = list(db.scalars(select(Calibration).order_by(Calibration.created_at.desc())).all())
+            return templates.TemplateResponse(
+                request,
+                "media/detail.html",
+                _media_detail_context(
+                    media=row,
+                    all_calibrations=all_calibrations_nf,
+                    form=form_snapshot,
+                    form_error="Selected calibration was not found.",
+                ),
+            )
+        row.active_calibration_id = cal_row.id
 
     return RedirectResponse(url=f"/media/{media_id}", status_code=303)
 

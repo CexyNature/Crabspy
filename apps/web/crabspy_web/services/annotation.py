@@ -7,8 +7,10 @@ from uuid import UUID
 from fastapi import HTTPException
 
 from crabspy_web.models.annotation import Annotation, AnnotationKind, AnnotationPoint
+from crabspy_web.models.calibration import Calibration
 from crabspy_web.models.media import Media, MediaKind
 from crabspy_web.schemas.annotation import AnnotationCreate, AnnotationOut, AnnotationPointOut
+from crabspy_web.services.calibration_measure import path_length_mm_for_polyline
 
 
 def validate_annotation_for_media(media: Media, body: AnnotationCreate) -> None:
@@ -49,7 +51,16 @@ def build_annotation_row(media_id: UUID, body: AnnotationCreate) -> Annotation:
     return ann
 
 
-def annotation_to_out(ann: Annotation) -> AnnotationOut:
+def annotation_to_out(
+    ann: Annotation,
+    *,
+    media: Media | None = None,
+    calibration: Calibration | None = None,
+) -> AnnotationOut:
+    path_mm: float | None = None
+    if media is not None:
+        cal = calibration if calibration is not None else getattr(media, "active_calibration", None)
+        path_mm = path_length_mm_for_polyline(ann, media, cal)
     return AnnotationOut(
         id=str(ann.id),
         kind=ann.kind.value,
@@ -59,4 +70,5 @@ def annotation_to_out(ann: Annotation) -> AnnotationOut:
         frame_index=ann.frame_index,
         ref_width_px=ann.ref_width_px,
         ref_height_px=ann.ref_height_px,
+        path_length_mm=path_mm,
     )

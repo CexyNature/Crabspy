@@ -503,6 +503,335 @@
   }
 
   /**
+   * @param {HTMLElement} wrap
+   * @param {Array<{ x_norm: number, y_norm: number }>} arr
+   */
+  function setQuadratPolygonContents(wrap, arr) {
+    while (wrap.firstChild) {
+      wrap.removeChild(wrap.firstChild);
+    }
+    if (!arr || arr.length === 0) {
+      return;
+    }
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 1 1");
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.setAttribute("class", "annotation-polyline-svg calibration-quadrat-svg is-draft");
+    if (arr.length < 4) {
+      var pl = document.createElementNS(svgNS, "polyline");
+      pl.setAttribute("fill", "none");
+      var pair = [];
+      for (var i = 0; i < arr.length; i++) {
+        pair.push(arr[i].x_norm + " " + arr[i].y_norm);
+      }
+      pl.setAttribute("points", pair.join(" "));
+      svg.appendChild(pl);
+    } else {
+      var pg = document.createElementNS(svgNS, "polygon");
+      var pts = arr
+        .map(function (p) {
+          return p.x_norm + "," + p.y_norm;
+        })
+        .join(" ");
+      pg.setAttribute("points", pts);
+      pg.setAttribute("fill", "none");
+      svg.appendChild(pg);
+    }
+    wrap.appendChild(svg);
+    for (var j = 0; j < arr.length; j++) {
+      var vtx = document.createElement("div");
+      vtx.className =
+        "annotation-polyline-vertex annotation-polyline-vertex-draft calibration-quadrat-vertex";
+      vtx.style.left = arr[j].x_norm * 100 + "%";
+      vtx.style.top = arr[j].y_norm * 100 + "%";
+      wrap.appendChild(vtx);
+    }
+  }
+
+  /**
+   * @param {HTMLElement} draftEl
+   * @param {HTMLVideoElement | HTMLImageElement} media
+   * @param {Array<{ x: number, y: number }>} points
+   */
+  function renderQuadratDraftEl(draftEl, media, points) {
+    if (!draftEl) {
+      return;
+    }
+    var arr = points.map(function (p) {
+      return { x_norm: p.x, y_norm: p.y };
+    });
+    positionPictureLayer(draftEl, media);
+    if (arr.length === 0) {
+      while (draftEl.firstChild) {
+        draftEl.removeChild(draftEl.firstChild);
+      }
+      return;
+    }
+    setQuadratPolygonContents(draftEl, arr);
+  }
+
+  /**
+   * Quadrat calibration: four clicks, then POST /media/{id}/calibration.
+   * @param {HTMLElement} wrap — [data-annotation-video-root] or [data-annotation-image-root]
+   * @param {HTMLElement} host — [data-media-video-viewer] or [data-media-image-viewer]
+   * @param {HTMLElement} panel — [data-calibration-panel]
+   * @param {{ overlay: HTMLElement, media: HTMLVideoElement | HTMLImageElement, mediaId: string, isVideo: boolean, video: HTMLVideoElement | null, fps: number, hasFps: boolean }} opts
+   */
+  function bindCalibrationUI(wrap, host, panel, opts) {
+    var overlay = opts.overlay;
+    var media = opts.media;
+    var mediaId = opts.mediaId;
+    var isVideo = opts.isVideo;
+    var video = opts.video;
+    var fps = opts.fps;
+    var hasFps = opts.hasFps;
+
+    var toggle = panel.querySelector("[data-calibration-toggle]");
+    var after = panel.querySelector("[data-calibration-after-points]");
+    var submitBtn = panel.querySelector("[data-calibration-submit]");
+    var clearBtn = panel.querySelector("[data-calibration-clear-draft]");
+    var errEl = panel.querySelector("[data-calibration-error]");
+
+    var quadratDraft = [];
+    var calibDraftEl = null;
+
+    function showCalErr(msg) {
+      if (!errEl) {
+        return;
+      }
+      errEl.textContent = msg || "";
+      errEl.hidden = !msg;
+    }
+
+    function clearCalibrationDraft() {
+      quadratDraft = [];
+      if (calibDraftEl && calibDraftEl.parentNode) {
+        calibDraftEl.parentNode.removeChild(calibDraftEl);
+      }
+      calibDraftEl = null;
+      if (after) {
+        after.hidden = true;
+      }
+      showCalErr("");
+    }
+
+    function ensureCalibDraftEl() {
+      if (calibDraftEl) {
+        return calibDraftEl;
+      }
+      calibDraftEl = document.createElement("div");
+      calibDraftEl.className = "annotation-polyline-wrap calibration-quadrat-draft";
+      calibDraftEl.setAttribute("data-calibration-quadrat-draft", "1");
+      overlay.appendChild(calibDraftEl);
+      return calibDraftEl;
+    }
+
+    host.addEventListener("crabspy-reset-calibration", function () {
+      host.classList.remove("is-calibrating-quadrat");
+      if (toggle) {
+        toggle.textContent = "Calibrate quadrat";
+      }
+      if (overlay) {
+        overlay.setAttribute("aria-hidden", "true");
+      }
+      clearCalibrationDraft();
+    });
+
+    if (toggle) {
+      toggle.addEventListener("click", function () {
+        host.classList.toggle("is-calibrating-quadrat");
+        var on = host.classList.contains("is-calibrating-quadrat");
+        toggle.textContent = on ? "Cancel quadrat" : "Calibrate quadrat";
+        if (!on) {
+          clearCalibrationDraft();
+          if (overlay) {
+            overlay.setAttribute("aria-hidden", "true");
+          }
+        } else {
+          wrap.classList.remove("is-annotating");
+          var annToggle = host.querySelector("[data-annotation-toggle]");
+          if (annToggle) {
+            annToggle.textContent = "Annotate";
+          }
+          /* Keep the current frame; otherwise the first click can reach the video and start playback. */
+          if (isVideo && video) {
+            try {
+              video.pause();
+            } catch (e) {
+              /* ignore */
+            }
+          }
+          if (overlay) {
+            overlay.setAttribute("aria-hidden", "false");
+          }
+        }
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        clearCalibrationDraft();
+      });
+    }
+
+    overlay.addEventListener(
+      "click",
+      function calibCap(e) {
+        if (!host.classList.contains("is-calibrating-quadrat")) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        var pt = normalizedMediaClick(media, e.clientX, e.clientY);
+        if (!pt) {
+          return;
+        }
+        if (quadratDraft.length >= 4) {
+          return;
+        }
+        quadratDraft.push({ x: pt.x, y: pt.y });
+        ensureCalibDraftEl();
+        renderQuadratDraftEl(calibDraftEl, media, quadratDraft);
+        if (quadratDraft.length === 4 && after) {
+          after.hidden = false;
+        }
+      },
+      true
+    );
+
+    if (submitBtn) {
+      submitBtn.addEventListener("click", function () {
+        if (quadratDraft.length !== 4) {
+          showCalErr("Place four corners first.");
+          return;
+        }
+        var refMmEl = panel.querySelector("[data-calibration-ref-mm]");
+        var edgeSel = panel.querySelector("[data-calibration-edge-idx]");
+        var labEl = panel.querySelector("[data-calibration-label]");
+        var mm = refMmEl && refMmEl.value ? parseFloat(refMmEl.value) : NaN;
+        if (!Number.isFinite(mm) || mm <= 0) {
+          showCalErr("Enter a positive reference length in mm.");
+          return;
+        }
+        var edgeIdx = edgeSel ? parseInt(edgeSel.value, 10) : 0;
+        var rd = getRefDimensions(media);
+        if (!rd.ref_width_px || !rd.ref_height_px) {
+          showCalErr("Wait for the image or video to load (dimensions unknown).");
+          return;
+        }
+        var payload = {
+          corners: quadratDraft.map(function (p) {
+            return { x_norm: p.x, y_norm: p.y };
+          }),
+          reference_edge_index: edgeIdx,
+          reference_length_mm: mm,
+          ref_width_px: rd.ref_width_px,
+          ref_height_px: rd.ref_height_px,
+        };
+        if (labEl && labEl.value && String(labEl.value).trim()) {
+          payload.label = String(labEl.value).trim();
+        }
+        if (isVideo && video) {
+          var t = video.currentTime;
+          payload.time_seconds = t;
+          if (hasFps) {
+            payload.frame_index = Math.floor(t * fps);
+          }
+        }
+        showCalErr("");
+        fetch("/media/" + mediaId + "/calibration", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then(function (r) {
+            if (!r.ok) {
+              return r.text().then(function (txt) {
+                throw new Error(txt || "Could not save calibration.");
+              });
+            }
+            return r.json();
+          })
+          .then(function () {
+            window.location.reload();
+          })
+          .catch(function (err) {
+            showCalErr(err.message || "Could not save calibration.");
+          });
+      });
+    }
+
+    document.addEventListener("keydown", function escCalib(e) {
+      if (e.key !== "Escape") {
+        return;
+      }
+      var tag = e.target && e.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+        return;
+      }
+      if (!host.classList.contains("is-calibrating-quadrat")) {
+        return;
+      }
+      if (quadratDraft.length === 0) {
+        return;
+      }
+      clearCalibrationDraft();
+    });
+
+    function syncCalib() {
+      if (calibDraftEl && quadratDraft.length) {
+        renderQuadratDraftEl(calibDraftEl, media, quadratDraft);
+      }
+    }
+
+    if (media.tagName === "VIDEO") {
+      media.addEventListener("loadeddata", syncCalib);
+    }
+    window.addEventListener("resize", syncCalib);
+  }
+
+  /**
+   * @param {HTMLElement} host — [data-media-video-viewer] or [data-media-image-viewer]
+   */
+  function initCalibrationOnHost(host) {
+    var panel = host.querySelector("[data-calibration-panel]");
+    if (!panel) {
+      return;
+    }
+    var wrap = host.querySelector("[data-annotation-video-root], [data-annotation-image-root]");
+    if (!wrap) {
+      return;
+    }
+    var overlay = wrap.querySelector("[data-annotation-overlay]");
+    var video = wrap.querySelector("video");
+    var img = wrap.querySelector("img");
+    var media = video || img;
+    if (!overlay || !media) {
+      return;
+    }
+    var mediaId = wrap.getAttribute("data-media-id");
+    if (!mediaId) {
+      return;
+    }
+    var fpsRaw = host.getAttribute("data-video-fps");
+    var fps =
+      fpsRaw && String(fpsRaw).trim() !== ""
+        ? parseFloat(fpsRaw)
+        : NaN;
+    var hasFps = Number.isFinite(fps) && fps > 0;
+    bindCalibrationUI(wrap, host, panel, {
+      overlay: overlay,
+      media: media,
+      mediaId: mediaId,
+      isVideo: video !== null,
+      video: video,
+      fps: fps,
+      hasFps: hasFps,
+    });
+  }
+
+  /**
    * @param {HTMLElement} wrap — video or image annotation root
    * @param {HTMLElement} host — [data-media-video-viewer] or [data-media-image-viewer]
    * @param {{ media: HTMLVideoElement | HTMLImageElement, overlay: HTMLElement, list: HTMLElement | null, mediaId: string, isVideo: boolean, video: HTMLVideoElement | null, fps: number, hasFps: boolean }} opts
@@ -585,6 +914,13 @@
         wrap.classList.toggle("is-annotating");
         var on = wrap.classList.contains("is-annotating");
         toggle.textContent = on ? "Stop annotating" : "Annotate";
+        if (on) {
+          try {
+            host.dispatchEvent(new CustomEvent("crabspy-reset-calibration"));
+          } catch (e) {
+            /* ignore */
+          }
+        }
         if (!on) {
           clearPolylineDraft();
         }
@@ -692,6 +1028,9 @@
     window.addEventListener("resize", syncMedia);
 
     overlay.addEventListener("click", function (e) {
+      if (host.classList.contains("is-calibrating-quadrat")) {
+        return;
+      }
       if (!wrap.classList.contains("is-annotating")) {
         return;
       }
@@ -857,6 +1196,12 @@
     var imgRoots = document.querySelectorAll("[data-annotation-image-root]");
     for (var k = 0; k < imgRoots.length; k++) {
       initAnnotationImage(imgRoots[k]);
+    }
+    var calHosts = document.querySelectorAll(
+      "[data-media-video-viewer], [data-media-image-viewer]"
+    );
+    for (var c = 0; c < calHosts.length; c++) {
+      initCalibrationOnHost(calHosts[c]);
     }
   }
 

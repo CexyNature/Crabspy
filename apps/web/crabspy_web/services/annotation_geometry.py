@@ -4,29 +4,9 @@ from __future__ import annotations
 
 import math
 
+from crabspy.measurement import polyline_path_length_norm, polyline_path_length_px
+
 from crabspy_web.models.annotation import Annotation, AnnotationKind
-
-
-def polyline_path_length_norm(coords: list[tuple[float, float]]) -> float:
-    """Sum of Euclidean segment lengths in normalized 0–1 space."""
-    if len(coords) < 2:
-        return 0.0
-    total = 0.0
-    for i in range(1, len(coords)):
-        total += math.hypot(coords[i][0] - coords[i - 1][0], coords[i][1] - coords[i - 1][1])
-    return total
-
-
-def polyline_path_length_px(coords: list[tuple[float, float]], ref_width_px: int, ref_height_px: int) -> float:
-    """Path length in pixels: segment (Δx·W)² + (Δy·H)² per edge."""
-    w = float(ref_width_px)
-    h = float(ref_height_px)
-    total = 0.0
-    for i in range(1, len(coords)):
-        dx = (coords[i][0] - coords[i - 1][0]) * w
-        dy = (coords[i][1] - coords[i - 1][1]) * h
-        total += math.hypot(dx, dy)
-    return total
 
 
 def edge_norm_and_px(

@@ -77,12 +77,19 @@
             · ({{ "%.4f"|format(ann.points[0].x_norm) }}, {{ "%.4f"|format(ann.points[0].y_norm) }})
           {% elif ann.kind.value == "polyline" %}
             · {{ ann.points|length }} vertices
+            {% if annotation_path_mm is defined %}
+              {% set mm = annotation_path_mm.get(ann.id|string) %}
+              {% if mm is not none %}
+                · {{ "%.2f"|format(mm) }} mm
+              {% endif %}
+            {% endif %}
           {% endif %}
           <button type="button" class="btn btn-danger annotation-delete">Delete</button>
         </li>
       {% endfor %}
     </ul>
   </div>
+  {% include "partials/media_calibration_panel.html" %}
   <div class="media-seek-bar">
     <div class="media-seek-row">
       <label class="media-seek-label">

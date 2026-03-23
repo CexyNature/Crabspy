@@ -110,6 +110,38 @@
         <input type="text" name="frame_rate" value="{{ f.frame_rate if f else (media.frame_rate if media.frame_rate is not none else '') }}" autocomplete="off" />
       </label>
 
+      <h2 class="h3">Calibration</h2>
+      <label>
+        Measurement method for polyline lengths
+        <select name="measurement_mode">
+          {% for v in ["homography", "isotropic"] %}
+            <option value="{{ v }}" {% if (f.measurement_mode if f else media.measurement_mode.value) == v %}selected{% endif %}>{{ v }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <p class="muted small-print">
+        <strong>homography</strong> rectifies perspective with the quadrat corners before measuring;
+        <strong>isotropic</strong> applies one global mm/px scale from the selected reference edge.
+      </p>
+      <label>
+        Active calibration (mm/px for polyline length on this clip)
+        <select name="active_calibration_id">
+          <option value="">— None —</option>
+          {% for c in all_calibrations %}
+            <option
+              value="{{ c.id }}"
+              {% if (f.active_calibration_id if f else (media.active_calibration_id|string if media.active_calibration_id else '')) == (c.id|string) %}selected{% endif %}
+            >
+              {% if c.label %}{{ c.label }} — {% endif %}{{ "%.6f"|format(c.mm_per_px) }} mm/px
+              (source media {{ c.source_media_id }}{% if c.frame_index is not none %} · f={{ c.frame_index }}{% endif %})
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+      <p class="muted small-print">
+        Link any saved quadrat calibration so carapace polylines show length in mm. Create calibrations from the view page or reuse one defined on another clip.
+      </p>
+
       <p class="muted small-print">
         Created: {{ media.created_at }} · Updated: {{ media.updated_at }}
       </p>

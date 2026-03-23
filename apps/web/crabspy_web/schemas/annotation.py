@@ -49,3 +49,4 @@ class AnnotationOut(BaseModel):
     frame_index: int | None
     ref_width_px: int | None = None
     ref_height_px: int | None = None
+    path_length_mm: float | None = None

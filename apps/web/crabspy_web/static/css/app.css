@@ -255,7 +255,9 @@ body {
 }
 
 .annotation-video-wrap.is-annotating .annotation-overlay,
-.annotation-image-wrap.is-annotating .annotation-overlay {
+.annotation-image-wrap.is-annotating .annotation-overlay,
+/* Calibration mode sets is-calibrating-quadrat on .media-viewer, not is-annotating on the wrap — without this, clicks hit the video and toggle play. */
+.media-viewer.is-calibrating-quadrat .annotation-overlay {
   pointer-events: auto;
   cursor: crosshair;
 }
@@ -347,6 +349,38 @@ body {
 .annotation-polyline-svg.is-draft polyline {
   stroke-dasharray: 6px 4px;
   opacity: 0.92;
+}
+
+.calibration-quadrat-svg polygon,
+.calibration-quadrat-svg polyline {
+  stroke: #e65100;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.calibration-quadrat-vertex {
+  background: #e65100;
+}
+
+.calibration-panel {
+  margin: 1rem 0 0;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--border);
+}
+
+.calibration-field {
+  display: block;
+  margin: 0.5rem 0 0;
+}
+
+.calibration-after-points {
+  margin-top: 0.75rem;
+}
+
+.calibration-error {
+  margin-top: 0.5rem;
 }
 
 /* Polyline vertices: red, same px size as .annotation-dot */

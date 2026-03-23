@@ -1,0 +1,50 @@
+{# Expects ``media`` with optional ``active_calibration`` relationship loaded. #}
+<div class="calibration-panel" data-calibration-panel>
+  <h2 class="h3">Calibration (quadrat)</h2>
+  <p class="muted small-print">
+    Measurement mode for this media: <strong>{{ media.measurement_mode.value }}</strong>
+    (<a href="/media/{{ media.id }}">change on edit page</a>).
+  </p>
+  {% if media.active_calibration %}
+    <p class="muted small-print">
+      Active scale: <strong>{{ "%.6f"|format(media.active_calibration.mm_per_px) }} mm/px</strong>
+      {% if media.active_calibration.label %} — {{ media.active_calibration.label }}{% endif %}
+    </p>
+  {% else %}
+    <p class="muted small-print">
+      No active calibration for this clip. Draw a quadrat below (sets scale for this media) or choose an existing calibration on the
+      <a href="/media/{{ media.id }}">edit page</a>.
+    </p>
+  {% endif %}
+  <p class="muted small-print">
+    Click <strong>Calibrate quadrat</strong>, then place <strong>four corners in clockwise order</strong> on the reference frame.
+    Enter the physical length of the chosen edge (mm) and which edge index it is (0 = corner0→corner1, …, 3 = corner3→corner0).
+  </p>
+  <p class="calibration-mode-actions">
+    <button type="button" class="btn btn-secondary" data-calibration-toggle>Calibrate quadrat</button>
+  </p>
+  <div class="calibration-after-points" data-calibration-after-points hidden>
+    <label class="calibration-field">
+      Reference edge length (mm)
+      <input type="number" step="any" min="0" data-calibration-ref-mm required />
+    </label>
+    <label class="calibration-field">
+      Reference edge index
+      <select data-calibration-edge-idx>
+        <option value="0">0 — corner 0 → 1</option>
+        <option value="1">1 — corner 1 → 2</option>
+        <option value="2">2 — corner 2 → 3</option>
+        <option value="3">3 — corner 3 → 0</option>
+      </select>
+    </label>
+    <label class="calibration-field">
+      Label (optional)
+      <input type="text" maxlength="512" data-calibration-label placeholder="e.g. quadrat A1" autocomplete="off" />
+    </label>
+    <p class="calibration-mode-actions">
+      <button type="button" class="btn" data-calibration-submit>Save calibration</button>
+      <button type="button" class="btn btn-secondary" data-calibration-clear-draft>Clear points</button>
+    </p>
+  </div>
+  <p class="form-error calibration-error" data-calibration-error hidden role="alert"></p>
+</div>

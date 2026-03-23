@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from crabspy_web.services.annotation_geometry import (
-    edge_norm_and_px,
-    polyline_path_length_norm,
-    polyline_path_length_px,
-)
+from crabspy.measurement import polyline_path_length_norm, polyline_path_length_px
+
+from crabspy_web.services.annotation_geometry import edge_norm_and_px
 
 
 def test_polyline_path_length_norm_right_angle() -> None:
