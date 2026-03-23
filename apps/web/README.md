@@ -21,8 +21,12 @@ PYTHONPATH=apps/web uvicorn crabspy_web.app:app --reload --app-dir apps/web
 
 Environment variables (optional):
 
-- `CRABSPY_DATA_DIR` — root for `uploads/`, `db/`, `exports/`, `cache/` (default: `<repo>/data`).
-- `CRABSPY_DATABASE_URL` — SQLAlchemy URL (default: SQLite under `CRABSPY_DATA_DIR/db/project.sqlite`). For PostgreSQL, use e.g. `postgresql+psycopg://user:pass@host:5432/dbname` after `pip install -e ".[postgres]"`.
+- `CRABSPY_DATA_DIR` — root for `uploads/`, `db/`, `exports/`, `cache/`, and `config/` (default: `<repo>/data`).
+- `CRABSPY_DATABASE_URL` — SQLAlchemy URL. If unset, the app uses `data/config/database_url` (one line) when present, otherwise SQLite at `CRABSPY_DATA_DIR/db/project.sqlite`. When this env var **is** set, it always wins and the Settings → Database form is read-only.
+
+**Project databases (Postgres-ready):** use one SQLite file per study or campaign, e.g. `data/db/coastal_site_2025.sqlite`, with URL `sqlite:////absolute/path/to/data/db/coastal_site_2025.sqlite` (four slashes after `sqlite:` for absolute paths on Unix). Switch in the UI under **Database** (`/settings/database`) or by editing `data/config/database_url`. For PostgreSQL: `postgresql+psycopg://user:pass@host:5432/dbname` after `pip install -e ".[postgres]"`.
+
+**Web UI:** register draft media and export CSV from [`/media/`](http://127.0.0.1:8000/media/) (see nav). On startup the app applies Alembic migrations to the active database automatically.
 
 ## Docker
 
@@ -38,7 +42,7 @@ Then open `http://127.0.0.1:8000` and `http://127.0.0.1:8000/api/health`.
 
 Configuration lives under `apps/web/alembic.ini`. Migrations are in `apps/web/alembic/versions/`.
 
-After installing the package, apply migrations (creates/updates tables — required before relying on the DB):
+The running app calls `alembic upgrade head` on startup for the resolved database URL (so a fresh clone usually only needs `pip install` and `uvicorn`). You can still run migrations manually:
 
 ```bash
 cd apps/web
@@ -49,6 +53,7 @@ alembic upgrade head
 To generate a new revision after changing models:
 
 ```bash
+cd apps/web
 alembic revision --autogenerate -m "describe change"
 alembic upgrade head
 ```

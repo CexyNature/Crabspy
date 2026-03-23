@@ -8,8 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from crabspy_web.config import get_settings
+from crabspy_web.db.migrate import run_alembic_upgrade_head
 from crabspy_web.db.session import init_engine
-from crabspy_web.routers import health, pages
+from crabspy_web.routers import health, media, pages, settings as settings_router
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 
@@ -21,7 +22,12 @@ async def lifespan(app: FastAPI):
     settings.uploads_dir.mkdir(parents=True, exist_ok=True)
     settings.exports_dir.mkdir(parents=True, exist_ok=True)
     settings.cache_dir.mkdir(parents=True, exist_ok=True)
-    init_engine(settings.database_url)
+    settings.config_dir.mkdir(parents=True, exist_ok=True)
+
+    url = settings.resolve_database_url()
+    init_engine(url)
+    run_alembic_upgrade_head(url)
+
     yield
 
 
@@ -43,6 +49,8 @@ def create_app() -> FastAPI:
 
     app.include_router(pages.router)
     app.include_router(health.router)
+    app.include_router(media.router)
+    app.include_router(settings_router.router)
 
     return app
 

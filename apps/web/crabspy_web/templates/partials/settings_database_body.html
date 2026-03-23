@@ -1,0 +1,42 @@
+<section class="panel">
+  <h1>Project database</h1>
+
+  {% if env_locked %}
+    <p class="notice">
+      <strong>Environment override:</strong> <code>CRABSPY_DATABASE_URL</code> is set. The app always uses that URL.
+      Unset it to switch databases from this page or via <code>data/config/database_url</code>.
+    </p>
+  {% endif %}
+
+  {% if saved %}
+    <p class="notice success" role="status">Database URL saved and migrations applied.</p>
+  {% endif %}
+
+  <p class="muted">
+    Use one SQLite file per field campaign or study. Example URL:
+    <code>sqlite:////absolute/path/to/data/db/my_project.sqlite</code>
+    (four slashes after <code>sqlite:</code> for absolute paths on Unix).
+  </p>
+
+  <p><strong>Active URL:</strong></p>
+  <pre class="code-block">{{ current_url }}</pre>
+
+  {% if not env_locked %}
+    <form
+      class="stacked-form"
+      method="post"
+      action="/settings/database"
+      hx-post="/settings/database"
+      hx-target="main"
+      hx-swap="innerHTML"
+    >
+      <label>
+        New database URL
+        <textarea name="database_url" rows="3" required placeholder="sqlite:////.../project.sqlite">{{ current_url }}</textarea>
+      </label>
+      <button type="submit" class="btn">Save and reconnect</button>
+    </form>
+  {% endif %}
+
+  <p class="muted"><a href="/media/">← Back to media</a></p>
+</section>

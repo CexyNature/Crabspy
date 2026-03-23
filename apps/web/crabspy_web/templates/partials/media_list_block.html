@@ -1,0 +1,65 @@
+<div id="media-list-block" class="media-list-block">
+  {% if error %}
+    <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
+
+  <form
+    class="stacked-form"
+    method="post"
+    action="/media/"
+    hx-post="/media/"
+    hx-target="#media-list-block"
+    hx-swap="outerHTML"
+  >
+    <h2 class="h3">New draft media</h2>
+    <label>
+      Storage path <span class="muted">(required)</span>
+      <input type="text" name="storage_path" required placeholder="uploads/project_a/clip01.mp4" autocomplete="off" />
+    </label>
+    <label>
+      Original filename
+      <input type="text" name="original_filename" placeholder="clip01.mp4" autocomplete="off" />
+    </label>
+    <label>
+      Media kind
+      <select name="media_kind">
+        <option value="unknown" selected>unknown</option>
+        <option value="image">image</option>
+        <option value="video">video</option>
+      </select>
+    </label>
+    <button type="submit" class="btn">Create draft</button>
+  </form>
+
+  <h2 class="h3">Registered media</h2>
+  {% if rows %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Kind</th>
+            <th>Status</th>
+            <th>Storage path</th>
+            <th>Sample code</th>
+            <th>Site</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td><code>{{ row.media_kind.value }}</code></td>
+              <td><code>{{ row.processing_status.value }}</code></td>
+              <td class="cell-path">{{ row.storage_path }}</td>
+              <td>{{ row.sample_code or "—" }}</td>
+              <td>{{ row.site_name or "—" }}</td>
+              <td class="muted">{{ row.created_at }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="muted">No media rows yet — add a draft above.</p>
+  {% endif %}
+</div>

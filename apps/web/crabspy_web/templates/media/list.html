@@ -1,0 +1,15 @@
+{% extends "layouts/base.html" %}
+{% block title %}Media — Crabspy{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>Media</h1>
+    <p class="muted">
+      Register draft rows before processing. One SQLite file per project is typical — switch under
+      <a href="/settings/database">Settings → Database</a>.
+    </p>
+    <p>
+      <a class="btn btn-secondary" href="/media/export.csv">Download CSV export</a>
+    </p>
+    {% include "partials/media_list_block.html" %}
+  </section>
+{% endblock %}

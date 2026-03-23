@@ -125,3 +125,6 @@ video/
 # Crabspy web — local SQLite DB files (schema lives in apps/web/alembic/versions/)
 data/db/*.sqlite
 data/db/*.sqlite3
+
+# Persisted DB URL from Settings UI (may contain credentials for Postgres)
+data/config/database_url
