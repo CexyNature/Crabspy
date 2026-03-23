@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import mimetypes
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -14,6 +15,7 @@ from crabspy_web.db.session import get_db
 from crabspy_web.models.media import Media, MediaKind, MediaProcessingStatus
 from crabspy_web.services.csv_export import media_rows_to_csv_bytes
 from crabspy_web.services.media_csv_import import decode_uploaded_csv, parse_collected_at, parse_media_import_csv
+from crabspy_web.services.media_files import resolve_storage_path_to_file
 from crabspy_web.services.media_form_utils import empty_to_none, parse_optional_float, parse_optional_int
 from crabspy_web.services.media_readiness import core_metadata_ready_for_processing
 
@@ -99,6 +101,56 @@ def media_export_csv(db: Annotated[Session, Depends(get_db)]) -> Response:
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": 'attachment; filename="media_export.csv"'},
     )
+
+
+@router.get("/{media_id:uuid}/view", response_class=HTMLResponse)
+def media_view_page(
+    request: Request,
+    media_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+) -> HTMLResponse:
+    row = db.get(Media, media_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    settings = request.app.state.settings
+    try:
+        resolve_storage_path_to_file(settings, row.storage_path)
+        file_on_disk = True
+    except (FileNotFoundError, ValueError):
+        file_on_disk = False
+    templates = request.app.state.templates
+    return templates.TemplateResponse(
+        request,
+        "media/view.html",
+        {
+            "title": "View media",
+            "media": row,
+            "file_on_disk": file_on_disk,
+        },
+    )
+
+
+@router.get("/{media_id:uuid}/file")
+def media_serve_file(
+    request: Request,
+    media_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+) -> FileResponse:
+    row = db.get(Media, media_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    settings = request.app.state.settings
+    try:
+        path = resolve_storage_path_to_file(settings, row.storage_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="File not found on disk.") from None
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    media_type, _ = mimetypes.guess_type(path.name)
+    if not media_type:
+        media_type = "application/octet-stream"
+    return FileResponse(path, media_type=media_type, filename=path.name)
 
 
 def _import_page_response(request: Request, templates, *, result: dict | None) -> HTMLResponse:

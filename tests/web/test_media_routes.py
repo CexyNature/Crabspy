@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -162,6 +163,51 @@ def test_media_edit_ready_without_core_fields_shows_error() -> None:
         )
         assert r_bad.status_code == 200
         assert "ready for processing" in r_bad.text.lower()
+
+
+def test_media_view_and_file_serve(tmp_path: Path) -> None:
+    (tmp_path / "uploads").mkdir(parents=True)
+    f = tmp_path / "uploads" / "clip.mp4"
+    f.write_bytes(b"%fakevideo")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/clip.mp4", "media_kind": "video"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        assert m is not None
+        mid = m.group(1)
+
+        r_file = client.get(f"/media/{mid}/file")
+        assert r_file.status_code == 200
+        assert r_file.content == b"%fakevideo"
+        assert "video" in r_file.headers.get("content-type", "").lower() or "octet" in r_file.headers.get(
+            "content-type", ""
+        ).lower()
+
+        r_view = client.get(f"/media/{mid}/view")
+        assert r_view.status_code == 200
+        assert "<video" in r_view.text
+        assert f"/media/{mid}/file" in r_view.text
+
+
+def test_media_file_missing_returns_404(tmp_path: Path) -> None:
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/missing.mp4", "media_kind": "video"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/file"', r.text)
+        assert m is None
+        m2 = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        assert m2 is not None
+        mid = m2.group(1)
+        r_file = client.get(f"/media/{mid}/file")
+        assert r_file.status_code == 404
 
 
 def test_media_import_duplicate_skipped() -> None:

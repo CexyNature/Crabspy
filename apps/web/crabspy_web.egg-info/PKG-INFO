@@ -39,8 +39,20 @@ PYTHONPATH=apps/web uvicorn crabspy_web.app:app --reload --app-dir apps/web
 
 Environment variables (optional):
 
-- `CRABSPY_DATA_DIR` — root for `uploads/`, `db/`, `exports/`, `cache/` (default: `<repo>/data`).
-- `CRABSPY_DATABASE_URL` — SQLAlchemy URL (default: SQLite under `CRABSPY_DATA_DIR/db/project.sqlite`).
+- `CRABSPY_DATA_DIR` — root for `uploads/`, `db/`, `exports/`, `cache/`, and `config/` (default: `<repo>/data`).
+- `CRABSPY_DATABASE_URL` — SQLAlchemy URL. If unset, the app uses `data/config/database_url` (one line) when present, otherwise SQLite at `CRABSPY_DATA_DIR/db/project.sqlite`. When this env var **is** set, it always wins and the Settings → Database form is read-only.
+
+**Project databases (Postgres-ready):** use one SQLite file per study or campaign, e.g. `data/db/coastal_site_2025.sqlite`, with URL `sqlite:////absolute/path/to/data/db/coastal_site_2025.sqlite` (four slashes after `sqlite:` for absolute paths on Unix). Switch in the UI under **Database** (`/settings/database`) or by editing `data/config/database_url`. For PostgreSQL: `postgresql+psycopg://user:pass@host:5432/dbname` after `pip install -e ".[postgres]"`.
+
+**Web UI:** register draft media and export CSV from [`/media/`](http://127.0.0.1:8000/media/) (see nav). Edit or delete a row via **Edit** on the list. On startup the app applies Alembic migrations to the active database automatically.
+
+**Storage paths:** `storage_path` is a string pointing at your files (e.g. on an external SSD or NAS). The app does not copy or move originals; it only records the path. Optional future feature: copy uploads into `data/uploads/` for self-contained projects.
+
+**Viewing in the browser (Phase 3a):** For each media row, **View** opens `/media/<uuid>/view` (image via `<img>`, video via `<video controls>`). The file is served at `/media/<uuid>/file` with a guessed MIME type. Relative paths resolve under `CRABSPY_DATA_DIR` (must stay inside that directory after normalization); absolute paths are read as-is. Starlette’s `FileResponse` supports HTTP range requests for seeking in video.
+
+**CI:** GitHub Actions runs `pytest tests/web` on push and pull requests (see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)).
+
+**Bulk import:** [`/media/import`](http://127.0.0.1:8000/media/import) accepts a UTF-8 CSV (headers in row 1). Required: a path column (`storage_path`, `path`, or `video_path`). Optional: `collected_at` / `date_collected` / `date`, `sample_code`, `site_name`, `location_name`, `notes`, `original_filename`, plus `camera_id`, `deployment_time`, `deployment_type`, `latitude`/`lat`, `longitude`/`lon`/`lng`. Dates accept ISO-8601 or `YYYY-MM-DD` (and a few common formats). Rows with path, date, sample, site, and location name set are stored as `ready_for_processing`; others as `draft`. Optional camera/deployment/geo fields can be empty without blocking readiness. Duplicate `storage_path` values already in the database are skipped.
 
 ## Docker
 
@@ -54,12 +66,20 @@ Then open `http://127.0.0.1:8000` and `http://127.0.0.1:8000/api/health`.
 
 ## Alembic
 
-Configuration lives under `apps/web/alembic.ini`. After installing the package:
+Configuration lives under `apps/web/alembic.ini`. Migrations are in `apps/web/alembic/versions/`.
+
+The running app calls `alembic upgrade head` on startup for the resolved database URL (so a fresh clone usually only needs `pip install` and `uvicorn`). You can still run migrations manually:
 
 ```bash
 cd apps/web
-alembic revision --autogenerate -m "init"
+export CRABSPY_DATABASE_URL=sqlite:////absolute/path/to/project.sqlite   # optional override
 alembic upgrade head
 ```
 
-(Autogenerate requires SQLAlchemy models to be wired in `alembic/env.py`.)
+To generate a new revision after changing models:
+
+```bash
+cd apps/web
+alembic revision --autogenerate -m "describe change"
+alembic upgrade head
+```

@@ -209,3 +209,16 @@ body {
   border-color: #2e7d32;
   background: color-mix(in srgb, #2e7d32 15%, transparent);
 }
+
+.media-viewer {
+  margin: 1rem 0;
+}
+
+.media-viewer img,
+.media-viewer video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}

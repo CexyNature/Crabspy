@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+{% block title %}View media — Crabspy{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>View media</h1>
+    <p class="muted">ID: <code>{{ media.id }}</code> · kind <code>{{ media.media_kind.value }}</code></p>
+    <p class="muted">Storage path: <code>{{ media.storage_path }}</code></p>
+
+    {% if not file_on_disk %}
+      <p class="form-error" role="alert">
+        File not found on disk for this storage path. Confirm the path and that the file exists (relative paths are under <code>CRABSPY_DATA_DIR</code>).
+      </p>
+    {% elif media.media_kind.value == "image" %}
+      <div class="media-viewer">
+        <img src="/media/{{ media.id }}/file" alt="" />
+      </div>
+    {% elif media.media_kind.value == "video" %}
+      <div class="media-viewer">
+        <video controls src="/media/{{ media.id }}/file"></video>
+      </div>
+    {% else %}
+      <p class="muted">Kind is <strong>unknown</strong> — showing as video; set kind to <strong>image</strong> or <strong>video</strong> on the edit page for the correct viewer.</p>
+      <div class="media-viewer">
+        <video controls src="/media/{{ media.id }}/file"></video>
+      </div>
+    {% endif %}
+
+    <p class="muted"><a href="/media/{{ media.id }}">Edit media</a> · <a href="/media/">← Back to media list</a></p>
+  </section>
+{% endblock %}

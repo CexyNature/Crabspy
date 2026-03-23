@@ -4,7 +4,7 @@
   {% set f = form %}
   <section class="panel">
     <h1>Edit media</h1>
-    <p class="muted">ID: <code>{{ media.id }}</code></p>
+    <p class="muted">ID: <code>{{ media.id }}</code> · <a href="/media/{{ media.id }}/view">View in browser</a></p>
 
     {% if form_error %}
       <p class="form-error" role="alert">{{ form_error }}</p>
