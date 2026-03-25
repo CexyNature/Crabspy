@@ -1,0 +1,3 @@
+storage_path,collected_at,sample_code,site_name,location_name,notes,original_filename,camera_id,deployment_type,latitude,longitude
+uploads/Image01.jpeg,2025-03-15,DEMO-001,Coastal Study Plot A,Upper intertidal,Demo quadrat frame — example still for UI walkthrough.,Image01.jpeg,CAM-DEMO-1,test_quadrat,-27.960627,153.382410
+uploads/Image02.jpeg,2025-03-15,DEMO-002,Coastal Study Plot A,Lower intertidal,Second demo image — paired with DEMO-001 for comparison.,Image02.jpeg,CAM-DEMO-1,test_quadrat,-27.960627,153.382410

@@ -12,7 +12,9 @@ services:
       CRABSPY_DATA_DIR: /data
       CRABSPY_DATABASE_URL: sqlite:////data/db/project.sqlite
     volumes:
-      - crabspy_data_uploads:/data/uploads
+      # Bind mount so host files under repo data/uploads/ are visible (demo images, CSV paths like uploads/…).
+      # Named volumes here were empty on first run, so uploads/Image01.jpeg could not resolve.
+      - ./data/uploads:/data/uploads
       - crabspy_data_db:/data/db
       - crabspy_data_exports:/data/exports
       - crabspy_data_cache:/data/cache
@@ -30,7 +32,6 @@ services:
       start_period: 15s
 
 volumes:
-  crabspy_data_uploads:
   crabspy_data_db:
   crabspy_data_exports:
   crabspy_data_cache:
