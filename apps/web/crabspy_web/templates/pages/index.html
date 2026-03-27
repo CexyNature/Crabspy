@@ -1,26 +1,72 @@
 {% extends "layouts/base.html" %}
 {% block title %}{{ title }} — Crabspy{% endblock %}
 {% block content %}
-  <section class="panel">
-    <h1>Crabspy web</h1>
+  <section class="panel landing-hero">
+    <h1>CrabSpy</h1>
     <p class="lead">
-      Register media drafts, switch project databases, and export media or annotations CSV — see <a href="/media/">Media</a> and
-      <a href="/settings/database">Database settings</a>.
+      A heuristic toolbox for spying on intertidal crabs in their environment — collecting information about species identity, movement patterns, coloration, feeding rates, bioturbation, and more.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2 class="h3">Quick start</h2>
+    <ul class="landing-links">
+      <li><a href="/media/">Media library</a> — register images and videos, annotate organisms, and export data.</li>
+      <li><a href="/media/import">Import media from CSV</a> — bulk-import study metadata.</li>
+      <li><a href="/settings/database">Database settings</a> — switch project databases.</li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <h2 class="h3">About</h2>
+    <p>
+      CrabSpy proposes an alternative workflow to collect biological and ecological data from intertidal crabs using computer vision. It aims to accelerate and improve information collection, enabling rapid and actionable scientific and policy response.
     </p>
     <p>
-      <strong>HTMX example:</strong>
-      <button
-        type="button"
-        class="btn"
-        hx-get="/fragments/status"
-        hx-target="#status-panel"
-        hx-swap="innerHTML"
-      >
-        Load status fragment
-      </button>
+      Traditional methods to study crab ecology are often time consuming, invasive, and can alter the natural habitat. CrabSpy incorporates automation — from quadrat-calibrated measurement to polyline annotations — to help researchers scale up data collection at broader spatial and temporal scales.
     </p>
-    <div id="status-panel" class="status-panel muted" aria-live="polite">
-      (status will appear here)
-    </div>
+    <blockquote class="landing-quote">
+      <p>
+        &ldquo;Until comparatively recently, ecologists were content to describe how nature &lsquo;looks&rsquo; &hellip; Now, an equal emphasis is being placed on what nature &lsquo;does&rsquo;, and rightly so, because the changing face of nature can never be understood unless her metabolism is also studied.&rdquo;
+      </p>
+      <footer class="muted">— Eugene P. Odum, <cite>Fundamentals of Ecology</cite>, 1957</footer>
+    </blockquote>
+  </section>
+
+  <section class="panel">
+    <h2 class="h3">Author</h2>
+    <p>
+      <strong>Cesar Herrera</strong>
+      · <a href="https://twitter.com/CexyNature" target="_blank" rel="noopener">@CexyNature</a>
+      · <a href="https://github.com/CexyNature" target="_blank" rel="noopener">GitHub</a>
+    </p>
+    <p class="muted small-print">
+      CrabSpy was originally developed at James Cook University to track intertidal crabs in soft sediments. Functions now include counting feeding events, extracting colour data, measuring and counting burrows, calibrated carapace measurement, and more.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2 class="h3">Acknowledgements</h2>
+    <p class="muted small-print">
+      Funded or supported by
+      <a href="https://www.jcu.edu.au/" target="_blank" rel="noopener">James Cook University</a>,
+      <a href="https://www.jcu.edu.au/sicem" target="_blank" rel="noopener">SICEM</a>,
+      <a href="https://www.ecolsoc.org.au/awards-and-prizes/holsworth-wildlife-research-endowment" target="_blank" rel="noopener">Holsworth Wildlife Research Endowment (ESA)</a>,
+      <a href="https://nectar.org.au/" target="_blank" rel="noopener">NeCTAR</a>,
+      <a href="https://www.qcif.edu.au/" target="_blank" rel="noopener">QCIF</a>,
+      <a href="https://www.mdatatechjcu.com/" target="_blank" rel="noopener">Marine Data Technology Hub</a>,
+      <a href="https://www.tropwater.com/" target="_blank" rel="noopener">TropWATER</a>,
+      and <a href="https://scipy-school.org/" target="_blank" rel="noopener">ASPP-APAC 2019</a>.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2 class="h3">License &amp; citation</h2>
+    <p class="muted small-print">
+      CrabSpy is released under the
+      <a href="https://www.gnu.org/licenses/gpl-3.0" target="_blank" rel="noopener">GNU GPL v3</a> license.
+      If you use CrabSpy in your research, please cite:
+      <a href="https://doi.org/10.5281/zenodo.3820270" target="_blank" rel="noopener">DOI 10.5281/zenodo.3820270</a>.
+    </p>
   </section>
 {% endblock %}
