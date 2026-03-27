@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Session
 from crabspy_web.models.calibration import Calibration
 from crabspy_web.models.media import Media, MediaKind
 from crabspy_web.schemas.calibration import CalibrationCornerIn, CalibrationCreate, CalibrationOut
+from crabspy_web.services.annotation import effective_fps_for_frame_index
 from crabspy_web.services.calibration_math import mm_per_px_from_quadrat
 
 
@@ -30,6 +32,20 @@ def calibration_to_out(row: Calibration) -> CalibrationOut:
         mm_per_px=row.mm_per_px,
         label=row.label,
     )
+
+
+def infer_calibration_frame_index(media: Media, body: CalibrationCreate) -> int | None:
+    """Prefer client frame_index; else derive from time_seconds × FPS (media.frame_rate or default)."""
+    if body.frame_index is not None:
+        return body.frame_index
+    if media.media_kind == MediaKind.image:
+        return None
+    if body.time_seconds is None:
+        return None
+    fps = effective_fps_for_frame_index(media)
+    if fps is None:
+        return None
+    return int(math.floor(body.time_seconds * fps))
 
 
 def create_calibration(
@@ -70,7 +86,7 @@ def create_calibration(
 
     row = Calibration(
         source_media_id=media.id,
-        frame_index=body.frame_index,
+        frame_index=infer_calibration_frame_index(media, body),
         time_seconds=body.time_seconds,
         corners_json=json.dumps([{"x_norm": c.x_norm, "y_norm": c.y_norm} for c in body.corners]),
         reference_edge_index=body.reference_edge_index,

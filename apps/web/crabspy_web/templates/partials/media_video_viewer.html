@@ -2,7 +2,8 @@
 <div
   class="media-viewer media-viewer--video"
   data-media-video-viewer="1"
-  data-video-fps="{% if media.frame_rate is not none %}{{ media.frame_rate }}{% endif %}"
+  data-video-fps="{% if media.frame_rate is not none %}{{ media.frame_rate }}{% else %}30{% endif %}"
+  {% if media.frame_rate is none %}data-video-fps-estimated="1"{% endif %}
 >
   <div
     class="annotation-video-wrap"
@@ -30,9 +31,14 @@
     </div>
   </div>
   <p class="form-error media-seek-error" hidden></p>
+  {% if media.frame_rate is none %}
+    <p class="muted small-print">
+      No frame rate in metadata: stored frame index uses <strong>30 fps</strong> until you set <strong>Frame rate</strong> on the media edit page.
+    </p>
+  {% endif %}
   <div class="annotation-controls">
     <p class="muted small-print">
-      <strong>Annotations (Phase 3b):</strong> choose <em>Point</em> or <em>Polyline</em>, toggle <em>Annotate</em>, then click on the picture area (letterboxing accounted for). Coordinates are normalized 0–1; each annotation stores the current playback time (and frame when fps is set). For polylines, use <strong>Finish polyline</strong> after two or more vertices.
+      <strong>Annotations (Phase 3b):</strong> choose <em>Point</em> or <em>Polyline</em>, toggle <em>Annotate</em>, then click on the picture area (letterboxing accounted for). Coordinates are normalized 0–1; each annotation stores the current playback time and a frame index (from the media frame rate, or 30 fps when unset). For polylines, use <strong>Finish polyline</strong> after two or more vertices.
       <a href="/media/export_annotations.csv">Download annotations backup (CSV)</a> (all media).
     </p>
     <div class="annotation-mode-row" role="radiogroup" aria-label="Annotation tool">

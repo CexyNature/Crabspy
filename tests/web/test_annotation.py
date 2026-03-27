@@ -78,6 +78,88 @@ def test_annotation_image_point_without_time(tmp_path: Path) -> None:
         assert r_post.json()["kind"] == "point"
 
 
+def test_annotation_video_infers_frame_index_when_frame_rate_set(tmp_path: Path) -> None:
+    """Server fills frame_index from time_seconds × media.frame_rate when client omits it."""
+    (tmp_path / "uploads").mkdir(parents=True)
+    (tmp_path / "uploads" / "clip.mp4").write_bytes(b"%fakevideo")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/clip.mp4", "media_kind": "video"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        assert m is not None
+        mid = m.group(1)
+        client.post(
+            f"/media/{mid}",
+            data={
+                "storage_path": "uploads/clip.mp4",
+                "processing_status": "draft",
+                "media_kind": "video",
+                "collected_at": "",
+                "sample_code": "",
+                "site_name": "",
+                "location_name": "",
+                "notes": "",
+                "camera_id": "",
+                "deployment_time": "",
+                "deployment_type": "",
+                "latitude": "",
+                "longitude": "",
+                "original_filename": "",
+                "mime_type": "",
+                "checksum_sha256": "",
+                "width_px": "",
+                "height_px": "",
+                "duration_seconds": "",
+                "frame_rate": "30",
+                "active_calibration_id": "",
+                "measurement_mode": "homography",
+            },
+            follow_redirects=False,
+        )
+        r_post = client.post(
+            f"/media/{mid}/annotations",
+            json={
+                "kind": "point",
+                "points": [{"x_norm": 0.25, "y_norm": 0.75}],
+                "time_seconds": 2.0,
+            },
+        )
+        assert r_post.status_code == 201
+        assert r_post.json()["frame_index"] == 60
+
+
+def test_annotation_video_infers_frame_index_when_frame_rate_missing_uses_default_fps(
+    tmp_path: Path,
+) -> None:
+    """When media.frame_rate is unset, server and UI use DEFAULT_VIDEO_FPS (30) for frame_index."""
+    (tmp_path / "uploads").mkdir(parents=True)
+    (tmp_path / "uploads" / "clip.mp4").write_bytes(b"%fakevideo")
+    with TestClient(create_app()) as client:
+        client.post(
+            "/media/",
+            data={"storage_path": "uploads/clip.mp4", "media_kind": "video"},
+            follow_redirects=False,
+        )
+        r = client.get("/media/")
+        m = re.search(r'href="/media/([0-9a-f-]{36})/view"', r.text)
+        assert m is not None
+        mid = m.group(1)
+        r_post = client.post(
+            f"/media/{mid}/annotations",
+            json={
+                "kind": "point",
+                "points": [{"x_norm": 0.25, "y_norm": 0.75}],
+                "time_seconds": 1.0,
+            },
+        )
+        assert r_post.status_code == 201
+        assert r_post.json()["frame_index"] == 30
+
+
 def test_annotation_rejects_image_media_with_time(tmp_path: Path) -> None:
     (tmp_path / "uploads").mkdir(parents=True)
     (tmp_path / "uploads" / "x.jpg").write_bytes(b"x")
@@ -278,6 +360,8 @@ def test_export_annotations_csv(tmp_path: Path) -> None:
         assert "x_norm" in body
         assert "path_length_norm" in body
         assert "path_length_px" in body
+        assert "path_length_mm" in body
+        assert "measurement_mode_used" in body
         assert "edge_length_norm" in body
         assert "edge_length_px" in body
         assert mid in body

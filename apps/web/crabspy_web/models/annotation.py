@@ -10,6 +10,7 @@ from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, String, Uuid,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from crabspy_web.models.base import Base
+from crabspy_web.models.media import MediaMeasurementMode
 
 
 class AnnotationKind(str, enum.Enum):
@@ -48,6 +49,13 @@ class Annotation(Base):
 
     ref_width_px: Mapped[int | None] = mapped_column(Integer, nullable=True)
     ref_height_px: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Polylines with calibration: length in mm (one decimal) and effective method (homography may fall back).
+    path_length_mm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    measurement_mode_used: Mapped[MediaMeasurementMode | None] = mapped_column(
+        Enum(MediaMeasurementMode, values_callable=_enum_values, native_enum=False),
+        nullable=True,
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

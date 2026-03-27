@@ -50,3 +50,4 @@ class AnnotationOut(BaseModel):
     ref_width_px: int | None = None
     ref_height_px: int | None = None
     path_length_mm: float | None = None
+    measurement_mode_used: str | None = None

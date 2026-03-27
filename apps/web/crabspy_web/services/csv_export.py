@@ -5,10 +5,26 @@ from __future__ import annotations
 import csv
 import io
 from collections.abc import Iterable
+from uuid import UUID
 
 from crabspy_web.models.annotation import Annotation, AnnotationPoint
 from crabspy_web.models.media import Media
 from crabspy_web.services.annotation_geometry import annotation_path_lengths, edge_norm_and_px
+from crabspy_web.services.calibration_measure import path_length_mm_and_mode_for_polyline
+
+
+def _mm_mode_for_csv_row(ann: Annotation, media: Media | None) -> tuple[float | str, str]:
+    """Stored polyline mm/mode, or compute from media + calibration; empty strings if N/A."""
+    if ann.path_length_mm is not None:
+        mode = ann.measurement_mode_used.value if ann.measurement_mode_used else ""
+        return round(float(ann.path_length_mm), 1), mode
+    if media is None:
+        return "", ""
+    cal = getattr(media, "active_calibration", None)
+    mm, mode_enum = path_length_mm_and_mode_for_polyline(ann, media, cal)
+    if mm is None:
+        return "", ""
+    return round(float(mm), 1), mode_enum.value if mode_enum else ""
 
 
 def media_rows_to_csv_bytes(rows: Iterable[Media]) -> bytes:
@@ -73,7 +89,11 @@ def media_rows_to_csv_bytes(rows: Iterable[Media]) -> bytes:
     return buffer.getvalue().encode("utf-8")
 
 
-def annotation_rows_to_csv_bytes(annotations: Iterable[Annotation]) -> bytes:
+def annotation_rows_to_csv_bytes(
+    annotations: Iterable[Annotation],
+    *,
+    media_by_id: dict[UUID, Media] | None = None,
+) -> bytes:
     """One row per vertex; suitable for spreadsheets and GIS joins."""
     buffer = io.StringIO()
     writer = csv.writer(buffer)
@@ -89,6 +109,8 @@ def annotation_rows_to_csv_bytes(annotations: Iterable[Annotation]) -> bytes:
             "ref_height_px",
             "path_length_norm",
             "path_length_px",
+            "path_length_mm",
+            "measurement_mode_used",
             "point_order",
             "x_norm",
             "y_norm",
@@ -104,6 +126,8 @@ def annotation_rows_to_csv_bytes(annotations: Iterable[Annotation]) -> bytes:
         path_n, path_px = annotation_path_lengths(ann, coords)
         rw = ann.ref_width_px
         rh = ann.ref_height_px
+        media = media_by_id.get(ann.media_id) if media_by_id else None
+        mm_out, mode_out = _mm_mode_for_csv_row(ann, media)
         for i, p in enumerate(points):
             edge_n: float | str = ""
             edge_px_out: float | str = ""
@@ -127,6 +151,8 @@ def annotation_rows_to_csv_bytes(annotations: Iterable[Annotation]) -> bytes:
                     rh if rh is not None else "",
                     path_n,
                     "" if path_px is None else path_px,
+                    mm_out,
+                    mode_out,
                     p.order_index,
                     p.x_norm,
                     p.y_norm,

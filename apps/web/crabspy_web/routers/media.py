@@ -19,7 +19,9 @@ from crabspy_web.schemas.annotation import AnnotationCreate, AnnotationOut
 from crabspy_web.schemas.calibration import CalibrationCreate, CalibrationOut
 from crabspy_web.services.annotation import (
     annotation_to_out,
+    apply_polyline_measurement_fields,
     build_annotation_row,
+    refresh_media_annotation_derived_fields,
     validate_annotation_for_media,
 )
 from crabspy_web.services.calibration_measure import path_length_mm_for_polyline
@@ -123,7 +125,16 @@ def annotations_export_csv(db: Annotated[Session, Depends(get_db)]) -> Response:
             .order_by(Annotation.media_id, Annotation.created_at)
         ).all()
     )
-    body = annotation_rows_to_csv_bytes(rows)
+    media_ids = {a.media_id for a in rows}
+    media_by_id: dict[UUID, Media] = {}
+    if media_ids:
+        loaded = db.scalars(
+            select(Media)
+            .where(Media.id.in_(media_ids))
+            .options(selectinload(Media.active_calibration))
+        ).all()
+        media_by_id = {m.id: m for m in loaded}
+    body = annotation_rows_to_csv_bytes(rows, media_by_id=media_by_id)
     return Response(
         content=body,
         media_type="text/csv; charset=utf-8",
@@ -164,7 +175,11 @@ def media_view_page(
     if file_on_disk and annotations:
         cal = row.active_calibration
         for a in annotations:
-            annotation_path_mm[str(a.id)] = path_length_mm_for_polyline(a, row, cal)
+            annotation_path_mm[str(a.id)] = (
+                a.path_length_mm
+                if a.path_length_mm is not None
+                else path_length_mm_for_polyline(a, row, cal)
+            )
     return templates.TemplateResponse(
         request,
         "media/view.html",
@@ -189,13 +204,16 @@ def annotation_create(
     body: AnnotationCreate,
     db: Annotated[Session, Depends(get_db)],
 ) -> AnnotationOut:
-    row = db.get(Media, media_id)
+    row = db.scalars(
+        select(Media).where(Media.id == media_id).options(selectinload(Media.active_calibration))
+    ).one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="Media not found")
     validate_annotation_for_media(row, body)
-    ann = build_annotation_row(media_id, body)
+    ann = build_annotation_row(row, body)
     db.add(ann)
     db.flush()
+    apply_polyline_measurement_fields(ann, row, row.active_calibration)
     aid = ann.id
     db.commit()
     media_row = db.scalars(
@@ -223,6 +241,7 @@ def calibration_create_endpoint(
     if row is None:
         raise HTTPException(status_code=404, detail="Media not found")
     cal = create_calibration(db, row, body, set_active_on_this_media=True)
+    refresh_media_annotation_derived_fields(db, row)
     return calibration_to_out(cal)
 
 
@@ -538,6 +557,7 @@ def media_update(
             )
         row.active_calibration_id = cal_row.id
 
+    refresh_media_annotation_derived_fields(db, row)
     return RedirectResponse(url=f"/media/{media_id}", status_code=303)
 
 
