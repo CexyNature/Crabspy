@@ -362,6 +362,10 @@ def test_export_annotations_csv(tmp_path: Path) -> None:
         assert "path_length_px" in body
         assert "path_length_mm" in body
         assert "measurement_mode_used" in body
+        assert "media_storage_path" in body
+        assert "media_sample_code" in body
+        assert "calibration_mm_per_px" in body
+        assert "calibration_reference_length_mm" in body
         assert "edge_length_norm" in body
         assert "edge_length_px" in body
         assert mid in body
