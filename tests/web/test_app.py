@@ -14,7 +14,8 @@ def test_index_contains_title() -> None:
     client = TestClient(create_app())
     response = client.get("/")
     assert response.status_code == 200
-    assert "Crabspy web" in response.text
+    assert "CrabSpy" in response.text
+    assert "Quick start" in response.text
 
 
 def test_htmx_fragment_status() -> None:

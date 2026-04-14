@@ -114,6 +114,10 @@ fabric.properties
 # Files and folders add by Cesar Herrera
 ../.idea/
 __pycache__/
+*.egg-info/
+*.egg
+build/
+dist/
 *.mp4
 *.MP4
 *.avi
